@@ -1,0 +1,14 @@
+[project]
+name = "dmp"
+version = "1.0.0"
+description = "Progetto finale per il corso di Data Mining."
+readme = "README.md"
+dependencies = [
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/dmp/_version.py"
