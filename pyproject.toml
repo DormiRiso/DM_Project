@@ -1,14 +1,14 @@
 [project]
 name = "dmp"
-version = "1.0.0"
+version = "0.1.0"
 description = "Progetto finale per il corso di Data Mining."
 readme = "README.md"
 dependencies = [
+    "pandas",
+    "numpy",
+    "matplotlib"
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[tool.hatch.version]
-path = "src/dmp/_version.py"
