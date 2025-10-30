@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from data_cleaning import clean_df
+from dmp.data_cleaning import clean_df
 
 if __name__ == "__main__":
     DATASET_PATH = "data/DM1_game_dataset.csv"

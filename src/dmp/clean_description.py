@@ -1,5 +1,5 @@
 import re
-from utils import check_for_column_content
+from dmp.utils import check_for_column_content
 
 def convert_string_column_to_sets(df, column_name):
     """

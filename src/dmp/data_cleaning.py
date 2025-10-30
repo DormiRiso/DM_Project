@@ -1,4 +1,4 @@
-import clean_description
+import dmp.clean_description as clean_description
 
 def clean_df(df):
     """
