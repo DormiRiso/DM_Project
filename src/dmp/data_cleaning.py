@@ -1,2 +1,17 @@
-from dmp.utils import check_for_column_content
+from utils import check_for_column_content
+from clean_Description import *
 
+
+def clean_df(df):
+    """
+        Pulisce il DataFrame e lo prepara per l'analisi.
+        Input: df (DataFrame originale)
+        Output: df (DataFrame pulito)
+    """ 
+    # Crea una copia del DataFrame per evitare modifiche all'originale
+    df = df.copy()
+
+    # Trasforma la colonna "Description" in insiemi di parole (set di stringhe)
+    df['Description'] = convert_string_column_to_sets(df, 'Description')
+
+    return df
