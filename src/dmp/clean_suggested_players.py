@@ -57,6 +57,13 @@ def clean_good_players(df, good_players_column, lower_column, higher_column):
     return df
 
 def clean_best_players(df, best_players_column, good_players_column):
+    """Funzione che esegue la pulizia della colonna best_players, sostituendo con nan tutto ciò che non è un numero oppure un numero
+    fuori dall'intervallo descritto da good_players
+    
+    Input: DataFrame, nome della colonna dei best_players, nome della colonna dei good_players
+    
+    Output: DataFrame modificato
+    """
 
     df = df.copy()
 
@@ -78,7 +85,7 @@ def clean_best_players(df, best_players_column, good_players_column):
         # Elimina duplicati
         unique_numbers = sorted(set(numbers))
 
-        good_players = row[good_players_column]
+        good_players = str(row[good_players_column])
 
         # Se non ho nessun numero o solo zeri aggiungi nan
         if not unique_numbers or set(unique_numbers) == {0}:
@@ -86,12 +93,15 @@ def clean_best_players(df, best_players_column, good_players_column):
             continue
 
         # Se good_players è nan aggiungi direttamente il valore di best_players al dataframe
-        if pd.isna(good_players):
+        if not good_players:
             cleaned_values.append(unique_numbers)
             continue
 
+        if isinstance(good_players, str):
+            good_players = [int(x) for x in good_players if x.isdigit()]
+
         # Controlla se il valore di best_players rientra in good_players, altrimenti nan
-        if unique_numbers in good_players:
+        if (set(unique_numbers).issubset(good_players)):
             cleaned_values.append(unique_numbers)
             continue
 

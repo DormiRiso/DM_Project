@@ -1,8 +1,7 @@
 from dmp.utils import check_for_column_content, count_word_occurrences
 from dmp.clean_description import convert_string_column_to_sets
-from dmp.data_cleaning import clean_df
 from dmp.clean_ordered_columns import clean_ordered_columns
-from dmp.clean_suggested_players import clean_good_players
+from dmp.clean_suggested_players import clean_good_players, clean_best_players
 from dmp.convert_zeros_into_nan import convert_zeros_into_nan
 import pandas as pd
 import numpy as np
@@ -193,10 +192,37 @@ def test_clean_good_players():
     assert result.loc[7, "good_players"] == [4, 5]
 
     print(result["good_players"])
-    
-    
+
+def test_clean_best_players():
+    """Test della funzione clean_best_players."""
+
+    # Dataset di esempio con vari casi da correggere
+    df = pd.DataFrame({
+        "good_players": ["4,5,6", "4, 5", "7,8", "3"],
+        "best_players": ["5", "4, arpofr@@+", "0", "9"]
+    })
+
+    # Applica la funzione
+    result = clean_best_players(df, 'best_players', 'good_players')
+
+    # Deve restituire un DataFrame della stessa forma
+    assert isinstance(result, pd.DataFrame)
+    assert result.shape == df.shape
+
+    # Il campo è un numero nell'intervallo corretto
+    assert result.loc[0, "best_players"] == [5]
+    # Il campo è un numero corretto ma ci sono caratteri non numerici
+    assert result.loc[1, "best_players"] == [4]
+    # Il campo è uno 0 -> nan
+    assert pd.isna(result.loc[2, "best_players"])
+    # Il campo è un numero fuori dall'intervallo corretto -> nan
+    assert pd.isna(result.loc[3, "best_players"])
+
+    print(result["best_players"])
 
 def test_convert_zeros_into_nan():
+    """Test della funzione convert_zeros_into_nan"""
+
     # Caso 1: Singola colonna
     df1 = pd.DataFrame({'A': [0, 1, 2, 0], 'B': [5, 6, 0, 7]})
     result1 = convert_zeros_into_nan(df1.copy(), 'A')
