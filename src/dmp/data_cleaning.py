@@ -1,5 +1,6 @@
 import dmp.clean_description as clean_description
 import dmp.clean_ordered_columns as clean_ordered_columns
+import dmp.clean_suggested_players as clean_suggested_players
 
 def clean_df(df):
     """
@@ -11,12 +12,23 @@ def clean_df(df):
     # Crea una copia del DataFrame per evitare modifiche all'originale
     df = df.copy()
 
+    print("\n*********************************************************************\n")
+    print("Inizio la pulizia del DataFrame")
+    
+    print("Pulisco Description")
     # Trasforma la colonna "Description" in insiemi di parole (set di stringhe)
     df['Description'] = clean_description.convert_string_column_to_sets(df, 'Description')
-    
-    #Assicura che le colonne min e max Players siano una più piccola dell'altra. In caso di 0 sostituisce con np.NaN
+    print("Pulisco max/min players")
+    # Assicura che le colonne min e max Players siano una più piccola dell'altra. In caso di 0 sostituisce con np.NaN
     df = clean_ordered_columns.clean_ordered_columns(df, 'MinPlayers', 'MaxPlayers')
-    #Faccio la stessa cosa per ComMinPlaytime e ComMaxPlaytime
+    print("Pulisco good players")
+    # Effettua la pulizia della colonna good players, rimuovendo ciò che non è un numero e basandosi sull'intervallo del nummero di giocatori consentiti
+    df = clean_suggested_players.clean_good_players(df, 'GoodPlayers', 'MinPlayers', 'MaxPlayers')
+    print("Pulisco com min/max play time")
+    # Faccio la stessa cosa per ComMinPlaytime e ComMaxPlaytime
     df = clean_ordered_columns.clean_ordered_columns(df, 'ComMinPlaytime', 'ComMaxPlaytime')
+
+    print("Concludo la pulizia del DataFrame")
+    print("\n*********************************************************************\n")
     
     return df
