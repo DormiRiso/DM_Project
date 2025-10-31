@@ -46,11 +46,12 @@ def clean_good_players(df, good_players_column, lower_column, higher_column):
             cleaned_values.append(unique_numbers)
             continue
 
-        # Controlla se i valori rientrano nell'intervallo, allora aggiungi i numeri trovati, altrimenti nan
+        # Controlla se i valori rientrano nell'intervallo, allora aggiungi i numeri trovati, altrimenti aggiusta la lista di good_player
         if (min(unique_numbers) >= lower) and (max(unique_numbers) <= upper):
             cleaned_values.append(unique_numbers)
         else:
-            cleaned_values.append(np.nan)
+            cut_unique_numbers = [num for num in unique_numbers if (num >= lower) and (num <= upper)]
+            cleaned_values.append(cut_unique_numbers if cut_unique_numbers else np.nan)
 
     # Aggiorna la colonna nel DataFrame
     df[good_players_column] = cleaned_values

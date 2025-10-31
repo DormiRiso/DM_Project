@@ -152,19 +152,37 @@ def test_clean_ordered_columns():
     assert list(result.columns) == ["lower_column", "higher_column"]
 
 def test_clean_good_players():
+    """Test della funzione clean_good_players."""
 
     # Dataset di esempio con vari casi da correggere
     df = pd.DataFrame({
-        "lower_column": [0, 1, 2, 3, 2, 1],
-        "higher_column": [4, 5, 6, 3, 7, 1],
-        "good_players": ["g", "4, 5", "7,8", "0", "3", "1"]
+        "lower_column": [0, 1, 2, 3, 2, 1, 1, 4],
+        "higher_column": [4, 5, 6, 3, 7, 1, 5, 6],
+        "good_players": ["g", "4, 5", "7,8", "0", "3, @'; par", "1", "3,4,5,6,7", "1,2,3,4,5"]
     })
 
     # Applica la funzione
     result = clean_good_players(df, 'good_players', 'lower_column', 'higher_column')
-    
+
     # Deve restituire un DataFrame della stessa forma
     assert isinstance(result, pd.DataFrame)
     assert result.shape == df.shape
 
-    #FUNZIONE DI TEST DA COMPLETARE
+    # Il campo non è un numero -> nan
+    assert pd.isna(result.loc[0, "good_players"])
+    # Il campo contiene moltiplici valori
+    assert result.loc[1, "good_players"] == [4, 5]
+    # Il campo è fuori range -> nan
+    assert pd.isna(result.loc[2, "good_players"])
+    # Il campo è uno 0 -> nan
+    assert pd.isna(result.loc[3, "good_players"])
+    # Il campo contiene un numero coerente e dei caratteri speciali
+    assert result.loc[4, "good_players"] == [3]
+    # Il campo è esattamente il numero di giocatori
+    assert result.loc[5, "good_players"] == [1]
+    # Il campo ha good players maggiori del numero di giocatori
+    assert result.loc[6, "good_players"] == [3, 4, 5]
+    # Il campo ha good players inferiori al numero di giocatori
+    assert result.loc[7, "good_players"] == [4, 5]
+
+    print(result["good_players"])
