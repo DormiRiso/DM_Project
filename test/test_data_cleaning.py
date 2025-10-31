@@ -1,6 +1,8 @@
 from dmp.utils import check_for_column_content, count_word_occurrences
 from dmp.clean_description import convert_string_column_to_sets
 from dmp.data_cleaning import clean_df
+from dmp.clean_ordered_columns import clean_ordered_columns
+from dmp.clean_suggested_players import clean_good_players
 import pandas as pd
 import numpy as np
 
@@ -112,7 +114,6 @@ def test_convert_string_column_to_sets():
 def test_clean_ordered_columns():
     """Testa la funzione clean_ordered_columns."""
     
-    from dmp.clean_ordered_columns import clean_ordered_columns
     # Dataset di esempio con vari casi da correggere
     df = pd.DataFrame({
         "lower_column": [0, 2, 5, 3, 4, 1],
@@ -149,3 +150,21 @@ def test_clean_ordered_columns():
 
     #  Test 5: tipo di ritorno coerente
     assert list(result.columns) == ["lower_column", "higher_column"]
+
+def test_clean_good_players():
+
+    # Dataset di esempio con vari casi da correggere
+    df = pd.DataFrame({
+        "lower_column": [0, 1, 2, 3, 2, 1],
+        "higher_column": [4, 5, 6, 3, 7, 1],
+        "good_players": ["g", "4, 5", "7,8", "0", "3", "1"]
+    })
+
+    # Applica la funzione
+    result = clean_good_players(df, 'good_players', 'lower_column', 'higher_column')
+    
+    # Deve restituire un DataFrame della stessa forma
+    assert isinstance(result, pd.DataFrame)
+    assert result.shape == df.shape
+
+    #FUNZIONE DI TEST DA COMPLETARE
