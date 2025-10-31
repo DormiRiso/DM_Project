@@ -1,72 +1,55 @@
 from dmp.utils import check_for_column_content, count_word_occurrences
+from dmp.clean_description import convert_string_column_to_sets
 from dmp.data_cleaning import clean_df
 import pandas as pd
 import numpy as np
 
-DATASET_PATH = "data/DM1_game_dataset.csv"
-df = pd.read_csv(DATASET_PATH)
-df = clean_df(df)
-
 def test_check_for_column_content():
+    """Testa la funzione check_for_column_content."""
 
-    # Test 1: controlla la colonna 'Name' senza istogramma, tutti i caratteri
-    char_list, hist = check_for_column_content(df, 'Name', show_hist=False, only_special_char=False)
+    # Dataset di esempio
+    df = pd.DataFrame({
+        "Description": [
+            "Hello, world!",                # Parole con punteggiatura
+            "Python 3.10 is great!!!",      # Numeri e punti
+            "Data-cleaning @ home",         # Caratteri speciali come "-"
+            "Multiple    spaces here",      # Spazi multipli
+            "repeat repeat word",           # Parole duplicate
+            None,                           # Valore nullo
+            1234                            # Valore numerico
+        ]
+    })
+
+    # Test 1: senza istogramma, tutti i caratteri
+    char_list, plot = check_for_column_content(df, "Description", show_hist=False, only_special_char=False)
     assert isinstance(char_list, list)
-    assert hist is None
+    assert plot is None
     assert len(char_list) > 0
-    print(f"Risultati test 1: {char_list}")
 
-    # Test 1.5: controlla la colonna 'Name' senza istogramma, solo caratteri speciali
-    char_list, hist = check_for_column_content(df, 'Name', show_hist=False, only_special_char=True)
+    # Test 2: senza istogramma, solo caratteri speciali
+    char_list, plot = check_for_column_content(df, "Description", show_hist=False, only_special_char=True)
     assert isinstance(char_list, list)
-    assert hist is None
+    assert plot is None
+    assert all(not c.isalnum() for c in char_list)
     assert len(char_list) > 0
-    print(f"Risultati test 1.5: {char_list}")
-
-
-    # Test 2: controlla la colonna 'GameWeight' senza istogramma, tutti i caratteri
-    char_list, hist = check_for_column_content(df, 'GameWeight', show_hist=False, only_special_char=False)
-    assert isinstance(char_list, list)
-    assert hist is None
-    assert len(char_list) > 0
-    print(f"Risultati test 2: {char_list}")
-
-    # Test 2.5: controlla la colonna 'GameWeight' senza istogramma, solo caratteri speciali
-    char_list, hist = check_for_column_content(df, 'GameWeight', show_hist=False, only_special_char=True)
-    assert isinstance(char_list, list)
-    assert hist is None
-    assert len(char_list) > 0
-    print(f"Risultati test 2.5: {char_list}")
-
-    # Test 3: controlla la colonna 'YearPublished' senza istogramma, tutti i caratteri
-    char_list, hist = check_for_column_content(df, 'YearPublished', show_hist=False, only_special_char=False)
-    assert isinstance(char_list, list)
-    assert hist is None
-    assert len(char_list) > 0
-    print(f"Risultati test 3: {char_list}")
-
-    # Test 3.5: controlla la colonna 'YearPublished' senza istogramma, solo caratteri speciali
-    char_list, hist = check_for_column_content(df, 'YearPublished', show_hist=False, only_special_char=True)
-    assert isinstance(char_list, list)
-    assert hist is None
-    assert len(char_list) > 0
-    print(f"Risultati test 3.5: {char_list}")
-
-    # Test 4: controlla la colonna 'ComAgeRec' senza istogramma, tutti i caratteri
-    char_list, hist = check_for_column_content(df, 'ComAgeRec', show_hist=False, only_special_char=False)
-    assert isinstance(char_list, list)
-    assert hist is None
-    assert len(char_list) > 0
-    print(f"Risultati test 4: {char_list}")
-
-    # Test 4.5: controlla la colonna 'ComAgeRec' senza istogramma, solo caratteri speciali
-    char_list, hist = check_for_column_content(df, 'ComAgeRec', show_hist=False, only_special_char=True)
-    assert isinstance(char_list, list)
-    assert hist is None
-    assert len(char_list) > 0
-    print(f"Risultati test 4.5: {char_list}")
 
 def test_count_word_occurrences():
+    """Testa la funzione count_word_occurrences."""
+
+    # Dataset di esempio
+    df = pd.DataFrame({
+        "Description": [
+            "Hello, world!",                # Parole con punteggiatura
+            "Python 3.10 is great!!!",      # Numeri e punti
+            "Data-cleaning @ home",         # Caratteri speciali come "-"
+            "Multiple    spaces here",      # Spazi multipli
+            "repeat repeat word",           # Parole duplicate
+            None,                           # Valore nullo
+            1234                            # Valore numerico
+        ]
+    })
+
+    df['Description'] = convert_string_column_to_sets(df, 'Description')
 
     # Test: conta le occorrenze delle parole nella colonna 'Description' senza istogramma
     word_occurrences = count_word_occurrences(df, 'Description', show_hist=False)
@@ -74,11 +57,9 @@ def test_count_word_occurrences():
     assert len(word_occurrences) > 0
     print(f"Risultati test count_word_occurrences: {word_occurrences}")
 
-
-
-
 def test_convert_string_column_to_sets():
-    from dmp.clean_description import convert_string_column_to_sets
+    """Testa la funzione convert_string_column_to_sets."""
+
     # Dataset di esempio
     df = pd.DataFrame({
         "Description": [
@@ -128,8 +109,9 @@ def test_convert_string_column_to_sets():
     for s in result:
         assert all(isinstance(el, str) for el in s)
 
-
 def test_clean_ordered_columns():
+    """Testa la funzione clean_ordered_columns."""
+    
     from dmp.clean_ordered_columns import clean_ordered_columns
     # Dataset di esempio con vari casi da correggere
     df = pd.DataFrame({

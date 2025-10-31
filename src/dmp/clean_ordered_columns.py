@@ -7,7 +7,7 @@ def clean_ordered_columns(df, lower_column, higher_column):
 
     Regole:
     - Se lower_column == 0 → np.nan
-    - Se lower_column == 0 → np.nan
+    - Se higher_column == 0 → np.nan
     - Se lower_column > higher_column e entrambi > 0 → scambia i valori
     """
 
