@@ -3,6 +3,7 @@ from dmp.clean_description import convert_string_column_to_sets
 from dmp.data_cleaning import clean_df
 from dmp.clean_ordered_columns import clean_ordered_columns
 from dmp.clean_suggested_players import clean_good_players
+from dmp.convert_zeros_into_nan import convert_zeros_into_nan
 import pandas as pd
 import numpy as np
 
@@ -186,3 +187,41 @@ def test_clean_good_players():
     assert result.loc[7, "good_players"] == [4, 5]
 
     print(result["good_players"])
+    
+    
+
+def test_convert_zeros_into_nan():
+    # Caso 1: Singola colonna
+    df1 = pd.DataFrame({'A': [0, 1, 2, 0], 'B': [5, 6, 0, 7]})
+    result1 = convert_zeros_into_nan(df1.copy(), 'A')
+    assert pd.isna(result1.loc[0, 'A'])
+    assert pd.isna(result1.loc[3, 'A'])
+    assert result1.loc[1, 'A'] == 1
+    assert result1.loc[2, 'A'] == 2
+    assert result1.loc[2, 'B'] == 0  # B non deve cambiare
+
+    # Caso 2: Multiple colonne
+    df2 = pd.DataFrame({'X': [0, 10, 0], 'Y': [1, 0, 3], 'Z': [0, 0, 0]})
+    result2 = convert_zeros_into_nan(df2.copy(), ['X', 'Y'])
+    assert pd.isna(result2.loc[0, 'X'])
+    assert pd.isna(result2.loc[2, 'X'])
+    assert pd.isna(result2.loc[1, 'Y'])
+    assert pd.notna(result2.loc[0, 'Y'])
+    assert result2.loc[0, 'Z'] == 0  # Z invariata
+
+    # Caso 3: Colonna di tipo stringa
+    df3 = pd.DataFrame({'num': [0, 1, 2], 'text': ['a', 'b', 'c']})
+    result3 = convert_zeros_into_nan(df3.copy(), ['num', 'text'])
+    assert pd.isna(result3.loc[0, 'num'])
+    assert result3.loc[1, 'text'] == 'b'
+
+    # Caso 4: Nessuno zero presente
+    df4 = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
+    result4 = convert_zeros_into_nan(df4.copy(), ['A', 'B'])
+    pd.testing.assert_frame_equal(result4, df4)
+
+    # Caso 5: Modifica in place
+    df5 = pd.DataFrame({'A': [0, 2]})
+    returned = convert_zeros_into_nan(df5, 'A')
+    assert pd.isna(df5.loc[0, 'A'])
+    assert returned is df5  # stesso oggetto

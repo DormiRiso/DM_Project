@@ -1,6 +1,7 @@
 import dmp.clean_description as clean_description
 import dmp.clean_ordered_columns as clean_ordered_columns
 import dmp.clean_suggested_players as clean_suggested_players
+import dmp.convert_zeros_into_nan as convert_zeros_into_nan
 
 def clean_df(df):
     """
@@ -14,6 +15,16 @@ def clean_df(df):
 
     print("\n*********************************************************************\n")
     print("Inizio la pulizia del DataFrame")
+    
+    print("Pulisco tutte le colonne dai missing values convertendo gli 0 in NaN")
+    #Converte tutti i valori 0 nel dataset come nan (solo nelle colonne in cui questo valore non ha senso)
+    columns_to_convert = [
+        "YearPublished", "GameWeight", "ComWeight", "MinPlayers", "MaxPlayers",
+        "ComAgeRec", "LanguageEase", "BestPlayers", "MfgPlaytime",
+        "ComMinPlaytime", "ComMaxPlaytime", "MfgAgeRec"
+    ]
+
+    df = convert_zeros_into_nan.convert_zeros_into_nan(df, columns_to_convert)
     
     print("Pulisco Description")
     # Trasforma la colonna "Description" in insiemi di parole (set di stringhe)
