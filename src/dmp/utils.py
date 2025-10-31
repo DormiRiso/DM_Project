@@ -1,21 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def split_df(df, num_rows):
-    """
-    Restituisce un sotto-DataFrame contenente solo le prime `num_rows` righe.
-    Utile per eseguire test più rapidi su dataset di grandi dimensioni.
-
-    Parametri:
-        df (pd.DataFrame): il DataFrame di input.
-        num_rows (int): numero di righe da mantenere.
-
-    Ritorna:
-        pd.DataFrame: un nuovo DataFrame con le prime `num_rows` righe.
-    """
-    splitted_df = df.head(num_rows)
-    return splitted_df
-
 def check_for_column_content(df: pd.DataFrame, column_name: str, show_hist: bool = False, only_special_char: bool = False) -> tuple:
     """Funzione che controlla il contenuto di una colonna del DataFrame
     
