@@ -9,8 +9,6 @@ def clean_good_players(df, good_players_column, lower_column, higher_column):
     Input: DataFrame, nome della colonna dei good_player, nome della colonna dei min_players, nome della colonna dei max_players
     
     Output: DataFrame con colonna good_players modificata
-    
-    FINIRE LOGICA DI NUMERI FUORI INTERVALLO
     """
 
     df = df.copy()
@@ -58,5 +56,48 @@ def clean_good_players(df, good_players_column, lower_column, higher_column):
 
     return df
 
-def clean_best_players(df, best_player_column):
-    pass
+def clean_best_players(df, best_players_column, good_players_column):
+
+    df = df.copy()
+
+    # Verifica che le colonne esistano nel DataFrame
+    for col in [best_players_column, good_players_column]:
+        if col not in df.columns:
+            raise ValueError(f"La colonna '{col}' non esiste nel DataFrame.")
+
+    cleaned_values = []
+
+    # Scorri il DataFrame iterando sulle righe con un indice
+    for i, row in df.iterrows():
+        
+        entry = str(row[best_players_column])
+
+        # Estrai solo i numeri
+        numbers = [int(x) for x in entry if x.isdigit()]
+
+        # Elimina duplicati
+        unique_numbers = sorted(set(numbers))
+
+        good_players = row[good_players_column]
+
+        # Se non ho nessun numero o solo zeri aggiungi nan
+        if not unique_numbers or set(unique_numbers) == {0}:
+            cleaned_values.append(np.nan)
+            continue
+
+        # Se good_players è nan aggiungi direttamente il valore di best_players al dataframe
+        if pd.isna(good_players):
+            cleaned_values.append(unique_numbers)
+            continue
+
+        # Controlla se il valore di best_players rientra in good_players, altrimenti nan
+        if unique_numbers in good_players:
+            cleaned_values.append(unique_numbers)
+            continue
+
+        cleaned_values.append(np.nan)
+
+    # Aggiorna la colonna nel DataFrame
+    df[best_players_column] = cleaned_values
+
+    return df

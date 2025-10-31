@@ -116,8 +116,8 @@ def test_clean_ordered_columns():
     
     # Dataset di esempio con vari casi da correggere
     df = pd.DataFrame({
-        "lower_column": [0, 2, 5, 3, 4, 1],
-        "higher_column": [4, 0, 3, 3, 2, 1]
+        "lower_column": [0, 2, 5, 3, 4, 1, "parola"],
+        "higher_column": [4, 0, 3, 3, 2, 1, "@d)"]
     })
 
     # Applica la funzione
@@ -150,6 +150,12 @@ def test_clean_ordered_columns():
 
     #  Test 5: tipo di ritorno coerente
     assert list(result.columns) == ["lower_column", "higher_column"]
+
+    #  Test 6: parole e caratteri speciali vengono scambiati con nan
+    assert pd.isna(result.loc[6, "lower_column"])
+    assert pd.isna(result.loc[6, "higher_column"])
+
+    print(result[["lower_column", "higher_column"]])
 
 def test_clean_good_players():
     """Test della funzione clean_good_players."""
