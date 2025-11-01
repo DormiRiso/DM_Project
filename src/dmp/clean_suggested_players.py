@@ -80,12 +80,13 @@ def clean_best_players(df, best_players_column, good_players_column):
         entry = str(row[best_players_column])
 
         # Estrai solo i numeri
-        numbers = [int(x) for x in entry if x.isdigit()]
+        numbers = [int(x) for x in entry if x.isdigit() and x != '0']
 
         # Elimina duplicati
         unique_numbers = sorted(set(numbers))
 
-        good_players = str(row[good_players_column])
+        # Estrai solo i numeri
+        good_players = [int(x) for x in str(row[good_players_column]) if x.isdigit()]
 
         # Se non ho nessun numero o solo zeri aggiungi nan
         if not unique_numbers or set(unique_numbers) == {0}:
