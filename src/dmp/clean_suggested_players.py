@@ -80,22 +80,18 @@ def clean_best_players(df, best_players_column, good_players_column):
         entry = str(row[best_players_column])
 
         # Estrai solo i numeri
-        numbers = [int(x) for x in entry if x.isdigit() and x != '0']
-
-        # Elimina duplicati
-        unique_numbers = sorted(set(numbers))
+        numbers = set([int(x) for x in entry if x.isdigit() and x != '0'])
 
         # Estrai solo i numeri
         good_players = [int(x) for x in str(row[good_players_column]) if x.isdigit()]
 
-        # Se best_players contiene più di un valore salva solo il minimo
-        if (len(unique_numbers) > 1):
-            unique_numbers = [min(unique_numbers)]
-
         # Se non ho nessun numero o solo zeri aggiungi nan
-        if not unique_numbers or unique_numbers == [0]:
+        if not numbers or numbers == [0]:
             cleaned_values.append(np.nan)
             continue
+
+        # Salvo solo il valore minimo di best_players
+        unique_numbers = min(numbers)
 
         # Se good_players è nan aggiungi direttamente il valore di best_players al dataframe
         if not good_players:
@@ -106,7 +102,7 @@ def clean_best_players(df, best_players_column, good_players_column):
             good_players = [int(x) for x in good_players if x.isdigit()]
 
         # Controlla se il valore di best_players rientra in good_players, altrimenti nan
-        if (set(unique_numbers).issubset(good_players)):
+        if (unique_numbers in good_players):
             cleaned_values.append(unique_numbers)
             continue
 
