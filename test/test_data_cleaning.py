@@ -2,7 +2,9 @@ from dmp.utils import check_for_column_content, count_word_occurrences
 from dmp.clean_description import convert_string_column_to_sets
 from dmp.clean_ordered_columns import clean_ordered_columns
 from dmp.clean_suggested_players import clean_good_players, clean_best_players
-from dmp.convert_zeros_into_nan import convert_zeros_into_nan
+from dmp.convert_wrong_values_into_nan import convert_wrong_values_into_nan
+from dmp.remove_columns import remove_columns
+from dmp.merge_columns_with_prefix import merge_columns_with_prefix
 import pandas as pd
 import numpy as np
 
@@ -220,40 +222,123 @@ def test_clean_best_players():
 
     print(result["best_players"])
 
-def test_convert_zeros_into_nan():
-    """Test della funzione convert_zeros_into_nan"""
+def test_convert_wrong_values_into_nan():
+    # --- Test 1: Valori validi (nessuna sostituzione) ---
+    df1 = pd.DataFrame({'A': [1, 2, 3, 4, 5]})
+    result1 = convert_wrong_values_into_nan(df1.copy(), 'A')
+    expected1 = pd.DataFrame({'A': [1, 2, 3, 4, 5]})
+    pd.testing.assert_frame_equal(result1, expected1)
 
-    # Caso 1: Singola colonna
-    df1 = pd.DataFrame({'A': [0, 1, 2, 0], 'B': [5, 6, 0, 7]})
-    result1 = convert_zeros_into_nan(df1.copy(), 'A')
-    assert pd.isna(result1.loc[0, 'A'])
-    assert pd.isna(result1.loc[3, 'A'])
-    assert result1.loc[1, 'A'] == 1
-    assert result1.loc[2, 'A'] == 2
-    assert result1.loc[2, 'B'] == 0  # B non deve cambiare
+    # --- Test 2: Valori uguali a 0 diventano NaN ---
+    df2 = pd.DataFrame({'A': [0, 1, 2, 3, 4]})
+    result2 = convert_wrong_values_into_nan(df2.copy(), 'A')
+    expected2 = pd.DataFrame({'A': [np.nan, 1, 2, 3, 4]})
+    pd.testing.assert_frame_equal(result2, expected2)
 
-    # Caso 2: Multiple colonne
-    df2 = pd.DataFrame({'X': [0, 10, 0], 'Y': [1, 0, 3], 'Z': [0, 0, 0]})
-    result2 = convert_zeros_into_nan(df2.copy(), ['X', 'Y'])
-    assert pd.isna(result2.loc[0, 'X'])
-    assert pd.isna(result2.loc[2, 'X'])
-    assert pd.isna(result2.loc[1, 'Y'])
-    assert pd.notna(result2.loc[0, 'Y'])
-    assert result2.loc[0, 'Z'] == 0  # Z invariata
+    # --- Test 3: Valori maggiori del numero di righe diventano NaN ---
+    # Qui il DataFrame ha 5 righe, quindi valori > 5 diventano NaN
+    df3 = pd.DataFrame({'A': [1, 6, 3, 7, 5]})
+    result3 = convert_wrong_values_into_nan(df3.copy(), 'A')
+    expected3 = pd.DataFrame({'A': [1, np.nan, 3, np.nan, 5]})
+    pd.testing.assert_frame_equal(result3, expected3)
 
-    # Caso 3: Colonna di tipo stringa
-    df3 = pd.DataFrame({'num': [0, 1, 2], 'text': ['a', 'b', 'c']})
-    result3 = convert_zeros_into_nan(df3.copy(), ['num', 'text'])
-    assert pd.isna(result3.loc[0, 'num'])
-    assert result3.loc[1, 'text'] == 'b'
+    # --- Test 4: Valori misti (0 e troppo grandi) ---
+    df4 = pd.DataFrame({'A': [0, 2, 8, 4, 1]})
+    result4 = convert_wrong_values_into_nan(df4.copy(), 'A')
+    expected4 = pd.DataFrame({'A': [np.nan, 2, np.nan, 4, 1]})
+    pd.testing.assert_frame_equal(result4, expected4)
 
-    # Caso 4: Nessuno zero presente
-    df4 = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
-    result4 = convert_zeros_into_nan(df4.copy(), ['A', 'B'])
-    pd.testing.assert_frame_equal(result4, df4)
+    # --- Test 5: Più colonne ---
+    df5 = pd.DataFrame({
+        'A': [0, 2, 6, 4, 1],
+        'B': [1, 0, 3, 7, 5]
+    })
+    result5 = convert_wrong_values_into_nan(df5.copy(), ['A', 'B'])
+    expected5 = pd.DataFrame({
+        'A': [np.nan, 2, np.nan, 4, 1],
+        'B': [1, np.nan, 3, np.nan, 5]
+    })
+    pd.testing.assert_frame_equal(result5, expected5)
 
-    # Caso 5: Modifica in place
-    df5 = pd.DataFrame({'A': [0, 2]})
-    returned = convert_zeros_into_nan(df5, 'A')
-    assert pd.isna(df5.loc[0, 'A'])
-    assert returned is df5  # stesso oggetto
+    # --- Test 6: DataFrame vuoto ---
+    df6 = pd.DataFrame({'A': []})
+    result6 = convert_wrong_values_into_nan(df6.copy(), 'A')
+    pd.testing.assert_frame_equal(result6, df6)
+
+
+
+def test_remove_columns():
+    # --- Test 1: Rimuove una singola colonna ---
+    df1 = pd.DataFrame({
+        'a': [1, 2, 3],
+        'b': [4, 5, 6],
+        'c': [7, 8, 9]
+    })
+    result1 = remove_columns(df1.copy(), 'b')
+    expected1 = pd.DataFrame({'a': [1, 2, 3], 'c': [7, 8, 9]})
+    pd.testing.assert_frame_equal(result1, expected1)
+
+    # --- Test 2: Rimuove più colonne ---
+    df2 = pd.DataFrame({
+        'a': [1, 2],
+        'b': [3, 4],
+        'c': [5, 6]
+    })
+    result2 = remove_columns(df2.copy(), ['a', 'c'])
+    expected2 = pd.DataFrame({'b': [3, 4]})
+    pd.testing.assert_frame_equal(result2, expected2)
+
+    # --- Test 3: Nessuna colonna rimossa se la lista è vuota ---
+    df3 = pd.DataFrame({'a': [1, 2], 'b': [3, 4]})
+    result3 = remove_columns(df3.copy(), [])
+    pd.testing.assert_frame_equal(result3, df3)
+
+    # --- Test 4: Funziona anche se viene passato un singolo nome come stringa ---
+    df5 = pd.DataFrame({'x': [1, 2], 'y': [3, 4]})
+    result5 = remove_columns(df5.copy(), 'x')
+    expected5 = pd.DataFrame({'y': [3, 4]})
+    pd.testing.assert_frame_equal(result5, expected5)
+
+
+
+def test_merge_columns_with_prefix():
+    # --- Test 1: Caso base ---
+    df1 = pd.DataFrame({
+        'id': [1, 2],
+        'cat:sport': [1, 0],
+        'cat:music': [0, 1],
+        'cat:food':  [1, 1]
+    })
+    result1 = merge_columns_with_prefix(df1.copy(), prefix="cat:", new_col="categories")
+    assert 'categories' in result1.columns
+    assert all(isinstance(x, np.ndarray) for x in result1['categories'])
+    np.testing.assert_array_equal(result1.loc[0, 'categories'], np.array([1, 0, 1]))
+    np.testing.assert_array_equal(result1.loc[1, 'categories'], np.array([0, 1, 1]))
+    assert set(result1.columns) == {'id', 'categories'}
+
+    # --- Test 2: Nessuna colonna con il prefisso ---
+    df2 = pd.DataFrame({'id': [1, 2], 'value': [10, 20]})
+    result2 = merge_columns_with_prefix(df2.copy(), prefix="cat:", new_col="categories")
+    pd.testing.assert_frame_equal(result2, df2)
+
+    # --- Test 3: Colonne tutte 0 ---
+    df3 = pd.DataFrame({
+        'cat:a': [0, 0, 0],
+        'cat:b': [0, 0, 0]
+    })
+    result3 = merge_columns_with_prefix(df3.copy(), prefix="cat:", new_col="categories")
+    np.testing.assert_array_equal(result3.loc[0, 'categories'], np.array([0, 0]))
+    np.testing.assert_array_equal(result3.loc[1, 'categories'], np.array([0, 0]))
+
+    # --- Test 4: Prefisso personalizzato ---
+    df4 = pd.DataFrame({
+        'id': [1, 2],
+        'tag:red': [1, 0],
+        'tag:blue': [0, 1],
+        'tag:green': [1, 1]
+    })
+    result4 = merge_columns_with_prefix(df4.copy(), prefix='tag:', new_col='tags')
+    assert 'tags' in result4.columns
+    np.testing.assert_array_equal(result4.loc[0, 'tags'], np.array([1, 0, 1]))
+    np.testing.assert_array_equal(result4.loc[1, 'tags'], np.array([0, 1, 1]))
+

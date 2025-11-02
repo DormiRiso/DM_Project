@@ -1,7 +1,9 @@
 import dmp.clean_description as clean_description
 import dmp.clean_ordered_columns as clean_ordered_columns
 import dmp.clean_suggested_players as clean_suggested_players
-import dmp.convert_zeros_into_nan as convert_zeros_into_nan
+import dmp.convert_wrong_values_into_nan as convert_wrong_values_into_nan
+import dmp.remove_columns as remove_columns
+import dmp.merge_columns_with_prefix as merge_columns_with_prefix
 
 def clean_df(df):
     """
@@ -16,14 +18,16 @@ def clean_df(df):
     print("\n*********************************************************************\n")
     print("Inizio la pulizia del DataFrame")
     
-    print("Pulisco tutte le colonne dai missing values convertendo gli 0 in NaN")
-    #Converte tutti i valori 0 nel dataset come nan (solo nelle colonne in cui questo valore non ha senso)
+    print("Pulisco tutte le colonne dai missing values convertendo gli 0 e i valori maggiori del numero di righe in NaN")
+    #Converte tutti i valori 0 o maggiori del numero di righe nel dataset come nan (solo nelle colonne in cui questo valore non ha senso)
     columns_to_convert = [
         "YearPublished", "GameWeight", "ComWeight", "MinPlayers", "MaxPlayers",
         "ComAgeRec", "LanguageEase", "BestPlayers", "MfgPlaytime",
-        "ComMinPlaytime", "ComMaxPlaytime", "MfgAgeRec"
+        "ComMinPlaytime", "ComMaxPlaytime", "MfgAgeRec", "Rank:strategygames",
+        "Rank:abstracts", "Rank:familygames", "Rank:thematic", "Rank:cgs",
+        "Rank:wargames", "Rank:partygames","Rank:childrensgames"
     ]
-    df = convert_zeros_into_nan.convert_zeros_into_nan(df, columns_to_convert)
+    df = convert_wrong_values_into_nan.convert_wrong_values_into_nan(df, columns_to_convert)
     
     print("Pulisco Description")
     # Trasforma la colonna "Description" in insiemi di parole (set di stringhe)
@@ -44,6 +48,22 @@ def clean_df(df):
     print("Pulisco com min/max play time")
     # Faccio la stessa cosa per ComMinPlaytime e ComMaxPlaytime
     df = clean_ordered_columns.clean_ordered_columns(df, 'ComMinPlaytime', 'ComMaxPlaytime')
+
+    #Se la colonna numComments contiene solo 0 la elimino
+    # Se tutti i valori sono 0 (o la colonna è vuota)
+    if (df['NumComments'] == 0).all():
+        df = remove_columns.remove_columns(df, 'NumComments')
+        print("Colonna NumComments eliminata, erano tutti 0")
+    else:
+        print("In NumComments ci sono dei valori diversi da 0")
+
+    #Elimino la colonna ImagePath
+    df = remove_columns.remove_columns(df, 'ImagePath')
+    print("Colonna ImagePath eliminata, erano tutte stringhe inutili")
+
+    #Unisco le colonne "cat:" in un vettore unico
+    df = merge_columns_with_prefix.merge_columns_with_prefix(df, prefix="Cat:", new_col="Categories")
+    print("Unisco le colonne 'cat' inuna singola colonna di arrays chiamata 'Categories'")
 
     print("Concludo la pulizia del DataFrame")
     print("\n*********************************************************************\n")
