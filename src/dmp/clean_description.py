@@ -23,3 +23,6 @@ def convert_string_column_to_sets(df, column_name):
 
     # Ritorna una Serie con gli insiemi
     return df[column_name].apply(clean_and_split)
+
+
+
