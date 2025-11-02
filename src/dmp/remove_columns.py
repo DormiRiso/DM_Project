@@ -20,4 +20,3 @@ def remove_columns(df, cols):
 
     # Restituisce il DataFrame aggiornato senza le colonne rimosse.
     return df
-

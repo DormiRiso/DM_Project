@@ -200,14 +200,14 @@ def test_clean_best_players():
 
     # Dataset di esempio con vari casi da correggere
     df = pd.DataFrame({
-        "good_players": ["4,5,6", "4, 5", "7,8", "3"],
-        "best_players": ["5", "4, arpofr@@+", "0", "9"]
+        "good_players": ["4,5,6", "4, 5", "7,8", "3", "1, 2, 3, 4, 5, 6"],
+        "best_players": ["5", "4, arpofr@@+", "0", "9", "4,5"]
     })
 
     # Applica la funzione
     result = clean_best_players(df, 'best_players', 'good_players')
 
-    # Deve restituire un DataFrame della stessa forma
+    # Deve restituire un DataFrame della stessa forma6
     assert isinstance(result, pd.DataFrame)
     assert result.shape == df.shape
 
@@ -219,6 +219,8 @@ def test_clean_best_players():
     assert pd.isna(result.loc[2, "best_players"])
     # Il campo è un numero fuori dall'intervallo corretto -> nan
     assert pd.isna(result.loc[3, "best_players"])
+    # Il campo contiene più di un intero
+    assert result.loc[4, "best_players"] == [4]
 
     print(result["best_players"])
 

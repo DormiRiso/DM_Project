@@ -76,7 +76,7 @@ def clean_best_players(df, best_players_column, good_players_column):
 
     # Scorri il DataFrame iterando sulle righe con un indice
     for i, row in df.iterrows():
-        
+
         entry = str(row[best_players_column])
 
         # Estrai solo i numeri
@@ -88,8 +88,12 @@ def clean_best_players(df, best_players_column, good_players_column):
         # Estrai solo i numeri
         good_players = [int(x) for x in str(row[good_players_column]) if x.isdigit()]
 
+        # Se best_players contiene più di un valore salva solo il minimo
+        if (len(unique_numbers) > 1):
+            unique_numbers = [min(unique_numbers)]
+
         # Se non ho nessun numero o solo zeri aggiungi nan
-        if not unique_numbers or set(unique_numbers) == {0}:
+        if not unique_numbers or unique_numbers == [0]:
             cleaned_values.append(np.nan)
             continue
 
