@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Data Mining Project - Data Cleaning Application
-This script loads the game dataset and performs data cleaning operations.
+Questo script carica un dataset, lo pulisce utilizzando la funzione `clean_df`
 """
 
 import pandas as pd
@@ -9,32 +9,26 @@ from pathlib import Path
 from dmp import clean_df
 
 def main():
-    # Define paths
+    # Definisci i percorsi
     data_dir = Path("data")
     input_file = data_dir / "DM1_game_dataset.csv"
     output_file = data_dir / "cleaned_df.csv"
 
-    # Ensure data directory exists
+    # Assicurati che la directory dei dati esista
     data_dir.mkdir(exist_ok=True)
-
-    print("\n=== Starting Data Cleaning Process ===\n")
     
-    # Load the dataset
-    print(f"Loading dataset from {input_file}")
+    # Carica il dataset
+    print(f"Caricando dataset da {input_file}")
     df = pd.read_csv(input_file)
-    print(f"Successfully loaded dataset with {len(df)} rows.")
+    print(f"Dataset caricato con successo con {len(df)} righe.")
 
-    # Clean the dataframe
-    print("\nCleaning the dataset...")
+    # Pulisci il dataframe
     df_cleaned = clean_df(df)
-    print("Dataset cleaning completed.")
 
-    # Save the cleaned dataset
-    print(f"\nSaving cleaned dataset to {output_file}")
+    # Salva il dataset pulito
+    print(f"Salvando il dataset come {output_file}")
     df_cleaned.to_csv(output_file, index=False)
-    print("Cleaned dataset saved successfully.")
+    print("Salvato con successo.")
     
-    print("\n=== Data Cleaning Process Completed ===\n")
-
 if __name__ == "__main__":
     main()
