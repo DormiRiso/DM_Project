@@ -1,5 +1,5 @@
 # Ignora il cleaned.csv per evitare conflitti nel versioning
-data/*
+data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
