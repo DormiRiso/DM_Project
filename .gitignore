@@ -1,3 +1,6 @@
+# Ignora il cleaned.csv per evitare conflitti nel versioning
+data/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
