@@ -1,1 +1,59 @@
-Board Games DatasetThe dataset contains information regarding more than 20k board games rated by an online board game community. The information provided range from year of publication, game difficulty, number of players, to information about game rank in specific categories and game characteristics/themes.GAMES	BGGId         		Game Id 							### Buttare via	Name			Name of game 							### String	Description		Description of the game 					### lista di stringhe	YearPublished		Year in which the game was published				### int o nan	GameWeight		Game complexity from 1 to 5 					### Float 1-5	ComWeight	        Community recommended game complexity from 1 to 5 		### Float 1-5	MinPlayers		Minimum number of players 					### Intero 	MaxPlayers		Maximum number of players					### Intero > min players	ComAgeRec		Community's recommended age minimum				### Float > 0	LanguageEase		Language requirement						### Float > 0	BestPlayers		Community voted best player count				### Intero in GoodPlayers	GoodPlayers		List of community voted good player counts			### Lista di interi 	NumOwned		Number of users who own this game				### Intero, anche 0	NumWant			Number of users who want this game				### Intero, anche 0	NumWish			Number of users who wishlisted this game			### Intero, anche 0	NumWeightVotes		Number of votes for the weight category received by users	### Intero, anche 0 	MfgPlayTime		Manufacturer Stated Play Time					### Intero	ComMinPlaytime		Community minimum play time					### Intero 	ComMaxPlaytime		Community maximum play time					### Intero > min playtime	MfgAgeRec		Manufacturer Age Recommendation					### Intero	NumUserRatings		Number of user ratings						### Intero, anche 0	NumComments		Number of user comments						### delete	NumAlternates		Number of alternate versions					### Intero, anche 0 	NumExpansions		Number of expansions						### Intero, anche 0	NumImplementations	Number of implementations					### Intero, anche 0	IsReimplementation	Is this game presenting a reimplementation? 			### Bool (0,1, nan)	Family			Game family the game belongs to					### String, nan	Kickstarted		Is this game from a kickstarter (crowdfunding campaign) project?### Bool (0,1, nan)	ImagePath		Image http:// path						### delete	Rank:strategygames	Rank in strategy games						### 	Rank:abstracts		Rank in abstracts						### 	Rank:familygames	Rank in family games						### 	Rank:thematic		Rank in thematic						### 	Rank:cgs		Rank in card games						### 	Rank:wargames		Rank in war games						### 	Rank:partygames		Rank in party games						### 	Rank:childrensgames	Rank in children's games					### 	Cat:Thematic		Binary is in Thematic category					### 	Cat:Strategy		Binary is in Strategy category					### 	Cat:War			Binary is in War category					### 	Cat:Family		Binary is in Family category					### 	Cat:CGS			Binary is in Card Games category				### 	Cat:Abstract		Binary is in Abstract category					### 	Cat:Party		Binary is in Party category					### 	Cat:Childrens		Binary is in Childrens category					### 	Rating			Game rating (low, medium, high)					### (-1,0,1) 	
+Board Games Dataset
+
+The dataset contains information regarding more than 20k board games rated by an online board game community. The information provided range from year of publication, game difficulty, number of players, to information about game rank in specific categories and game characteristics/themes.
+
+
+GAMES
+	BGGId         		Game Id 													### Buttare via
+	Name			Name of game 													### String
+	Description		Description of the game 										### lista di stringhe
+	YearPublished		Year in which the game was published						### int o nan
+	GameWeight		Game complexity from 1 to 5 									### Float 1-5
+	ComWeight	        Community recommended game complexity from 1 to 5 			### Float 1-5
+	MinPlayers		Minimum number of players 										### Intero 
+	MaxPlayers		Maximum number of players										### Intero > min players
+	ComAgeRec		Community's recommended age minimum								### Float > 0
+	LanguageEase		Language requirement										### Float > 0
+	BestPlayers		Community voted best player count								### Intero in GoodPlayers
+	GoodPlayers		List of community voted good player counts						### Lista di interi 
+	NumOwned		Number of users who own this game								### Intero, anche 0
+	NumWant			Number of users who want this game								### Intero, anche 0
+	NumWish			Number of users who wishlisted this game						### Intero, anche 0
+	NumWeightVotes		Number of votes for the weight category received by users	### Intero, anche 0 
+	MfgPlayTime		Manufacturer Stated Play Time									### Intero
+	ComMinPlaytime		Community minimum play time									### Intero 
+	ComMaxPlaytime		Community maximum play time									### Intero > min playtime
+	MfgAgeRec		Manufacturer Age Recommendation									### Intero
+	NumUserRatings		Number of user ratings										### Intero, anche 0
+	NumComments		Number of user comments											### delete
+	NumAlternates		Number of alternate versions								### Intero, anche 0 
+	NumExpansions		Number of expansions										### Intero, anche 0
+	NumImplementations	Number of implementations									### Intero, anche 0
+	IsReimplementation	Is this game presenting a reimplementation? 				### Bool (0,1, nan)
+	Family			Game family the game belongs to									### String, nan
+	Kickstarted		Is this game from a kickstarter (crowdfunding campaign) project?### Bool (0,1, nan)
+	ImagePath		Image http:// path												### delete
+	Rank:strategygames	Rank in strategy games										### 
+	Rank:abstracts		Rank in abstracts											### 
+	Rank:familygames	Rank in family games										### 
+	Rank:thematic		Rank in thematic											### 
+	Rank:cgs		Rank in card games												### 
+	Rank:wargames		Rank in war games											### 
+	Rank:partygames		Rank in party games											### 
+	Rank:childrensgames	Rank in children's games									### 
+	Cat:Thematic		Binary is in Thematic category								### 
+	Cat:Strategy		Binary is in Strategy category								### 
+	Cat:War			Binary is in War category										### 
+	Cat:Family		Binary is in Family category									### 
+	Cat:CGS			Binary is in Card Games category								### 
+	Cat:Abstract		Binary is in Abstract category								### 
+	Cat:Party		Binary is in Party category										### 
+	Cat:Childrens		Binary is in Childrens category								### 
+	Rating			Game rating (low, medium, high)									### (-1,0,1)
+
+
+
+
+ 
+
+	
