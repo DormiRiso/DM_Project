@@ -16,8 +16,8 @@ def clean_ordered_columns(df, lower_column, higher_column):
     df = df.copy()
 
     # Coerce non-numeric to NaN
-    df[lower_column] = pd.to_numeric(df[lower_column], errors='coerce')
-    df[higher_column] = pd.to_numeric(df[higher_column], errors='coerce')
+    df[lower_column] = pd.to_numeric(df[lower_column], errors='coerce', downcast='integer')
+    df[higher_column] = pd.to_numeric(df[higher_column], errors='coerce', downcast='integer')
 
     # Sostituisce con NaN i valori numerici che non sono interi (es. 3.5)
     mask_lower_not_int = df[lower_column].notna() & (df[lower_column] % 1 != 0)

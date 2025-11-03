@@ -57,9 +57,10 @@ def clean_df(df):
     else:
         print("In NumComments ci sono dei valori diversi da 0")
 
-    #Elimino la colonna ImagePath
+    #Elimino la colonna ImagePath e BGGId in quanto inutili
     df = remove_columns.remove_columns(df, 'ImagePath')
-    print("Colonna ImagePath eliminata, erano tutte stringhe inutili")
+    df = remove_columns.remove_columns(df, 'BGGId')
+    print("Colonne ImagePath, BGGID eliminate")
 
     #Unisco le colonne "cat:" in un vettore unico
     df = merge_columns_with_prefix.merge_columns_with_prefix(df, prefix="Cat:", new_col="Categories")
@@ -67,5 +68,4 @@ def clean_df(df):
 
     print("Concludo la pulizia del DataFrame")
     print("\n*********************************************************************\n")
-    
     return df

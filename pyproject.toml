@@ -9,6 +9,9 @@ dependencies = [
     "matplotlib"
 ]
 
+[project.scripts]
+clean-dataset = "main:main"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
