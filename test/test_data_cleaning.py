@@ -4,9 +4,11 @@ from dmp.clean_ordered_columns import clean_ordered_columns
 from dmp.clean_suggested_players import clean_good_players, clean_best_players
 from dmp.convert_wrong_values_into_nan import convert_wrong_values_into_nan
 from dmp.remove_columns import remove_columns
-from dmp.merge_columns_with_prefix import merge_columns_with_prefix
+from dmp.clean_ranks_and_cats import clean_ranks_and_cats
+from dmp.convert_string_column_to_ints import convert_string_column_to_ints
 import pandas as pd
 import numpy as np
+import pytest
 
 def test_check_for_column_content():
     """Testa la funzione check_for_column_content."""
@@ -303,44 +305,61 @@ def test_remove_columns():
 
 
 
-def test_merge_columns_with_prefix():
-    # --- Test 1: Caso base ---
-    df1 = pd.DataFrame({
-        'id': [1, 2],
-        'cat:sport': [1, 0],
-        'cat:music': [0, 1],
-        'cat:food':  [1, 1]
+def test_clean_ranks_and_cats():
+    # --- Dati di test ---
+    data = {
+        "Rank:thematic": [10, np.nan, 0],
+        "Rank:strategygames": [5, 20, np.nan],
+        "Cat:Thematic": [1, 0, 0],
+        "Cat:Strategy": [1, 1, 0]
+    }
+
+    df = pd.DataFrame(data)
+
+    rank_cols = ["Rank:thematic", "Rank:strategygames"]
+    cat_cols = ["Cat:Thematic", "Cat:Strategy"]
+
+    # --- Esegui funzione ---
+    df_clean = clean_ranks_and_cats(df.copy(), rank_cols, cat_cols)
+
+    # --- Verifiche ---
+    #1️ Deve esistere la nuova colonna "Ranks"
+    assert "Ranks" in df_clean.columns, "La colonna 'Ranks' non è stata creata."
+
+    #2 Tutti gli elementi devono essere liste di interi
+    for ranks in df_clean["Ranks"]:
+        assert isinstance(ranks, list), "Un valore in 'Ranks' non è una lista."
+        assert all(isinstance(x, int) for x in ranks), "Non tutti gli elementi in 'Ranks' sono interi."
+
+    #3️ I NaN devono essere sostituiti con 0
+    assert not df_clean[rank_cols].isna().any().any(), "Sono rimasti NaN nelle colonne Rank."
+
+    #4 Controlla che il contenuto della colonna Ranks sia corretto
+    expected_ranks = [
+        [10, 5],
+        [0, 20],
+        [0, 0]
+    ]
+    assert df_clean["Ranks"].tolist() == expected_ranks, "I valori nella colonna 'Ranks' non sono corretti."
+
+
+def test_convert_string_column_to_ints():
+    
+    # Dati di esempio
+    df = pd.DataFrame({
+        "priority": ["low", "medium", "high", "low"]
     })
-    result1 = merge_columns_with_prefix(df1.copy(), prefix="cat:", new_col="categories")
-    assert 'categories' in result1.columns
-    assert all(isinstance(x, np.ndarray) for x in result1['categories'])
-    np.testing.assert_array_equal(result1.loc[0, 'categories'], np.array([1, 0, 1]))
-    np.testing.assert_array_equal(result1.loc[1, 'categories'], np.array([0, 1, 1]))
-    assert set(result1.columns) == {'id', 'categories'}
-
-    # --- Test 2: Nessuna colonna con il prefisso ---
-    df2 = pd.DataFrame({'id': [1, 2], 'value': [10, 20]})
-    result2 = merge_columns_with_prefix(df2.copy(), prefix="cat:", new_col="categories")
-    pd.testing.assert_frame_equal(result2, df2)
-
-    # --- Test 3: Colonne tutte 0 ---
-    df3 = pd.DataFrame({
-        'cat:a': [0, 0, 0],
-        'cat:b': [0, 0, 0]
+    mapping = {"low": -1, "medium": 0, "high": 1}
+    
+    # Caso corretto: tutti i valori sono ammessi
+    converted_df = convert_string_column_to_ints(df.copy(), "priority", mapping)
+    assert all(converted_df["priority"].isin([-1, 0, 1]))
+    assert converted_df["priority"].tolist() == [-1, 0, 1, -1]
+    
+    # Caso con valore non valido: deve sollevare ValueError
+    df_invalid = pd.DataFrame({
+        "priority": ["low", "medium", "urgent"]  # 'urgent' non è ammesso
     })
-    result3 = merge_columns_with_prefix(df3.copy(), prefix="cat:", new_col="categories")
-    np.testing.assert_array_equal(result3.loc[0, 'categories'], np.array([0, 0]))
-    np.testing.assert_array_equal(result3.loc[1, 'categories'], np.array([0, 0]))
-
-    # --- Test 4: Prefisso personalizzato ---
-    df4 = pd.DataFrame({
-        'id': [1, 2],
-        'tag:red': [1, 0],
-        'tag:blue': [0, 1],
-        'tag:green': [1, 1]
-    })
-    result4 = merge_columns_with_prefix(df4.copy(), prefix='tag:', new_col='tags')
-    assert 'tags' in result4.columns
-    np.testing.assert_array_equal(result4.loc[0, 'tags'], np.array([1, 0, 1]))
-    np.testing.assert_array_equal(result4.loc[1, 'tags'], np.array([0, 1, 1]))
-
+    with pytest.raises(ValueError):
+        convert_string_column_to_ints(df_invalid, "priority", mapping)
+    
