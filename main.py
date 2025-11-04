@@ -7,6 +7,18 @@ Questo script carica un dataset, lo pulisce utilizzando la funzione `clean_df`
 import pandas as pd
 from pathlib import Path
 from dmp.data_cleaning import clean_df
+from dmp.data_understanding import understand_df
+
+# Colori ANSI per una stampa più leggibile
+class Colors:
+    HEADER = "\033[95m"
+    BLUE = "\033[94m"
+    CYAN = "\033[96m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
 
 # Colori ANSI per una stampa più leggibile
 class Colors:
@@ -47,6 +59,12 @@ def main():
     print(f"{Colors.GREEN}🎉 File salvato correttamente!{Colors.RESET}\n")
 
     print(f"{Colors.BOLD}🏁 Operazione completata!{Colors.RESET} ✅")
+        
+    ###############################################
+
+
+    #Fai data understanding sul df pulito
+    understand_df(df_cleaned)
 
 if __name__ == "__main__":
     main()
