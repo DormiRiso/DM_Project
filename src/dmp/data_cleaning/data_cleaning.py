@@ -6,101 +6,116 @@ from .remove_columns import remove_columns
 from .clean_ranks_and_cats import clean_ranks_and_cats
 from .convert_string_column_to_ints import convert_string_column_to_ints
 
+# 🎨 Colori ANSI per un output chiaro e leggibile
+class Colors:
+    HEADER = "\033[95m"
+    BLUE = "\033[94m"
+    CYAN = "\033[96m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
+
+
+def section(title: str, emoji: str = "🧩"):
+    """Stampa una sezione evidenziata."""
+    print(f"\n{Colors.HEADER}{Colors.BOLD}{emoji} {title}{Colors.RESET}")
+    print(f"{Colors.HEADER}{'─' * (len(title) + 4)}{Colors.RESET}")
+
+
 def clean_df(df):
     """
-        Pulisce il DataFrame e lo prepara per l'analisi.
-        Input: df (DataFrame originale)
-        Output: df (DataFrame pulito)
+    🧹 Pulisce il DataFrame e lo prepara per l'analisi.
+    Input: df (DataFrame originale)
+    Output: df (DataFrame pulito)
     """
 
-    # Crea una copia del DataFrame per evitare modifiche all'originale
     df = df.copy()
 
-    print("\n*********************************************************************\n")
-    print("Inizio la pulizia del DataFrame")
-    
-    print("Pulisco tutte le colonne dai missing values convertendo gli 0 e i valori maggiori del numero di righe in NaN")
-    #Converte tutti i valori 0 o maggiori del numero di righe nel dataset come nan (solo nelle colonne in cui questo valore non ha senso)
+    print(f"\n{Colors.BOLD}{Colors.BLUE}🚀 Inizio processo di Data Cleaning...{Colors.RESET}")
+    print(f"{'=' * 60}\n")
+
+    # 🔧 Conversione valori errati in NaN
+    section("Pulizia valori errati", "🧪")
+    print("👉 Converto 0 e valori non validi in NaN nelle colonne numeriche...")
     columns_to_convert = [
         "YearPublished", "GameWeight", "ComWeight", "MinPlayers", "MaxPlayers",
         "ComAgeRec", "LanguageEase", "BestPlayers", "MfgPlaytime",
         "ComMinPlaytime", "ComMaxPlaytime", "MfgAgeRec", "Rank:strategygames",
         "Rank:abstracts", "Rank:familygames", "Rank:thematic", "Rank:cgs",
-        "Rank:wargames", "Rank:partygames","Rank:childrensgames"
+        "Rank:wargames", "Rank:partygames", "Rank:childrensgames"
     ]
     df = convert_wrong_values_into_nan(df, columns_to_convert)
+    print(f"{Colors.GREEN}✅ Conversione completata!{Colors.RESET}")
 
-    print("Pulisco Description")
-    # Trasforma la colonna "Description" in insiemi di parole (set di stringhe)
+    # 📝 Pulizia descrizioni
+    section("Pulizia della colonna Description", "🗒️")
     df['Description'] = convert_string_column_to_sets(df, 'Description')
+    print(f"{Colors.GREEN}✅ Descrizioni convertite in insiemi di parole!{Colors.RESET}")
 
-    print("Pulisco max/min players")
-    # Assicura che le colonne min e max Players siano una più piccola dell'altra. In caso di 0 sostituisce con np.NaN
+    # 👥 Giocatori
+    section("Pulizia colonne giocatori", "🎮")
     df = clean_ordered_columns(df, 'MinPlayers', 'MaxPlayers')
-
-    print("Pulisco good players")
-    # Effettua la pulizia della colonna good players, rimuovendo ciò che non è un numero e basandosi sull'intervallo del nummero di giocatori consentiti
     df = clean_good_players(df, 'GoodPlayers', 'MinPlayers', 'MaxPlayers')
-
-    print("Pulisco best players")
-    # Effettua la pulizia della colonna best players, rimuovendo ciò che non è un numero o non è compreso in good players
     df = clean_best_players(df, 'BestPlayers', 'GoodPlayers')
+    print(f"{Colors.GREEN}✅ Colonne giocatori pulite e coerenti!{Colors.RESET}")
 
-    print("Pulisco com min/max play time")
-    # Faccio la stessa cosa per ComMinPlaytime e ComMaxPlaytime
+    # ⏱️ Tempi di gioco
+    section("Pulizia tempi di gioco", "⏱️")
     df = clean_ordered_columns(df, 'ComMinPlaytime', 'ComMaxPlaytime')
+    print(f"{Colors.GREEN}✅ Pulizia tempi completata!{Colors.RESET}")
 
-    #Se la colonna numComments contiene solo 0 la elimino
-    # Se tutti i valori sono 0 (o la colonna è vuota)
+    # 💬 Commenti
+    section("Controllo colonna NumComments", "💬")
     if (df['NumComments'] == 0).all():
         df = remove_columns(df, 'NumComments')
-        print("Colonna NumComments eliminata, erano tutti 0")
+        print(f"{Colors.YELLOW}⚠️ Colonna NumComments rimossa (tutti 0).{Colors.RESET}")
     else:
-        print("In NumComments ci sono dei valori diversi da 0")
+        print(f"{Colors.GREEN}✅ NumComments contiene valori utili, mantenuta.{Colors.RESET}")
 
-    #Elimino la colonna ImagePath e BGGId in quanto inutili
+    # 🗑️ Rimozione colonne inutili
+    section("Rimozione colonne inutili", "🧺")
     df = remove_columns(df, 'ImagePath')
     df = remove_columns(df, 'BGGId')
-    print("Colonne ImagePath, BGGID eliminate")
+    print(f"{Colors.GREEN}✅ Rimosse colonne 'ImagePath' e 'BGGId'.{Colors.RESET}")
 
-    #Se c'è corrispondenza tra le colonne 'cat:' e 'Rank:' unisco le colonne 'rank:' in un vettore unico e elimino le colonne 'Cat:'
+    # 📊 Pulizia colonne rank/cat
+    section("Pulizia colonne Rank e Cat", "📊")
     rank_cols = [
-    "Rank:strategygames", "Rank:abstracts", "Rank:familygames",
-    "Rank:thematic", "Rank:cgs", "Rank:wargames",
-    "Rank:partygames", "Rank:childrensgames"
+        "Rank:strategygames", "Rank:abstracts", "Rank:familygames",
+        "Rank:thematic", "Rank:cgs", "Rank:wargames",
+        "Rank:partygames", "Rank:childrensgames"
     ]
-
     cat_cols = [
-    "Cat:Strategy", "Cat:Abstract", "Cat:Family",
-    "Cat:Thematic", "Cat:CGS", "Cat:War",
-    "Cat:Party", "Cat:Childrens"
+        "Cat:Strategy", "Cat:Abstract", "Cat:Family",
+        "Cat:Thematic", "Cat:CGS", "Cat:War",
+        "Cat:Party", "Cat:Childrens"
     ]
-
     df = clean_ranks_and_cats(df, rank_cols, cat_cols)
-    print("Unisco le colonne 'cat' e 'rank' in una colonna di arrays chiamata 'Ranks'")
-    #Rimuovo le colonne 'cat' e 'rank' dopo averle convertite in array
+    print("📦 Unisco colonne 'cat' e 'rank' in un'unica colonna 'Ranks'.")
     df = remove_columns(df, rank_cols)
     df = remove_columns(df, cat_cols)
-    print("Rimosse le colonne 'cat' e 'rank'")
-    
-    #Converto le colonne necessarie in interi64 (così non ho problemi con i NaN)
-    Cols_to_convert_in_int = ["YearPublished", "MinPlayers", "MaxPlayers", 
-    "BestPlayers", "MfgPlaytime", "ComMinPlaytime", "ComMaxPlaytime",
-    "MfgAgeRec"]
+    print(f"{Colors.GREEN}✅ Rimosse le colonne originali 'cat' e 'rank'.{Colors.RESET}")
 
-    df[Cols_to_convert_in_int] = df[Cols_to_convert_in_int].astype("Int64")
-    print("Converto le colonne che lo necessitano in Int64 (per i NaN)")
+    # 🔢 Conversione a interi
+    section("Conversione colonne in Int64", "🔢")
+    cols_to_convert_in_int = [
+        "YearPublished", "MinPlayers", "MaxPlayers",
+        "BestPlayers", "MfgPlaytime", "ComMinPlaytime",
+        "ComMaxPlaytime", "MfgAgeRec"
+    ]
+    df[cols_to_convert_in_int] = df[cols_to_convert_in_int].astype("Int64")
+    print(f"{Colors.GREEN}✅ Conversione completata!{Colors.RESET}")
 
-    #Converto la colonna Rating in interi mappandoli con -1, 0, 1
+    # 🎯 Conversione Rating
+    section("Mappatura Rating in interi", "🎯")
     map_string_to_int = {"Low": -1, "Medium": 0, "High": 1}
     df = convert_string_column_to_ints(df, 'Rating', map_string_to_int)
-    print("Convertito la colonna 'Rating' in interi (-1,0,1)")
+    print(f"{Colors.GREEN}✅ Colonna 'Rating' convertita in (-1, 0, 1)!{Colors.RESET}")
 
-    # Stampo i tipi all'interno del df per fare un check veloce
-    # print("\n Tipi all'interno del df:")
-    # print(df.dtypes)
+    # 🏁 Fine
+    print(f"\n{Colors.BOLD}{Colors.CYAN}🏁 Pulizia completata con successo!{Colors.RESET}")
+    print(f"{'=' * 60}\n")
 
-
-    print("Concludo la pulizia del DataFrame")
-    print("\n*********************************************************************\n")
     return df
