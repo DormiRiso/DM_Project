@@ -18,7 +18,7 @@ def make_hist(df, colonna, bins=10, titolo=None):
 
     # Crea il grafico
     plt.figure(figsize=(8, 5))
-    plt.hist(df[colonna].dropna(), bins=bins, edgecolor='black', alpha=0.7)
+    data = plt.hist(df[colonna].dropna(), bins=bins, edgecolor='black', alpha=0.7)
     plt.title(titolo if titolo else f"Istogramma di '{colonna}'")
     plt.xlabel(colonna)
     plt.ylabel("Frequenza")
@@ -27,3 +27,4 @@ def make_hist(df, colonna, bins=10, titolo=None):
     file_path = save_figure(plt, titolo if titolo else colonna, "figures", ".png")
     
     print(f"Istogramma salvato in: {file_path}")
+    return data
