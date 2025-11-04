@@ -1,10 +1,10 @@
 from dmp.utils import check_for_column_content, count_word_occurrences
-from dmp.clean_description import convert_string_column_to_sets
-from dmp.clean_ordered_columns import clean_ordered_columns
-from dmp.clean_suggested_players import clean_good_players, clean_best_players
-from dmp.convert_wrong_values_into_nan import convert_wrong_values_into_nan
-from dmp.remove_columns import remove_columns
-from dmp.merge_columns_with_prefix import merge_columns_with_prefix
+from dmp.data_cleaning.clean_description import convert_string_column_to_sets
+from dmp.data_cleaning.clean_ordered_columns import clean_ordered_columns
+from dmp.data_cleaning.clean_suggested_players import clean_good_players, clean_best_players
+from dmp.data_cleaning.convert_wrong_values_into_nan import convert_wrong_values_into_nan
+from dmp.data_cleaning.remove_columns import remove_columns
+from dmp.data_cleaning.merge_columns_with_prefix import merge_columns_with_prefix
 import pandas as pd
 import numpy as np
 

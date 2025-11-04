@@ -1,3 +1,6 @@
-from dmp.data_cleaning import clean_df
+from . import data_cleaning
+from . import data_understanding
+from . import modeling
+from . import utils
 
-__all__ = ['clean_df']
+__all__ = ["data_cleaning", "data_understanding", "modeling", "utils"]

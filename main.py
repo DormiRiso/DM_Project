@@ -6,7 +6,7 @@ Questo script carica un dataset, lo pulisce utilizzando la funzione `clean_df`
 
 import pandas as pd
 from pathlib import Path
-from dmp import clean_df
+from dmp.data_cleaning import clean_df
 
 def main():
     # Definisci i percorsi
