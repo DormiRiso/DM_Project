@@ -1,6 +1,10 @@
 # Ignora il cleaned.csv per evitare conflitti nel versioning
 data/
 
+# Ignora la cartella contenente i grafici per evitare conflitti nel versioning
+figures/
+plots/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
