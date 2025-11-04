@@ -4,7 +4,8 @@ from dmp.data_cleaning.clean_ordered_columns import clean_ordered_columns
 from dmp.data_cleaning.clean_suggested_players import clean_good_players, clean_best_players
 from dmp.data_cleaning.convert_wrong_values_into_nan import convert_wrong_values_into_nan
 from dmp.data_cleaning.remove_columns import remove_columns
-from dmp.data_cleaning.merge_columns_with_prefix import merge_columns_with_prefix
+from dmp.data_cleaning.clean_ranks_and_cats import clean_ranks_and_cats
+from dmp.data_cleaning.convert_string_column_to_ints import convert_string_column_to_ints
 import pandas as pd
 import numpy as np
 import pytest

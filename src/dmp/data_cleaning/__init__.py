@@ -7,7 +7,6 @@ from .convert_string_column_to_ints import convert_string_column_to_ints
 from .convert_wrong_values_into_nan import convert_wrong_values_into_nan
 from .remove_columns import remove_columns
 from .data_cleaning import clean_df
-from .merge_columns_with_prefix import merge_columns_with_prefix
 
 __all__ = [
     "convert_string_column_to_sets",
@@ -18,5 +17,4 @@ __all__ = [
     "convert_wrong_values_into_nan",
     "remove_columns",
     "clean_df",
-    "merge_columns_with_prefix"
 ]
