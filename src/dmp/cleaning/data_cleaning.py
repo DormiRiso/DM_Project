@@ -1,10 +1,10 @@
-import dmp.clean_description as clean_description
-import dmp.clean_ordered_columns as clean_ordered_columns
-import dmp.clean_suggested_players as clean_suggested_players
-import dmp.convert_wrong_values_into_nan as convert_wrong_values_into_nan
-import dmp.remove_columns as remove_columns
-import dmp.clean_ranks_and_cats as clean_ranks_and_cats
-import dmp.convert_string_column_to_ints as convert_string_column_to_ints
+import dmp.cleaning.clean_description as clean_description
+import dmp.cleaning.clean_ordered_columns as clean_ordered_columns
+import dmp.cleaning.clean_suggested_players as clean_suggested_players
+import dmp.cleaning.convert_wrong_values_into_nan as convert_wrong_values_into_nan
+import dmp.cleaning.remove_columns as remove_columns
+import dmp.cleaning.clean_ranks_and_cats as clean_ranks_and_cats
+import dmp.cleaning.convert_string_column_to_ints as convert_string_column_to_ints
 
 def clean_df(df):
     """
