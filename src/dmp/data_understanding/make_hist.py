@@ -1,6 +1,7 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import os
+from dmp.utils import save_figure
 
 def make_hist(df, colonna, bins=10, titolo=None):
     """
@@ -14,10 +15,7 @@ def make_hist(df, colonna, bins=10, titolo=None):
     """
     if colonna not in df.columns:
         raise ValueError(f"La colonna '{colonna}' non esiste nel DataFrame.")
-    
-    # Crea la cartella figures se non esiste
-    os.makedirs("figures", exist_ok=True)
-    
+
     # Crea il grafico
     plt.figure(figsize=(8, 5))
     plt.hist(df[colonna].dropna(), bins=bins, edgecolor='black', alpha=0.7)
@@ -26,11 +24,6 @@ def make_hist(df, colonna, bins=10, titolo=None):
     plt.ylabel("Frequenza")
     plt.grid(axis='y', alpha=0.75)
     
-    # Salvataggio del file
-    nome_file = titolo if titolo else colonna
-    nome_file = nome_file.replace(" ", "_").lower() + ".png"
-    percorso_file = os.path.join("figures", nome_file)
-    plt.savefig(percorso_file, bbox_inches='tight')
-    plt.close()
+    file_path = save_figure(plt, titolo if titolo else colonna, "figures", ".png")
     
-    print(f"Istogramma salvato in: {percorso_file}")
+    print(f"Istogramma salvato in: {file_path}")

@@ -6,13 +6,15 @@ TODO:
     - Data regression o no
 
 - Data understanding:
-    - Colonne "numeriche": 
+
+    - Colonne "numeriche":
         - Histo, box and whisker plot raw
         - Trovare outliers (tramite i percentili o manualmente)
         - Plotta senza outliers (scrivere numero di punti rimossi nella legenda)
 
     - Colonne stringe:
-        - 
+        - Da determinare
+
     - Colonne vettoriali:
         - Histogram del genere singolo
         - Heatmap 8x8

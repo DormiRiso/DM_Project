@@ -1,5 +1,20 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
+
+def save_figure(plot, title, folder="figures", extension=".png"):
+
+    # Crea la cartella "folder" se non esiste
+    os.makedirs(folder, exist_ok=True)
+
+    # Salvataggio del file
+    file_name = title
+    file_name = file_name.replace(" ", "_").lower() + extension
+    file_path = os.path.join(folder, file_name)
+    plot.savefig(file_path, bbox_inches='tight')
+    plot.close()
+
+    return file_path
 
 def check_for_column_content(df: pd.DataFrame, column_name: str, show_hist: bool = False, only_special_char: bool = False) -> tuple:
     """Funzione che controlla il contenuto di una colonna del DataFrame
