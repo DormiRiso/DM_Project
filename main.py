@@ -7,7 +7,7 @@ Questo script carica un dataset, lo pulisce utilizzando la funzione `clean_df`
 import pandas as pd
 from pathlib import Path
 from dmp.data_cleaning import clean_df
-from dmp.data_understanding import understand_df
+from dmp.data_understanding import analizza_colonne_numeriche
 
 # Colori ANSI per una stampa più leggibile
 class Colors:
@@ -64,6 +64,6 @@ def main():
 
 
     #Fai data understanding sul df pulito
-    understand_df(df_cleaned)
+    analizza_colonne_numeriche(df_cleaned)
 if __name__ == "__main__":
     main()
