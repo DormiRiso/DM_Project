@@ -65,6 +65,5 @@ def main():
 
     #Fai data understanding sul df pulito
     understand_df(df_cleaned)
-
 if __name__ == "__main__":
     main()
