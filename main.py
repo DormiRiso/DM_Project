@@ -7,6 +7,7 @@ Questo script carica un dataset, lo pulisce utilizzando la funzione `clean_df`
 import pandas as pd
 from pathlib import Path
 from dmp.data_cleaning import clean_df
+from dmp.data_understanding import understand_df
 
 def main():
     # Definisci i percorsi
@@ -29,6 +30,12 @@ def main():
     print(f"Salvando il dataset come {output_file}")
     df_cleaned.to_csv(output_file, index=False)
     print("Salvato con successo.")
+        
+    ###############################################
+
+
+    #Fai data understanding sul df pulito
+    understand_df(df_cleaned)
     
 if __name__ == "__main__":
     main()
