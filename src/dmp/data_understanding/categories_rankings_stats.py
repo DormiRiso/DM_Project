@@ -1,6 +1,7 @@
 from dmp.utils import save_figure
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.colors import LogNorm
 
 def number_of_categories_dist(ranks_column):
     """Funzione che crea un istogramma per la distribuzione del numero di categorie rankate per gioco
@@ -88,26 +89,21 @@ def category_couples_heatmap(ranks_column):
 
     category_names = ["strategy", "abstract", "family", "thematic", "cgs", "war", "party", "childerns"]
 
-    # Plot heatmap con matplotlib
+    # Creazione heatmap con scala logaritmica
     plt.figure(figsize=(7, 6))
-    plt.imshow(matrix, cmap="YlGnBu", interpolation="nearest")
-    plt.colorbar(label="Occorrenze")
-
-    # Aggiungi etichette assi
+    plt.imshow(matrix, cmap="cividis", norm=LogNorm(vmin=1, vmax=matrix.max()), interpolation="nearest")
+    plt.colorbar(label="Occorrenze (scala log)")
     plt.xticks(ticks=np.arange(len(category_names)), labels=category_names, rotation=45, ha="right")
     plt.yticks(ticks=np.arange(len(category_names)), labels=category_names)
     plt.xlabel("Categoria")
     plt.ylabel("Categoria")
-    plt.title("Heatmap della co-occorrenza delle categorie")
+    plt.title("Heatmap logaritmica della co-occorrenza delle categorie")
 
     # Annotazioni dei valori nelle celle
     for i in range(n_categories):
         for j in range(n_categories):
-            plt.text(j, i, str(matrix[i, j]), ha="center", va="center", color="black", fontsize=9)
-
-    # Griglia leggera per separare le celle
-    plt.grid(False)
-    plt.tight_layout()
+            value = matrix[i, j]
+            plt.text(j, i, str(value), ha="center", va="center", color="black", fontsize=9)
 
     file_path = save_figure(plt, "category_couples_heatmap", "figures", ".png")
     print(f'Heatmap per le coppie di categorie salvata in: {file_path}')
