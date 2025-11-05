@@ -1,5 +1,7 @@
 from dmp.utils import save_figure
 import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
 
 def number_of_categories_dist(ranks_column):
 
@@ -25,5 +27,30 @@ def number_of_categories_dist(ranks_column):
 
     return True
 
-def category_couples_heatmap():
-    pass
+def category_couples_heatmap(ranks_column):
+
+    n_categories = 8
+    matrix = np.zeros((n_categories, n_categories), dtype=int)
+
+    for entry in ranks_column:
+        # Salva gli indici delle categorie non-zero
+        active = [i for i, x in enumerate(entry) if x != 0]
+
+        # Per ogni coppia di indici incremente il contatore nella matrice
+        for i in active:
+            for j in active:
+                matrix[i, j] += 1
+
+    category_names = []
+
+    # plot heatmap
+    plt.figure(figsize=(7, 6))
+    sns.heatmap(matrix, annot=True, fmt="d", cmap="YlGnBu")
+    plt.title("Heatmap della co-occorenza delle categorie")
+    plt.xlabel("Categoria")
+    plt.ylabel("Categoria")
+
+    file_path = save_figure(plt, "category_couples_heatmap", "figures", ".png")
+    print(f'Heatmap per le coppie di categorie salvata in: {file_path}')
+
+    return matrix
