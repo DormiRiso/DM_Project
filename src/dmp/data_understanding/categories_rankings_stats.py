@@ -94,7 +94,7 @@ def category_couples_heatmap(ranks_column, normalized=False):
     # Heatmap: logaritmica solo se non normalizzata
     if normalized:
         matrix = matrix - np.identity(8)
-        im = plt.imshow(matrix, cmap="inferno", vmin=0, vmax=matrix.max(), interpolation="nearest")
+        im = plt.imshow(matrix, cmap="Greys", vmin=0, vmax=matrix.max(), interpolation="nearest")
         plt.colorbar(im, label="Co-occorrenza normalizzata")
         plt.title("Heatmap della co-occorrenza delle categorie (normalizzata)")
     else:
