@@ -1,6 +1,5 @@
 from dmp.utils import save_figure
 import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 
 def number_of_categories_dist(ranks_column):
@@ -43,19 +42,26 @@ def category_couples_heatmap(ranks_column):
 
     category_names = ["strategy", "abstract", "family", "thematic", "cgs", "war", "party", "childerns"]
 
-    # plot heatmap
+    # Plot heatmap con matplotlib
     plt.figure(figsize=(7, 6))
-    sns.heatmap(
-        matrix,
-        annot=True,
-        fmt="d",
-        cmap="YlGnBu",
-        xticklabels=category_names,
-        yticklabels=category_names
-    )
-    plt.title("Heatmap della co-occorrenza delle categorie")
+    plt.imshow(matrix, cmap="YlGnBu", interpolation="nearest")
+    plt.colorbar(label="Occorrenze")
+
+    # Aggiungi etichette assi
+    plt.xticks(ticks=np.arange(len(category_names)), labels=category_names, rotation=45, ha="right")
+    plt.yticks(ticks=np.arange(len(category_names)), labels=category_names)
     plt.xlabel("Categoria")
     plt.ylabel("Categoria")
+    plt.title("Heatmap della co-occorrenza delle categorie")
+
+    # Annotazioni dei valori nelle celle
+    for i in range(n_categories):
+        for j in range(n_categories):
+            plt.text(j, i, str(matrix[i, j]), ha="center", va="center", color="black", fontsize=9)
+
+    # Griglia leggera per separare le celle
+    plt.grid(False)
+    plt.tight_layout()
 
     file_path = save_figure(plt, "category_couples_heatmap", "figures", ".png")
     print(f'Heatmap per le coppie di categorie salvata in: {file_path}')
