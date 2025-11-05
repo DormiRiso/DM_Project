@@ -20,7 +20,7 @@ import argparse
 import pandas as pd
 from ast import literal_eval
 from dmp.data_cleaning import clean_df
-from dmp.data_understanding import analizza_colonne_numeriche
+from dmp.data_understanding import analizza_colonne_numeriche, number_of_categories_dist
 
 
 # 🎨 Colori ANSI per una stampa più leggibile
@@ -61,7 +61,9 @@ def understand_data(input_file: Path, do_scatters: bool):
 
     print(f"{Colors.CYAN}🔍 Avvio dell'analisi delle colonne numeriche...{Colors.RESET}")
     analizza_colonne_numeriche(df_cleaned, do_scatters)
+    number_of_categories_dist(df_cleaned["Ranks"])
     print(f"{Colors.GREEN}📈 Analisi completata!{Colors.RESET}\n")
+
 
 
 def main():
