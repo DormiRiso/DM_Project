@@ -1,8 +1,8 @@
+import math
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import math
-import os
 from dmp.utils import save_figure
 
 def plot_column_analysis(df, colonna, bins=30):
@@ -104,8 +104,6 @@ def plot_column_analysis(df, colonna, bins=30):
     print(f"Analysis plot saved in: {file_path}")
     plt.close()
 
-
-
 def scatter_column(df, col, cols_to_check=None, output_dir="figures/scatterplots"):
     """
     Genera tutti gli scatterplot possibili per una data colonna del dataframe.
@@ -169,8 +167,6 @@ def scatter_column(df, col, cols_to_check=None, output_dir="figures/scatterplots
     plt.close(fig)
 
     print(f"✅ Scatterplot di '{col}' salvati in: {file_path}")
-
-
 
 def analizza_colonne_numeriche(df, do_scatters = False):
     """
