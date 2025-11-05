@@ -41,12 +41,19 @@ def category_couples_heatmap(ranks_column):
             for j in active:
                 matrix[i, j] += 1
 
-    category_names = []
+    category_names = ["strategy", "abstract", "family", "thematic", "cgs", "war", "party", "childerns"]
 
     # plot heatmap
     plt.figure(figsize=(7, 6))
-    sns.heatmap(matrix, annot=True, fmt="d", cmap="YlGnBu")
-    plt.title("Heatmap della co-occorenza delle categorie")
+    sns.heatmap(
+        matrix,
+        annot=True,
+        fmt="d",
+        cmap="YlGnBu",
+        xticklabels=category_names,
+        yticklabels=category_names
+    )
+    plt.title("Heatmap della co-occorrenza delle categorie")
     plt.xlabel("Categoria")
     plt.ylabel("Categoria")
 
