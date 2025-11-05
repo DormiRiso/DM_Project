@@ -15,10 +15,10 @@ Esempi:
     python main.py -c -u
     python main.py      # esegue tutto
 """
-
+from pathlib import Path
 import argparse
 import pandas as pd
-from pathlib import Path
+from ast import literal_eval
 from dmp.data_cleaning import clean_df
 from dmp.data_understanding import analizza_colonne_numeriche
 
@@ -56,7 +56,7 @@ def clean_data(input_file: Path, output_file: Path):
 def understand_data(input_file: Path, do_scatters: bool):
     """Esegue l'analisi delle colonne numeriche del dataset pulito."""
     print(f"{Colors.BLUE}📊 Caricamento dataset pulito da:{Colors.RESET} {input_file}")
-    df_cleaned = pd.read_csv(input_file)
+    df_cleaned = pd.read_csv(input_file, converters={"Ranks": literal_eval}) #Leggi direttamente la colonna "Ranks" come python list e non stringa
     print(f"{Colors.GREEN}✅ Dataset pulito caricato!{Colors.RESET}\n")
 
     print(f"{Colors.CYAN}🔍 Avvio dell'analisi delle colonne numeriche...{Colors.RESET}")
