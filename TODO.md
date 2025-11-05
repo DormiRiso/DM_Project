@@ -1,16 +1,24 @@
 TODO: 
 - Parser nel main
-    - Pulire o no il dataset
-    - Data undertanding o no
+    - Pulire o no il dataset (✅)
+    - Data undertanding o no (✅)
+        - Solo hist. o anche scatter (✅)
     - Data clustering o no 
     - Data regression o no
 
 - Data understanding:
 
     - Colonne "numeriche":
-        - Histo, box and whisker plot raw
-        - Trovare outliers (tramite i percentili o manualmente)
-        - Plotta senza outliers (scrivere numero di punti rimossi nella legenda)
+        - Histo, box and whisker plot raw (✅)
+        - Trovare outliers (tramite i percentili o manualmente) (✅)
+        - Plotta senza outliers (scrivere numero di punti rimossi nella legenda) (✅)
+        - Migliorare il binning in generale e guardare case-by-case se ci sono delle modifiche da fare su singole colonne
+
+        - Scatterplot 2x2 per ogni coppia (✅)
+        - Prendere solo metà delle coppie (rimuove ridondanze, poco importante)
+        - Rimuovere outliers
+        
+        - Studio della correlazione a coppie
 
     - Colonne stringe:
         - Da determinare
