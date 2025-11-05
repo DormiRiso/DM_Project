@@ -67,45 +67,66 @@ def category_distribution(ranks_column):
 
     return category_occ
 
-def category_couples_heatmap(ranks_column):
-    """Funzione che crea una heatmap per le coppie di categorie co-occorrenti
+def category_couples_heatmap(ranks_column, normalized=False):
+    """Funzione che crea una heatmap per le coppie di categorie co-occorrenti.
 
-    Input: ranks_cloumn: pandas dataframe column
+    Input:
+        ranks_column: colonna di un DataFrame contenente liste o array di categorie (0 = non attiva)
+        normalized: se True, normalizza la matrice di co-occorrenza
 
-    Output: matrix: matrice contenente le occorrenze di ogni coppia di categorie (lungo la diagonale il numero di occorrenze per singola categoria) 
+    Output:
+        matrix: matrice NxN delle occorrenze o co-occorrenze normalizzate
     """
 
     n_categories = 8
-    matrix = np.zeros((n_categories, n_categories), dtype=int)
+    matrix = np.zeros((n_categories, n_categories), dtype=float)
 
+    # Conta le co-occorrenze
     for entry in ranks_column:
-        # Salva gli indici delle categorie non-zero
         active = [i for i, x in enumerate(entry) if x != 0]
-
-        # Per ogni coppia di indici incremente il contatore nella matrice
         for i in active:
             for j in active:
                 matrix[i, j] += 1
 
+    # Normalizzazione opzionale (cosine-like)
+    if normalized:
+        for i in range(n_categories):
+            for j in range(n_categories):
+                if matrix[i, i] > 0 and matrix[j, j] > 0:
+                    matrix[i, j] = matrix[i, j] / np.sqrt(matrix[i, i] * matrix[j, j])
+
     category_names = ["strategy", "abstract", "family", "thematic", "cgs", "war", "party", "childerns"]
 
-    # Creazione heatmap con scala logaritmica
     plt.figure(figsize=(7, 6))
-    plt.imshow(matrix, cmap="cividis", norm=LogNorm(vmin=1, vmax=matrix.max()), interpolation="nearest")
-    plt.colorbar(label="Occorrenze (scala log)")
-    plt.xticks(ticks=np.arange(len(category_names)), labels=category_names, rotation=45, ha="right")
-    plt.yticks(ticks=np.arange(len(category_names)), labels=category_names)
+
+    # Heatmap: logaritmica solo se non normalizzata
+    if normalized:
+        im = plt.imshow(matrix, cmap="cividis", vmin=0, vmax=1, interpolation="nearest")
+        plt.colorbar(im, label="Co-occorrenza normalizzata")
+        plt.title("Heatmap della co-occorrenza delle categorie (normalizzata)")
+    else:
+        vmin = max(1, matrix.min())  # evita log(0)
+        vmax = max(1, matrix.max())
+        im = plt.imshow(matrix, cmap="cividis", norm=LogNorm(vmin=vmin, vmax=vmax), interpolation="nearest")
+        plt.colorbar(im, label="Occorrenze (scala log)")
+        plt.title("Heatmap logaritmica della co-occorrenza delle categorie")
+
+    # Etichette
+    plt.xticks(ticks=np.arange(n_categories), labels=category_names, rotation=45, ha="right")
+    plt.yticks(ticks=np.arange(n_categories), labels=category_names)
     plt.xlabel("Categoria")
     plt.ylabel("Categoria")
-    plt.title("Heatmap logaritmica della co-occorrenza delle categorie")
 
-    # Annotazioni dei valori nelle celle
+    # Annotazioni celle
     for i in range(n_categories):
         for j in range(n_categories):
             value = matrix[i, j]
-            plt.text(j, i, str(value), ha="center", va="center", color="black", fontsize=9)
+            text = f"{value:.2f}" if normalized else f"{int(value)}"
+            plt.text(j, i, text, ha="center", va="center", color="black", fontsize=8)
 
-    file_path = save_figure(plt, "category_couples_heatmap", "figures", ".png")
-    print(f'Heatmap per le coppie di categorie salvata in: {file_path}')
+    # Salvataggio figura
+    filename = "category_couples_heatmap_norm" if normalized else "category_couples_heatmap"
+    file_path = save_figure(plt, filename, "figures", ".png")
+    print(f"Heatmap per le coppie di categorie salvata in: {file_path}")
 
     return matrix
