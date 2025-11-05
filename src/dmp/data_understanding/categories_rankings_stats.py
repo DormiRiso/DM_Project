@@ -79,18 +79,22 @@ def category_couples_heatmap(ranks_column, normalized=False):
 
     # Normalizzazione opzionale (cosine-like)
     if normalized:
+        normalized_matrix = np.zeros((n_categories, n_categories), dtype=float)
         for i in range(n_categories):
             for j in range(n_categories):
                 if matrix[i, i] > 0 and matrix[j, j] > 0:
-                    matrix[i, j] = matrix[i, j] / np.sqrt(matrix[i, i] * matrix[j, j])
+                    normalized_matrix[i, j] = matrix[i, j] / np.sqrt(matrix[i, i] * matrix[j, j])
+
+        matrix = normalized_matrix
 
     category_names = ["strategy", "abstract", "family", "thematic", "cgs", "war", "party", "childerns"]
 
-    plt.figure(figsize=(7, 6))
+    plt.figure(figsize=(8, 7))
 
     # Heatmap: logaritmica solo se non normalizzata
     if normalized:
-        im = plt.imshow(matrix, cmap="cividis", vmin=0, vmax=1, interpolation="nearest")
+        matrix = matrix - np.identity(8)
+        im = plt.imshow(matrix, cmap="inferno", vmin=0, vmax=matrix.max(), interpolation="nearest")
         plt.colorbar(im, label="Co-occorrenza normalizzata")
         plt.title("Heatmap della co-occorrenza delle categorie (normalizzata)")
     else:
@@ -107,11 +111,12 @@ def category_couples_heatmap(ranks_column, normalized=False):
     plt.ylabel("Categoria")
 
     # Annotazioni celle
-    for i in range(n_categories):
-        for j in range(n_categories):
-            value = matrix[i, j]
-            text = f"{value:.2f}" if normalized else f"{int(value)}"
-            plt.text(j, i, text, ha="center", va="center", color="black", fontsize=8)
+    if not normalized:
+        for i in range(n_categories):
+            for j in range(n_categories):
+                value = matrix[i, j]
+                text = f"{value:.2f}" if normalized else f"{int(value)}"
+                plt.text(j, i, text, ha="center", va="center", color="black", fontsize=8)
 
     # Salvataggio figura
     filename = "category_couples_heatmap_norm" if normalized else "category_couples_heatmap"
