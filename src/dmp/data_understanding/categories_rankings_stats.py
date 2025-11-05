@@ -1,4 +1,5 @@
 from dmp.utils import save_figure
+from dmp.my_graphs import bar_graph, hist_graph
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LogNorm
@@ -20,15 +21,9 @@ def number_of_categories_dist(ranks_column):
         lengths_list.append(len(rank_list))
 
     #creo un hist per lenght_list
-    plt.figure(figsize=(8, 5))
-    plt.hist(lengths_list, bins=range(0, max(lengths_list) + 2), edgecolor='black', align='left')
-    plt.title("Distribuzione del numero di categorie per gioco")
-    plt.xlabel("Numero di categories")
-    plt.ylabel("Occorrenze")
-    plt.yscale("log")
-    plt.grid(axis='y', alpha=0.3)
+    plot = hist_graph(lengths_list, range(0, max(lengths_list) + 2), "Distribuzione del numero di categorie per gioco", "Numero di categorie", "Occorrenze", log_scale=True)
 
-    file_path = save_figure(plt, "Distribuzione del numero di categorie per gioco", "figures", ".png")
+    file_path = save_figure(plot, "Distribuzione del numero di categorie per gioco", "figures", ".png")
     print(f'Istogramma per la distribuzione del numero di categorie salvato come: {file_path}')
 
     return lengths_list
@@ -53,16 +48,10 @@ def category_distribution(ranks_column):
     category_names = ["strategy", "abstract", "family", "thematic", "cgs", "war", "party", "childerns"]
 
     # Crea grafico a colonne
-    plt.figure(figsize=(8, 5))
-    plt.bar(category_names, category_occ, color="skyblue", edgecolor="black")
-    plt.title("Distribuzione delle categorie")
-    plt.xlabel("Categoria")
-    plt.ylabel("Occorrenze")
-    plt.xticks(rotation=45, ha="right")
-    plt.grid(axis='y', alpha=0.3)
+    plot = bar_graph(category_names, category_occ, "Distribuzione delle categorie", "Categoria", "Occorrenze")
 
     # Salva la figura
-    file_path = save_figure(plt, "Distribuzione delle categorie", "figures", ".png")
+    file_path = save_figure(plot, "Distribuzione delle categorie", "figures", ".png")
     print(f"Grafico a colonne della distribuzione delle categorie salvato come: {file_path}")
 
     return category_occ

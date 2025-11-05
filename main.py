@@ -60,7 +60,7 @@ def understand_data(input_file: Path, do_scatters: bool):
     print(f"{Colors.GREEN}✅ Dataset pulito caricato!{Colors.RESET}\n")
 
     print(f"{Colors.CYAN}🔍 Avvio dell'analisi delle colonne numeriche...{Colors.RESET}")
-    analizza_colonne_numeriche(df_cleaned, do_scatters)
+    #analizza_colonne_numeriche(df_cleaned, do_scatters)
     number_of_categories_dist(df_cleaned["Ranks"])
     category_couples_heatmap(df_cleaned["Ranks"], normalized=False)
     category_couples_heatmap(df_cleaned["Ranks"], normalized=True)
