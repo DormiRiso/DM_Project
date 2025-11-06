@@ -17,6 +17,7 @@ Esempi:
 """
 
 from pathlib import Path
+import subprocess
 from ast import literal_eval
 import argparse
 import pandas as pd
@@ -24,6 +25,7 @@ from yaspin import yaspin
 from dmp.data_cleaning import clean_df
 from dmp.data_understanding import understand_df
 from dmp import config
+from dmp.config import VERBOSE
 
 # 🎨 Colori ANSI per una stampa più leggibile
 class Colors:
@@ -164,6 +166,21 @@ def main():
 
     if args.hypnotoad:
         hypno_toad()
+
+    # Compilo il file latex per manterlo aggiornato ai nuovi grafici prodotti (da capire se rendere opzionale)
+    command = ["pdflatex", "main.tex"]
+
+    result = subprocess.run(command, capture_output=True, text=True)
+
+    # Printa l'output del compilatore latex
+    if VERBOSE:
+        print("STDOUT:\n", result.stdout)
+        print("STDERR:\n", result.stderr)
+
+    if result.returncode == 0:
+        print("✅ Compilazione completata!")
+    else:
+        print("❌ Compilazione fallita.")
 
 if __name__ == "__main__":
     main()
