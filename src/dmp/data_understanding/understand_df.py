@@ -27,9 +27,11 @@ def understand_df(df_cleaned, do_scatters, do_hists):
         "NumExpansions", "NumImplementations"]
     generate_correlation_heatmap(df_cleaned, columns)
 
-    # Se richiesto genera una figura composta da tutti gli scatter plot per ogni coppia di colonne numeriche
+    # Se richiesto genera una figura composta da tutti gli scatter plot per ogni coppia di colonne numeriche (con e senza outliers)
     if do_scatters:
-        generate_scatterplots(df_cleaned, columns)
+        generate_scatterplots(df_cleaned, columns, filter_outliers=None)
+        generate_scatterplots(df_cleaned, columns, title="Cleaned Scatterplot Matrix", filter_outliers=(0.05, 0.95))
+
     # Se richiesto genera istogrammi + boxplot per ogni colonna numerica
     if do_hists:
         analizza_colonne_numeriche(df_cleaned)
