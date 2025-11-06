@@ -15,6 +15,7 @@ Esempi:
     python main.py -c -u
     python main.py      # esegue tutto
 """
+
 from pathlib import Path
 from ast import literal_eval
 import argparse
@@ -28,7 +29,6 @@ from dmp.data_understanding import (
     generate_scatterplots,
     generate_correlation_heatmap,
 )
-
 
 # 🎨 Colori ANSI per una stampa più leggibile
 class Colors:
@@ -138,3 +138,25 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+"""
+      ,'``.._   ,'``.
+     :,--._:)\,:,._,.:       All Glory to
+     :`--,''   :`...';\      the HYPNO TOAD!
+      `,'       `---'  `.
+      /                 :
+     /                   \.
+   ,'                     :\.___,-.
+  `...,---'``````-..._    |:       \.
+    (                 )   ;:    )   \  _,-.
+     `.              (   //          `'    \.
+      :               `.//  )      )     , ;
+    ,-|`.            _,'/       )    ) ,' ,'
+   (  :`.`-..____..=:.-':     .     _,' ,'
+    `,'\ ``--....-)='    `._,  \  ,') _ '``._
+ _.-/ _ `.       (_)      /     )' ; / \ \`-.'
+`--(   `-:`.     `' ___..'  _,-'   |/   `.)
+    `-. `.`.``-----``--,  .'
+      |/`.\`'        ,','); SSt
+          `         (/  (/
+"""
