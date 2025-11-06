@@ -20,6 +20,7 @@ from pathlib import Path
 from ast import literal_eval
 import argparse
 import pandas as pd
+from yaspin import yaspin
 from dmp.data_cleaning import clean_df
 from dmp.data_understanding import understand_df
 from dmp import config
@@ -35,14 +36,20 @@ class Colors:
     BOLD = "\033[1m"
     RESET = "\033[0m"
 
-def clean_data(input_file: Path, output_file: Path):
+def clean_data(input_file: Path, output_file: Path, verbose: bool):
     """Esegue il data cleaning e salva il risultato."""
 
     print(f"{Colors.BLUE}📂 Caricamento dataset da:{Colors.RESET} {input_file}")
     df = pd.read_csv(input_file)
 
-    print(f"{Colors.CYAN}🧹 Avvio della pulizia del DataFrame...{Colors.RESET}")
-    df_cleaned = clean_df(df)
+    if verbose:
+        print(f"{Colors.CYAN}🧹 Avvio della pulizia del DataFrame...{Colors.RESET}")
+        df_cleaned = clean_df(df)
+    else:
+        with yaspin(text="🧹 Avvio della pulizia del DataFrame...", color="cyan") as spinner:
+            df_cleaned = clean_df(df)
+            spinner.ok("✅")
+
     print(f"{Colors.GREEN}✨ Pulizia completata con successo!{Colors.RESET}\n")
 
     print(f"{Colors.YELLOW}💾 Salvataggio del dataset pulito in:{Colors.RESET} {output_file}")
@@ -50,14 +57,20 @@ def clean_data(input_file: Path, output_file: Path):
 
     return df_cleaned
 
-def understand_data(input_file: Path, do_scatters, do_hists):
+def understand_data(input_file: Path, do_scatters, do_hists, verbose: bool):
     """Esegue le analisi sul dataframe pulito necessarie per svolgere il data understanding."""
 
     print(f"{Colors.BLUE}📊 Caricamento dataset pulito da:{Colors.RESET} {input_file}")
     df_cleaned = pd.read_csv(input_file, converters={"Ranks": literal_eval}) #Leggi direttamente la colonna "Ranks" come python list e non stringa
 
-    print(f"{Colors.CYAN}🔍 Avvio dell'analisi per data understanding {Colors.RESET}")
-    understand_df(df_cleaned, do_scatters, do_hists)
+    if verbose:
+        print(f"{Colors.CYAN}🔍 Avvio dell'analisi per data understanding {Colors.RESET}")
+        understand_df(df_cleaned, do_scatters, do_hists)
+    else:
+        with yaspin(text="🔍 Avvio dell'analisi per data understanding ", color="cyan") as spinner:
+            understand_df(df_cleaned, do_scatters, do_hists)
+            spinner.ok("✅")
+
     print(f"{Colors.GREEN}📈 Analisi completata!{Colors.RESET}\n")
 
 def main():
@@ -110,14 +123,14 @@ def main():
 
     # Esecuzione task
     if args.cleaning:
-        _ = clean_data(input_file, output_file)
+        _ = clean_data(input_file, output_file, args.verbose)
 
     if args.understanding:
         if not output_file.exists():
             print(f"{Colors.RED}❌ Errore: il file pulito non esiste. Esegui prima con -c o --cleaning.{Colors.RESET}")
             return
         # Passa il flag --scatters come parametro
-        understand_data(output_file, args.scatters, args.hists)
+        understand_data(output_file, args.scatters, args.hists, args.verbose)
 
     print(f"{Colors.BOLD}🏁 Operazione completata!{Colors.RESET} ✅")
 
