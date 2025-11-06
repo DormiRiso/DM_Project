@@ -73,6 +73,29 @@ def understand_data(input_file: Path, do_scatters, do_hists, verbose: bool):
 
     print(f"{Colors.GREEN}📈 Analisi completata!{Colors.RESET}\n")
 
+def hypno_toad():
+    print(r"""
+            ,'``.._   ,'``.
+        :,--._:)\,:,._,.:       All Glory to
+        :`--,''   :`...';\      the HYPNO TOAD!
+        `,'       `---'  `.
+        /                 :
+        /                   \
+    ,'                     :\.___,-.
+    `...,---'``````-..._    |:       \
+        (                 )   ;:    )   \  _,-.
+        `.              (   //          `'    \
+        :               `.//  )      )     , ;
+        ,-|`.            _,'/       )    ) ,' ,'
+    (  :`.`-..____..=:.-':     .     _,' ,'
+        `,'\ ``--....-)='    `._,  \  ,') _ '``._
+    _.-/ _ `.       (_)      /     )' ; / \ \`-.'
+    `--(   `-:`.     `' ___..'  _,-'   |/   `.)
+        `-. `.`.``-----``--,  .'
+        |/`.\`'        ,','); SSt
+            `         (/  (/
+    """)
+
 def main():
     """Funzione di accesso principale del programma di Data Mining"""
 
@@ -104,6 +127,11 @@ def main():
         action="store_true",
         help="Attiva print di log più esaustivi"
     )
+    parser.add_argument(
+        "-hypno", "--hypnotoad",
+        action="store_true",
+        help="GLORY TO THE HYPNO TOAD"
+    )
 
     args = parser.parse_args()
 
@@ -133,6 +161,9 @@ def main():
         understand_data(output_file, args.scatters, args.hists, args.verbose)
 
     print(f"{Colors.BOLD}🏁 Operazione completata!{Colors.RESET} ✅")
+
+    if args.hypnotoad:
+        hypno_toad()
 
 if __name__ == "__main__":
     main()
