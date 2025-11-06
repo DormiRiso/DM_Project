@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import itertools
-from dmp.utils import save_figure
+from dmp.utils import save_figure, filter_column
 
-def generate_scatterplots(df, columns=None, output_dir="figures/scatterplots", title="Scatterplot Matrix"):
+def generate_scatterplots(df, columns=None, output_dir="figures/scatterplots", title="Scatterplot Matrix", filter_outliers=(0.05,0.95)):
     """
     Genera una griglia di scatterplot per tutte le coppie uniche di colonne numeriche.
     (Non ripete coppie simmetriche e non include la diagonale.)
@@ -21,11 +21,19 @@ def generate_scatterplots(df, columns=None, output_dir="figures/scatterplots", t
         Directory dove salvare l'immagine.
     title : str
         Titolo della figura.
+    filter_outliers : tuple(float, float)
+        Percentili per filtrare i dati (default: (0.05, 0.95)).
 
     Output
     ------
     Nessun ritorno. Salva un file PNG con la griglia di scatterplot.
     """
+
+     # Filtra outliers se specificato
+    if filter_outliers:
+        df = filter_column(df, columns, by_percentile=True, percentiles=filter_outliers)
+    else:
+        pass
 
     # Se columns non è specificato, usa tutte le colonne numeriche
     if columns is None:
@@ -65,7 +73,10 @@ def generate_scatterplots(df, columns=None, output_dir="figures/scatterplots", t
     plt.tight_layout(rect=[0, 0, 1, 0.97])
 
     # Salva un’unica immagine
-    file_path = os.path.join(output_dir, "scatterplot_matrix_unique.png")
+    if filter_outliers:
+        file_path = os.path.join(output_dir, "scatterplot_matrix_cleaned.png")
+    else:
+        file_path = os.path.join(output_dir, "scatterplot_matrix_unique.png")
     plt.savefig(file_path, dpi=100, bbox_inches="tight")
     plt.close()
 

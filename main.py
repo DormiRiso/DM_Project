@@ -73,7 +73,9 @@ def understand_data(input_file: Path, do_scatters):
         "NumExpansions", "NumImplementations"]
     generate_correlation_heatmap(df_cleaned, columns)
     if do_scatters:
-        generate_scatterplots(df_cleaned, columns)
+        generate_scatterplots(df_cleaned, columns, filter_outliers=None)
+        generate_scatterplots(df_cleaned, columns, title="Cleaned Scatterplot Matrix",  filter_outliers=(0.05,0.95))
+
 
     print(f"{Colors.GREEN}📈 Analisi completata!{Colors.RESET}\n")
 
