@@ -20,7 +20,7 @@ from ast import literal_eval
 import argparse
 import pandas as pd
 from dmp.data_cleaning import clean_df
-from dmp.data_understanding import analizza_colonne_numeriche, number_of_categories_dist, category_couples_heatmap, category_distribution
+from dmp.data_understanding import analizza_colonne_numeriche, number_of_categories_dist, category_couples_heatmap, category_distribution, generate_scatterplots, generate_correlation_heatmap
 
 
 # 🎨 Colori ANSI per una stampa più leggibile
@@ -53,19 +53,28 @@ def clean_data(input_file: Path, output_file: Path):
     return df_cleaned
 
 
-def understand_data(input_file: Path, do_scatters: bool):
+def understand_data(input_file: Path, do_scatters):
     """Esegue l'analisi delle colonne numeriche del dataset pulito."""
     print(f"{Colors.BLUE}📊 Caricamento dataset pulito da:{Colors.RESET} {input_file}")
     df_cleaned = pd.read_csv(input_file, converters={"Ranks": literal_eval}) #Leggi direttamente la colonna "Ranks" come python list e non stringa
     print(f"{Colors.GREEN}✅ Dataset pulito caricato!{Colors.RESET}\n")
 
     print(f"{Colors.CYAN}🔍 Avvio dell'analisi delle colonne numeriche...{Colors.RESET}")
-    #analizza_colonne_numeriche(df_cleaned, do_scatters)
+    analizza_colonne_numeriche(df_cleaned)
     number_of_categories_dist(df_cleaned["Ranks"])
     category_couples_heatmap(df_cleaned["Ranks"], normalized=False)
     category_couples_heatmap(df_cleaned["Ranks"], normalized=True)
     category_distribution(df_cleaned["Ranks"])
-    
+
+    columns=[
+        "YearPublished", "GameWeight", "ComWeight", "MinPlayers", "MaxPlayers",
+        "ComAgeRec", "LanguageEase", "NumOwned", "NumWant", "NumWish","MfgPlaytime",
+        "ComMinPlaytime", "ComMaxPlaytime", "MfgAgeRec", "NumUserRatings", "NumAlternates",
+        "NumExpansions", "NumImplementations"]
+    generate_correlation_heatmap(df_cleaned, columns)
+    if do_scatters:
+        generate_scatterplots(df_cleaned, columns)
+
     print(f"{Colors.GREEN}📈 Analisi completata!{Colors.RESET}\n")
 
 def main():
@@ -111,7 +120,7 @@ def main():
             print(f"{Colors.RED}❌ Errore: il file pulito non esiste. Esegui prima con -c o --cleaning.{Colors.RESET}")
             return
         # Passa il flag --scatters come parametro
-        understand_data(output_file, do_scatters=args.scatters)
+        understand_data(output_file, args.scatters)
 
     print(f"{Colors.BOLD}🏁 Operazione completata!{Colors.RESET} ✅")
 

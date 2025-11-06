@@ -104,71 +104,9 @@ def plot_column_analysis(df, colonna, bins=30):
     print(f"Analysis plot saved in: {file_path}")
     plt.close()
 
-def scatter_column(df, col, cols_to_check=None, output_dir="figures/scatterplots"):
-    """
-    Genera tutti gli scatterplot possibili per una data colonna del dataframe.
-    Per ogni colonna 'col', crea una figura con scatterplot di 'col' rispetto alle colonne specificate.
 
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        Il dataframe di input (solo colonne numeriche verranno usate).
-    col : str
-        Colonna di cui fare gli scatterplot.
-    cols_to_check : list[str] o None
-        Colonne da confrontare con 'col'. Se None, vengono usate tutte le altre colonne numeriche.
-    output_dir : str, default="scatterplots"
-        Directory dove salvare le immagini.
-    """
-    
-    # Considera solo le colonne numeriche
-    df_numeric = df.select_dtypes(include=["number"])
-    numeric_cols = df_numeric.columns
 
-    if col not in numeric_cols:
-        raise ValueError(f"La colonna '{col}' non è numerica o non esiste nel DataFrame.")
-
-    # Se non è specificato cols_to_check, usa tutte le altre colonne numeriche
-    if cols_to_check is None:
-        cols_to_check = [c for c in numeric_cols if c != col]
-    else:
-        # Filtra solo le colonne valide e numeriche
-        cols_to_check = [c for c in cols_to_check if c in numeric_cols and c != col]
-
-    if len(cols_to_check) == 0:
-        print(f"Nessuna colonna valida trovata per confrontare '{col}'.")
-        return
-
-    # Crea directory di output
-    os.makedirs(output_dir, exist_ok=True)
-
-    # Definisci layout della figura
-    ncols = 3
-    nrows = math.ceil(len(cols_to_check) / ncols)
-
-    fig, axes = plt.subplots(nrows, ncols, figsize=(5*ncols, 4*nrows))
-    axes = axes.flatten()
-
-    for i, other in enumerate(cols_to_check):
-        axes[i].scatter(df_numeric[col], df_numeric[other], alpha=0.6)
-        axes[i].set_xlabel(col)
-        axes[i].set_ylabel(other)
-        axes[i].set_title(f"{col} vs {other}")
-
-    # Rimuovi subplot vuoti
-    for j in range(i + 1, len(axes)):
-        fig.delaxes(axes[j])
-
-    plt.tight_layout()
-
-    # Percorso file
-    file_path = os.path.join(output_dir, f"scatterplot_{col}.png")
-    plt.savefig(file_path, dpi=100, bbox_inches="tight")
-    plt.close(fig)
-
-    print(f"✅ Scatterplot di '{col}' salvati in: {file_path}")
-
-def analizza_colonne_numeriche(df, do_scatters = False):
+def analizza_colonne_numeriche(df):
     """
     Crea grafici di analisi completi per tutte le colonne numeriche del DataFrame.
     """
@@ -177,10 +115,6 @@ def analizza_colonne_numeriche(df, do_scatters = False):
             if len(df[colonna].dropna().unique()) > 1:  # Se ci sono almeno due punti diversi...
                 # print(f"\nAnalyzing column: {colonna}")
                 plot_column_analysis(df, colonna)
-                if do_scatters:
-                    scatter_column(df, colonna)
-                else:
-                    pass
             else:
                 pass # print(f"\nSkipping {colonna}: insufficient variation in data")
         else:

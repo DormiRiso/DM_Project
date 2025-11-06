@@ -92,3 +92,50 @@ def count_word_occurrences(df: pd.DataFrame, column_name: str, show_hist: bool =
         plt.show()
 
     return word_occurrences
+
+
+def filter_column(df, colonne, by_percentile=False, by_threshold=False,
+                  percentiles=(0.05, 0.95), thresholds=(1, 100)):
+    """
+    Filtra un DataFrame mantenendo solo le righe in cui i valori
+    delle colonne specificate si trovano entro i percentili o soglie dati.
+
+    Parametri:
+    ----------
+    df : pd.DataFrame
+        Il DataFrame da filtrare.
+    colonne : list
+        Lista delle colonne su cui applicare il filtro.
+    by_percentile : bool
+        Se True, filtra la colonna per percentili.
+    by_threshold : bool
+        Se True, filtra la colonna per soglie numeriche.
+    percentiles : tuple (float, float)
+        Percentili inferiore e superiore (es. (0.05, 0.95) → 5° e 95° percentile).
+    thresholds : tuple (float, float)
+        Soglie inferiori e superiori (es. (1, 100) → valori tra 1 e 100).
+
+    Ritorna:
+    --------
+    pd.DataFrame
+        Un nuovo DataFrame filtrato.
+    """
+    df_filtrato = df.copy()
+
+    if not by_percentile and not by_threshold:
+        raise ValueError("Devi specificare almeno una modalità di filtro: by_percentile=True o by_threshold=True")
+
+    for col in colonne:
+        if by_percentile:
+            low, high = percentiles
+            low_val = df[col].quantile(low)
+            high_val = df[col].quantile(high)
+            df_filtrato = df_filtrato[(df_filtrato[col] >= low_val) & (df_filtrato[col] <= high_val)]
+
+        elif by_threshold:
+            low_val, high_val = thresholds
+            df_filtrato = df_filtrato[(df_filtrato[col] >= low_val) & (df_filtrato[col] <= high_val)]
+
+    return df_filtrato
+
+
