@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from dmp.utils import save_figure
+from dmp.config import VERBOSE
 
 def make_hist(df, colonna, bins=10, titolo=None):
     """
@@ -26,5 +27,6 @@ def make_hist(df, colonna, bins=10, titolo=None):
     
     file_path = save_figure(plt, titolo if titolo else colonna, "figures", ".png")
     
-    print(f"Istogramma salvato in: {file_path}")
+    if VERBOSE:
+        print(f"Istogramma salvato in: {file_path}")
     return data

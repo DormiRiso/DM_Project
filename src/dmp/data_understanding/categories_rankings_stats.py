@@ -3,6 +3,7 @@ from dmp.my_graphs import bar_graph, hist_graph
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LogNorm
+from dmp.config import VERBOSE
 
 CATEGORY_ANALYSIS_FIGURES_FOLDER = "figures/category_figures"
 
@@ -26,7 +27,8 @@ def number_of_categories_dist(ranks_column):
     plot = hist_graph(lengths_list, range(0, max(lengths_list) + 2), "Distribuzione del numero di categorie per gioco", "Numero di categorie", "Occorrenze", log_scale=True)
 
     file_path = save_figure(plot, "Distribuzione del numero di categorie per gioco", CATEGORY_ANALYSIS_FIGURES_FOLDER, ".png")
-    print(f'Istogramma per la distribuzione del numero di categorie salvato come: {file_path}')
+    if VERBOSE:
+        print(f'Istogramma per la distribuzione del numero di categorie salvato come: {file_path}')
 
     return lengths_list
 
@@ -54,7 +56,8 @@ def category_distribution(ranks_column):
 
     # Salva la figura
     file_path = save_figure(plot, "Distribuzione delle categorie", CATEGORY_ANALYSIS_FIGURES_FOLDER, ".png")
-    print(f"Grafico a colonne della distribuzione delle categorie salvato come: {file_path}")
+    if VERBOSE:
+        print(f"Grafico a colonne della distribuzione delle categorie salvato come: {file_path}")
 
     return category_occ
 
@@ -123,6 +126,7 @@ def category_couples_heatmap(ranks_column, normalized=False):
     # Salvataggio figura
     filename = "category_couples_heatmap_norm" if normalized else "category_couples_heatmap"
     file_path = save_figure(plt, filename, CATEGORY_ANALYSIS_FIGURES_FOLDER, ".png")
-    print(f"Heatmap per le coppie di categorie salvata in: {file_path}")
+    if VERBOSE:
+        print(f"Heatmap per le coppie di categorie salvata in: {file_path}")
 
     return matrix

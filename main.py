@@ -22,6 +22,7 @@ import argparse
 import pandas as pd
 from dmp.data_cleaning import clean_df
 from dmp.data_understanding import understand_df
+from dmp import config
 
 # 🎨 Colori ANSI per una stampa più leggibile
 class Colors:
@@ -85,8 +86,15 @@ def main():
         action="store_true",
         help="(Opzionale) Genera gli istogrammi durante l'understanding"
     )
+    parser.add_argument(
+        "-v", "--verbose",
+        action="store_true",
+        help="Attiva print di log più esaustivi"
+    )
 
     args = parser.parse_args()
+
+    config.set_verbose(args.verbose)
 
     # Se non viene specificato nulla → esegui tutto
     if not args.cleaning and not args.understanding:

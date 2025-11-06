@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import itertools
 from dmp.utils import save_figure, filter_column
+from dmp.config import VERBOSE
 
 def generate_scatterplots(df, columns=None, output_dir="figures/scatterplots", title="Scatterplot Matrix", filter_outliers=(0.05,0.95)):
     """
@@ -80,8 +81,8 @@ def generate_scatterplots(df, columns=None, output_dir="figures/scatterplots", t
     plt.savefig(file_path, dpi=100, bbox_inches="tight")
     plt.close()
 
-    print(f"✅ Scatterplot matrix salvata in: {file_path}")
-
+    if VERBOSE:
+        print(f"✅ Scatterplot matrix salvata in: {file_path}")
 
 def generate_correlation_heatmap(df, columns=None, output_dir="figures/heatmaps", title="Matrice_di_correlazione"):
     """
@@ -134,4 +135,5 @@ def generate_correlation_heatmap(df, columns=None, output_dir="figures/heatmaps"
     # Salva il file
     file_path = save_figure(plt, title, folder=output_dir, extension=".png")
 
-    print(f"✅ Heatmap di covarianza salvata in: {file_path}")
+    if VERBOSE:
+        print(f"✅ Heatmap di covarianza salvata in: {file_path}")
