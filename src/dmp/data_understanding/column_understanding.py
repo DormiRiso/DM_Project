@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from dmp.utils import save_figure
+from dmp.config import VERBOSE
 
 def plot_column_analysis(df, colonna, bins=30):
     """
@@ -100,11 +101,10 @@ def plot_column_analysis(df, colonna, bins=30):
     plt.suptitle(f'Analisi statistica di {colonna}', fontsize=16, y=1.02)
 
     # Salva
-    file_path = save_figure(plt, f"histo_{colonna}", "figures/histograms", ".png")
-    print(f"Analysis plot saved in: {file_path}")
+    file_path = save_figure(plt, f"analisi_singola_{colonna}", "figures/histograms", ".png")
+    if VERBOSE:
+        print(f"Analysis plot saved in: {file_path}")
     plt.close()
-
-
 
 def analizza_colonne_numeriche(df):
     """

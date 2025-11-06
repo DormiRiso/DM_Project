@@ -1,3 +1,8 @@
+# Ignora i file ausiliari di LaTex e il pdf prodotto
+*.aux
+*.pdf
+*.log
+
 # Ignora il cleaned.csv per evitare conflitti nel versioning
 data/
 
