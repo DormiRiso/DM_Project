@@ -20,7 +20,14 @@ from ast import literal_eval
 import argparse
 import pandas as pd
 from dmp.data_cleaning import clean_df
-from dmp.data_understanding import analizza_colonne_numeriche, number_of_categories_dist, category_couples_heatmap, category_distribution, generate_scatterplots, generate_correlation_heatmap
+from dmp.data_understanding import (
+    analizza_colonne_numeriche,
+    number_of_categories_dist,
+    category_couples_heatmap,
+    category_distribution,
+    generate_scatterplots,
+    generate_correlation_heatmap,
+)
 
 
 # 🎨 Colori ANSI per una stampa più leggibile
@@ -94,7 +101,12 @@ def main():
     parser.add_argument(
         "-s", "--scatters",
         action="store_true",
-        help="(Opzionale) Genera i scatterplot durante l'understanding"
+        help="(Opzionale) Genera gli scatterplot durante l'understanding"
+    )
+    parser.add_argument(
+        "-h", "--hist",
+        action="store_true",
+        help="(Opzionale) Genera gli istogrammi durante l'understanding"
     )
 
     args = parser.parse_args()
@@ -123,7 +135,6 @@ def main():
         understand_data(output_file, args.scatters)
 
     print(f"{Colors.BOLD}🏁 Operazione completata!{Colors.RESET} ✅")
-
 
 if __name__ == "__main__":
     main()
