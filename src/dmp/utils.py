@@ -121,7 +121,11 @@ def filter_column(df, colonne, by_percentile=False, by_threshold=False,
         Un nuovo DataFrame filtrato.
     """
     df_filtrato = df.copy()
-
+    # Se colonna non è specificata, usa tutte le colonne numeriche
+    if colonne is None:
+        df_filtrato = df_filtrato.select_dtypes(include=["number"])
+        colonne = df_filtrato.columns.tolist()
+        
     if not by_percentile and not by_threshold:
         raise ValueError("Devi specificare almeno una modalità di filtro: by_percentile=True o by_threshold=True")
 

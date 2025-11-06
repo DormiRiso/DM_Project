@@ -100,7 +100,7 @@ def plot_column_analysis(df, colonna, bins=30):
     plt.suptitle(f'Analisi statistica di {colonna}', fontsize=16, y=1.02)
 
     # Salva
-    file_path = save_figure(plt, f"analisi_singola_{colonna}", "figures/histograms", ".png")
+    file_path = save_figure(plt, f"histo_{colonna}", "figures/histograms", ".png")
     print(f"Analysis plot saved in: {file_path}")
     plt.close()
 

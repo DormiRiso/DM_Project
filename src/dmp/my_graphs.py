@@ -1,5 +1,8 @@
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import os
+from dmp.utils import save_figure, filter_column
 
 def bar_graph(x_data, y_data, title: str, x_label: str, y_label:str, size: tuple=(8, 5), log_scale=False):
     """Funzione per creare dei grafici a colonne standardizzati e modulari
@@ -53,161 +56,117 @@ def hist_graph(data, binning, title: str, x_label: str, y_label:str, size: tuple
 
     return plt
 
-def box_plot(data, percentiles=(5,25,50,75,95), vertical=False, larghezza_boxplot=0.5, y_boxplot=0.5):
+###############
+
+
+def draw_hist(ax, data, binning, **kwargs):
+    """Funzione per creare degli istogrammi standardizzati e modulari
+    
+    Input:
+    ax: asse di matplotlib su cui disegnare l'istogramma
+    data: dati da usare per creare l'istogramma
+    binning: bin da usare per l'istogramma
+
+
+    Output: n, bins_arr, patches, ax
+    """
+    if ax is None:
+        fig, ax = plt.subplots()
+    n, bins_arr, patches = ax.hist(data, bins=binning, edgecolor='black', alpha=0.7, **kwargs)
+    return n, bins_arr, patches, ax
+
+
+def box_plot(ax, data, horizontal=True, summary=False,**kwargs):
     """ Funzione per creare dei 'box and whisker' plot stadardizzati e modulari
     
     Input:
+    ax: asse di matplotlib su cui disegnare il boxplot
     data: dati da usare per creare il boxplot
-    percentiles: tuple con i percentili da usare per i baffi del boxplot
-    vertical: se True il boxplot è verticale, altrimenti orizzontale
-    larghezza_boxplot: larghezza del boxplot
-    y_boxplot: posizione del boxplot sull'asse y (o x se orizzontale)
+    horizontal: se True crea un boxplot orizzontale
+    summary: se True aggiunge una textbox con i percentili 5,25,50,75,95
     
-    Output: istanza di oggetto grafico di matplotlib
+    Output: 
     """
+    if ax is None:
+        fig, ax = plt.subplots()
+    bp = ax.boxplot(data, whis=[5,95], vert= not horizontal, medianprops=dict(color="red", linewidth=1.5), **kwargs)
 
-    plt.boxplot(data, whis=(percentiles[0],percentiles[4]), showfliers=True, 
-                vert=vertical, widths=larghezza_boxplot, positions=[y_boxplot], 
-                medianprops=dict(color="red", linewidth=1.5))
-    return plt
+    # Aggiungi textbox con percentili se richiesto
+    if summary:
+        percentiles = np.percentile(data, [5, 25, 50, 75, 95])
+        pct_text_orig = (
+            f"Percentili:\n"
+            f"5%: {percentiles[0]:.2f}\n"
+            f"25%: {percentiles[1]:.2f}\n"
+            f"50%: {percentiles[2]:.2f}\n"
+            f"75%: {percentiles[3]:.2f}\n"
+            f"95%: {percentiles[4]:.2f}"
+        )
+        ax.text(0.98, 0.98, pct_text_orig, transform=ax.transAxes,
+                fontsize=9, va='top', ha='right', bbox=dict(facecolor='white', alpha=0.8))
+        
+    return bp, ax
 
-
-def histo_box(data,colonna):
+def histo_box(ax, data,colonna):
     """ Funzione per creare un grafico con istogramma e boxplot insieme
     
     Output: istanza di oggetto grafico di matplotlib"""
-    # Crea subplot 1x2
-    fig = plt.figure(figsize=(15, 10))
-    gs = fig.add_gridspec(1, 2, hspace=0.3, wspace=0.3)
+    if ax is None:
+        fig, ax = plt.subplots()
 
-    ax1 = fig.add_subplot(gs[0, 0])
-    ax1.histo_graph(data=data, binning=30)
-    ax1.set_title(f'Istogramma originale di {colonna}')
-    ax1.grid(True, alpha=0.3)
-    ax1.set_ylabel("Conteggi")
+    draw_hist(ax, data=data, binning=30)
+    ax.set_title(f'Istogramma di {colonna}')
+    ax.grid(True, alpha=0.3)
+    ax.set_ylabel("Conteggi")
 
-    ax2=ax1.twinx()
-    ax2.set_ylim(0, 1)
+    ax_box=ax.twinx()
+    ax_box.set_ylim(0, 1)
 
-  
-    ax2.box_plot(data, larghezza_boxplot=0.15, y_boxplot=0.75)
-    ax2.get_yaxis().set_visible(False)
-    percentiles = np.percentile(data, [5, 25, 50, 75, 95])
-
-    # Aggiungi textbox con percentili originali sull'asse del boxplot sinistro
-    pct_text_orig = (
-        f"Percentili (originale):\n"
-        f"5%: {percentiles[0]:.2f}\n"
-        f"25%: {percentiles[1]:.2f}\n"
-        f"50%: {percentiles[2]:.2f}\n"
-        f"75%: {percentiles[3]:.2f}\n"
-        f"95%: {percentiles[4]:.2f}"
-    )
-    ax1.text(0.98, 0.98, pct_text_orig, transform=ax1.transAxes,
-             fontsize=9, va='top', ha='right', bbox=dict(facecolor='white', alpha=0.8))
-    
-
+    box_plot(ax_box, data, positions=[0.75],widths=0.15,)
+    ax_box.get_yaxis().set_visible(False)
     return plt
 
+def histo_box_grid(df, columns=None, output_dir="figures/histograms", title= "Histo box grid", filter_outliers=(0.05,0.95)):
 
-# def plot_column_analysis(df, colonna, bins=30):
-#     """
-#     Crea un grafico di analisi completo per una colonna numerica con:
-#     - Istogramma originale (in alto a sinistra)
-#     - Box plot con i percentili 5,25,50,75,95 (in basso a sinistra)
-#     - Istogramma pulito senza outliers (in alto a destra)
-#     - Box plot pulito senza outliers (in basso a destra)
-#     """
-#     # Crea subplot 1x2
-#     fig = plt.figure(figsize=(15, 10))
-#     gs = fig.add_gridspec(1, 2, hspace=0.3, wspace=0.3)
+    if filter_outliers:
+        df = filter_column(df, columns, by_percentile=True, percentiles=filter_outliers)
+    else:
+        pass
 
-#     # Prendi dati e rimuovi Nan
-#     data = df[colonna].dropna()
-#     # Calcola i percentili che si useranno per i box plot
-#     percentiles = np.percentile(data, [5, 25, 50, 75, 95])
+    # Se colonna non è specificata, usa tutte le colonne numeriche
+    if columns is None:
+        df_numeric = df.select_dtypes(include=["number"])
+    else:
+        df_numeric = df[columns].select_dtypes(include=["number"])
+        numfigs= len(columns)
+
+    numeric_cols = df_numeric.columns.tolist()
+    numfigs= len(numeric_cols)
     
-#     # Dati puliti
-#     clean_mask = (data >= percentiles[0]) & (data <= percentiles[4])
-#     clean_data = data[clean_mask]
-#     num_outliers = len(data) - len(clean_data)
+    # Crea directory di output
+    os.makedirs(output_dir, exist_ok=True)
 
-#     # Sx: istogramma originale
-#     ax1 = fig.add_subplot(gs[0, 0])
-#     ax1.hist(data, bins=bins, edgecolor='black', alpha=0.7)
-#     ax1.set_title(f'Istogramma originale di {colonna}')
-#     ax1.grid(True, alpha=0.3)
-#     ax1.set_ylabel("Conteggi")
-
-#     ax2=ax1.twinx()
-#     ax2.set_ylim(0, 1)
-
-#     larghezza_boxplot = 0.15
-#     y_boxplot = 0.75    
+    # Prova a rendere la griglia il più quadrata possibile
+    ncols =int(np.floor(np.sqrt(numfigs)))
+    nrows =int(np.ceil(np.sqrt(numfigs)))+1
     
-#     ax2.boxplot(data, whis=[5, 95], showfliers=True, 
-#                 vert=False, widths=larghezza_boxplot, positions=[y_boxplot], 
-#                 medianprops=dict(color="red", linewidth=1.5))
+    fig, axes = plt.subplots(nrows, ncols, figsize=(5*ncols, 4*nrows))
+    axes = axes.flatten()
 
-#     ax2.get_yaxis().set_visible(False)
+    for i in range(numfigs):
+        histo_box(axes[i], colonna=numeric_cols[i], data=df_numeric[numeric_cols[i]])
 
-#     # Aggiungi textbox con percentili originali sull'asse del boxplot sinistro
-#     pct_text_orig = (
-#         f"Percentili (originale):\n"
-#         f"5%: {percentiles[0]:.2f}\n"
-#         f"25%: {percentiles[1]:.2f}\n"
-#         f"50%: {percentiles[2]:.2f}\n"
-#         f"75%: {percentiles[3]:.2f}\n"
-#         f"95%: {percentiles[4]:.2f}"
-#     )
-#     ax1.text(0.98, 0.98, pct_text_orig, transform=ax1.transAxes,
-#              fontsize=9, va='top', ha='right', bbox=dict(facecolor='white', alpha=0.8))
-    
+    # Rimuovi se la griglia non è piena
+    for j in range(i + 1, len(axes)):
+        fig.delaxes(axes[j])
 
-#     # Dx: istogramma pulito
-#     ax3 = fig.add_subplot(gs[0, 1])
-#     ax3.hist(clean_data, bins=bins, edgecolor='black', alpha=0.7)
-#     ax3.set_title(f'Istogramma pulito di {colonna}\n(5-95 percentili)')
-#     ax3.grid(True, alpha=0.3)
-#     ax3.set_ylabel("Conteggi")
+    plt.suptitle(title, fontsize=16)
+    plt.tight_layout(rect=[0, 0, 1, 0.97])
 
-#     ax4 = ax3.twinx()
-#     ax4.set_ylim(0, 1)
-#     y_boxplot = 0.75 
-#     larghezza_boxplot = 0.15
-
-
-#     ax4.boxplot(clean_data, whis=[5, 95], showfliers=True,
-#                 vert=False, widths=larghezza_boxplot, positions=[y_boxplot],
-#                 medianprops=dict(color="red", linewidth=1.5))
-
-#     ax4.get_yaxis().set_visible(False)
-
-#     # Aggiungi textbox con percentili puliti e conteggio outliers sull'asse destro
-#     if len(clean_data) > 0:
-#         percentiles_clean = np.percentile(clean_data, [5, 25, 50, 75, 95])
-#         pct_text_clean = (
-#             f"Percentili (pulito):\n"
-#             f"5%: {percentiles_clean[0]:.2f}\n"
-#             f"25%: {percentiles_clean[1]:.2f}\n"
-#             f"50%: {percentiles_clean[2]:.2f}\n"
-#             f"75%: {percentiles_clean[3]:.2f}\n"
-#             f"95%: {percentiles_clean[4]:.2f}\n\n"
-#             f"Outliers rimossi: {num_outliers} ({num_outliers/len(data)*100:.2f}%)"
-#         )
-#     else:
-#         pct_text_clean = f"Nessun dato nel range 5-95%. Outliers rimossi: {num_outliers}"
-
-#     ax3.text(0.98, 0.98, pct_text_clean, transform=ax3.transAxes,
-#              fontsize=9, va='top', ha='right', bbox=dict(facecolor='white', alpha=0.8))
-
-
-#     plt.suptitle(f'Analisi statistica di {colonna}', fontsize=16, y=1.02)
-
-#     # Salva
-#     file_path = save_figure(plt, f"analisi_singola_{colonna}", "figures/histograms", ".png")
-#     print(f"Analysis plot saved in: {file_path}")
-#     plt.close()
-
-
+    # Salva unica immagine
+    if filter_outliers:
+        file_path = os.path.join(output_dir, "histo_box_matrix_cleaned.png")
+    else:
+        file_path = os.path.join(output_dir, "histo_box_matrix.png")
+    plt.savefig(file_path, dpi=100, bbox_inches="tight")
 

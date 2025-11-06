@@ -1,6 +1,8 @@
 from .column_understanding import analizza_colonne_numeriche
 from .categories_rankings_stats import number_of_categories_dist, category_couples_heatmap, category_distribution
 from .couple_columns_understanding import generate_scatterplots, generate_correlation_heatmap
+from dmp.my_graphs import histo_box_grid
+import os
 
 def understand_df(df_cleaned, do_scatters, do_hists):
     """Funzione che esegue le operazioni di analisi necessarie per il data understanding
@@ -34,6 +36,7 @@ def understand_df(df_cleaned, do_scatters, do_hists):
 
     # Se richiesto genera istogrammi + boxplot per ogni colonna numerica
     if do_hists:
+        histo_box_grid(df_cleaned, columns=None, output_dir="figures/histograms", title="Histo Boxplot Matrix", filter_outliers=None)
+        histo_box_grid(df_cleaned, columns=None, output_dir="figures/histograms", title="Cleaned Histo Boxplot Matrix", filter_outliers=(0.05, 0.95))
         analizza_colonne_numeriche(df_cleaned)
-
     return True
