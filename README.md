@@ -8,7 +8,7 @@ Il progetto include un **Makefile** per gestire facilmente la compilazione del d
 
 | Comando | Descrizione |
 |----------|--------------|
-| `make` | Compila `main.tex` e genera `main.pdf` |
+| `make` | Compila `main.tex` e genera `main.pdf` rimuovendo i file temporanei |
 | `make view` | Apre il PDF appena compilato |
 | `make clean` | Rimuove i file temporanei di compilazione (`.aux`, `.log`, `.out`, ecc.) |
 | `make cleanall` | Rimuove tutti i file di output, incluso `main.pdf` |
