@@ -29,6 +29,10 @@ $(OUTPUT): $(SRC)
 	@echo "📘 Compilazione del file TeX..."
 	$(LATEX) $(LATEXFLAGS) $(MAIN).tex
 	@echo "✅ Compilazione completata: $(OUTPUT)"
+	@echo "🧹 Rimozione dei file temporanei..."
+	@latexmk -c
+	@rm -f $(MAIN).bbl $(MAIN).run.xml $(MAIN).synctex.gz
+	@echo "✅ Pulizia completata."
 
 # Mostra il PDF (solo se esiste)
 view: $(OUTPUT)
