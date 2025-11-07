@@ -192,21 +192,6 @@ def main():
 
     if args.hypnotoad:
         hypno_toad()
-    """
-    # Compilo il file latex per manterlo aggiornato ai nuovi grafici prodotti (da capire se rendere opzionale)
-    command = ["pdflatex", "main.tex"]
-	
-    result = subprocess.run(command, capture_output=True, text=True)
-    
-    # Printa l'output del compilatore latex
-    if VERBOSE:
-        print("STDOUT:\n", result.stdout)
-        print("STDERR:\n", result.stderr)
 
-    if result.returncode == 0:
-        print("✅ Compilazione completata!")
-    else:
-        print("❌ Compilazione fallita.")
-    """
 if __name__ == "__main__":
     main()
