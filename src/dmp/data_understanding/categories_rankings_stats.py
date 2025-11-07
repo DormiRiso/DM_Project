@@ -23,8 +23,8 @@ def number_of_categories_dist(ranks_column):
         #aggiungo la sua lunghezza a lenght_lsit
         lengths_list.append(len(rank_list))
 
-    #creo un hist per lenght_list
-    plot = hist_graph(lengths_list, range(0, max(lengths_list) + 2), "Distribuzione del numero di categorie per gioco", "Numero di categorie", "Occorrenze", log_scale=True)
+    #creo un hist per length_list
+    plot = hist_graph(lengths_list, "Distribuzione del numero di categorie per gioco", "Numero di categorie", "Occorrenze", log_scale=True)
 
     file_path = save_figure(plot, "Distribuzione del numero di categorie per gioco", CATEGORY_ANALYSIS_FIGURES_FOLDER, ".png")
     if VERBOSE:

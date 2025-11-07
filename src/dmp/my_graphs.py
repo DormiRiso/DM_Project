@@ -30,12 +30,12 @@ def bar_graph(x_data, y_data, title: str, x_label: str, y_label:str, size: tuple
 
     return plt
 
-def hist_graph(data, binning, title: str, x_label: str, y_label:str, size: tuple=(8, 5), log_scale=False):
+def hist_graph(data, title: str, x_label: str, y_label:str, size: tuple=(8, 5), log_scale=False):
     """Funzione per creare degli istogrammi standardizzati e modulari
+    default sturges binning
     
     Input:
     data: dati da usare per creare l'istogramma
-    binning: bin da usare per l'istogramma
     x_label: label dell'asse x
     y_label: label dell'asse y
     title: titolo del grafico
@@ -46,7 +46,7 @@ def hist_graph(data, binning, title: str, x_label: str, y_label:str, size: tuple
     """
 
     plt.figure(figsize=size)
-    plt.hist(data, bins=binning, edgecolor='black', align='left')
+    plt.hist(data, bins="sturges", edgecolor='black', align='left')
     plt.title(title)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
@@ -59,24 +59,24 @@ def hist_graph(data, binning, title: str, x_label: str, y_label:str, size: tuple
 ###############
 
 
-def draw_hist(ax, data, binning, **kwargs):
+def draw_hist(ax, data, **kwargs):
     """Funzione per creare degli istogrammi standardizzati e modulari
     
     Input:
     ax: asse di matplotlib su cui disegnare l'istogramma
     data: dati da usare per creare l'istogramma
-    binning: bin da usare per l'istogramma
 
+    default sturges binning
 
     Output: n, bins_arr, patches, ax
     """
     if ax is None:
         fig, ax = plt.subplots()
-    n, bins_arr, patches = ax.hist(data, bins=binning, edgecolor='black', alpha=0.7, **kwargs)
+    n, bins_arr, patches = ax.hist(data, edgecolor='black', alpha=0.7, align='mid', **kwargs)
     return n, bins_arr, patches, ax
 
 
-def box_plot(ax, data, horizontal=True, summary=False,**kwargs):
+def box_plot(ax, data, horizontal=True, summary=False, extra_info="No dati rimossi", **kwargs):
     """ Funzione per creare dei 'box and whisker' plot stadardizzati e modulari
     
     Input:
@@ -84,6 +84,7 @@ def box_plot(ax, data, horizontal=True, summary=False,**kwargs):
     data: dati da usare per creare il boxplot
     horizontal: se True crea un boxplot orizzontale
     summary: se True aggiunge una textbox con i percentili 5,25,50,75,95
+    exrtra_info: Default: 'No dati rimossi'. Se vuoi aggiungere info alla textbox
     
     Output: 
     """
@@ -100,21 +101,22 @@ def box_plot(ax, data, horizontal=True, summary=False,**kwargs):
             f"25%: {percentiles[1]:.2f}\n"
             f"50%: {percentiles[2]:.2f}\n"
             f"75%: {percentiles[3]:.2f}\n"
-            f"95%: {percentiles[4]:.2f}"
+            f"95%: {percentiles[4]:.2f}\n"
+            + str(extra_info)
         )
         ax.text(0.98, 0.98, pct_text_orig, transform=ax.transAxes,
                 fontsize=9, va='top', ha='right', bbox=dict(facecolor='white', alpha=0.8))
         
     return bp, ax
 
-def histo_box(ax, data,colonna):
+def histo_box(ax, data,colonna, summary=False, extra_info="No dati rimossi"):
     """ Funzione per creare un grafico con istogramma e boxplot insieme
     
     Output: istanza di oggetto grafico di matplotlib"""
     if ax is None:
         fig, ax = plt.subplots()
 
-    draw_hist(ax, data=data, binning=30)
+    draw_hist(ax, data=data)
     ax.set_title(f'Istogramma di {colonna}')
     ax.grid(True, alpha=0.3)
     ax.set_ylabel("Conteggi")
@@ -122,7 +124,7 @@ def histo_box(ax, data,colonna):
     ax_box=ax.twinx()
     ax_box.set_ylim(0, 1)
 
-    box_plot(ax_box, data, positions=[0.75],widths=0.15,)
+    box_plot(ax_box, data, positions=[0.75],widths=0.15, summary=summary, extra_info=extra_info)
     ax_box.get_yaxis().set_visible(False)
     return plt
 
