@@ -15,7 +15,7 @@ def filter_df_by_descriptors(df, descriptors, column="Description"):
     # Converte la colonna in stringhe per evitare errori con NaN o tipi misti
     col = df[column].astype(str)
 
-    # Crea una maschera: True se almeno un descrittore è presente nel testo
+    # Crea una maschera: True se tutti i descrittori sono presenti nel testo
     mask = col.apply(lambda x: all(d.lower() in x.lower() for d in descriptors))
     
     return df[mask]
