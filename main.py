@@ -75,6 +75,22 @@ def understand_data(input_file: Path, do_scatters, do_hists, descriptors, verbos
 
     print(f"{Colors.GREEN}📈 Analisi completata!{Colors.RESET}\n")
 
+def prepare_data(input_file: Path, do_scatters, do_hists, descriptors, verbose: bool):
+    """Esegue la preparazione del dataframe, prendendo un dataframe pulito e 
+    riducendo ulteriormente la sua dimensione"""
+    pass #per ora, quando e pronto togliere commenti:
+    # print(f"{Colors.BLUE}📊 Caricamento dataset pulito da:{Colors.RESET} {input_file}")
+    # df_cleaned = pd.read_csv(input_file, converters={"Ranks": literal_eval}) #Leggi direttamente la colonna "Ranks" come python list e non stringa
+
+    # if verbose:
+    #     print(f"{Colors.CYAN}🔍 Avvio della preparazione dei dati {Colors.RESET}")
+    #     prepare_df(df_cleaned)
+    # else:
+    #     with yaspin(text="🔍 Avvio della preparazione dei dati ", color="cyan") as spinner:
+    #         prepare_df(df_cleaned)
+    #         spinner.ok("✅")
+    # print(f"{Colors.GREEN}📈 Preparazione completata!{Colors.RESET}\n")  
+
 def hypno_toad():
     print(r"""
       ,'``.._   ,'``.
@@ -113,6 +129,11 @@ def main():
         "-u", "--understanding",
         action="store_true",
         help="Esegui solo la fase di data understanding"
+    )
+    parser.add_argument(
+        "-p", "--preparation",
+        action="store_true",
+        help="Esegui solo la fase di data preparation"
     )
     parser.add_argument(
         "-s", "--scatters",
