@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from dmp.utils import save_figure
 from dmp.config import VERBOSE
 
-def plot_column_analysis(df, colonna, bins=30):
+def plot_column_analysis(df, colonna, output_path, bins=30):
     """
     Crea un grafico di analisi completo per una colonna numerica con:
     - Istogramma originale (in alto a sinistra)
@@ -101,21 +101,37 @@ def plot_column_analysis(df, colonna, bins=30):
     plt.suptitle(f'Analisi statistica di {colonna}', fontsize=16, y=1.02)
 
     # Salva
-    file_path = save_figure(plt, f"analisi_singola_{colonna}", "figures/histograms", ".png")
+    file_path = save_figure(plt, f"analisi_singola_{colonna}", output_path, ".png")
     if VERBOSE:
         print(f"Analysis plot saved in: {file_path}")
     plt.close()
 
-def analizza_colonne_numeriche(df):
+def analizza_colonne_numeriche(df, output_path, columns=None):
     """
-    Crea grafici di analisi completi per tutte le colonne numeriche del DataFrame.
+    Crea grafici di analisi completi per le colonne numeriche specificate del DataFrame.
+
+    Parametri:
+        df (pd.DataFrame): Il DataFrame da analizzare.
+        columns (list[str] | None): Lista di colonne da analizzare.
+                                    Se None, analizza tutte le colonne numeriche.
     """
-    for colonna in df.columns:
-        if pd.api.types.is_numeric_dtype(df[colonna]):
-            if len(df[colonna].dropna().unique()) > 1:  # Se ci sono almeno due punti diversi...
-                # print(f"\nAnalyzing column: {colonna}")
-                plot_column_analysis(df, colonna)
-            else:
-                pass # print(f"\nSkipping {colonna}: insufficient variation in data")
-        else:
-            pass # print(f"\nSkipping {colonna}: not a numerical column")
+    # Se non passo nessuna lista → prendo tutte le colonne numeriche
+    if columns is None:
+        columns = [col for col in df.columns if pd.api.types.is_numeric_dtype(df[col])]
+
+    for col in columns:
+        if col not in df.columns:
+            print(f"⚠️ Colonna '{col}' non trovata nel DataFrame, salto.")
+            continue
+
+        if not pd.api.types.is_numeric_dtype(df[col]):
+            print(f"⚠️ Colonna '{col}' non è numerica, salto.")
+            continue
+
+        if len(df[col].dropna().unique()) <= 1:
+            print(f"⚠️ Colonna '{col}' ha variazione insufficiente, salto.")
+            continue
+
+        # Se passa tutti i controlli → analizza la colonna
+        plot_column_analysis(df, col, output_path)
+

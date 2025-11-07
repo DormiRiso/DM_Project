@@ -59,7 +59,7 @@ def clean_data(input_file: Path, output_file: Path, verbose: bool):
 
     return df_cleaned
 
-def understand_data(input_file: Path, do_scatters, do_hists, verbose: bool):
+def understand_data(input_file: Path, do_scatters, do_hists, descriptors, verbose: bool):
     """Esegue le analisi sul dataframe pulito necessarie per svolgere il data understanding."""
 
     print(f"{Colors.BLUE}📊 Caricamento dataset pulito da:{Colors.RESET} {input_file}")
@@ -67,10 +67,10 @@ def understand_data(input_file: Path, do_scatters, do_hists, verbose: bool):
 
     if verbose:
         print(f"{Colors.CYAN}🔍 Avvio dell'analisi per data understanding {Colors.RESET}")
-        understand_df(df_cleaned, do_scatters, do_hists)
+        understand_df(df_cleaned, do_scatters, do_hists, descriptors)
     else:
         with yaspin(text="🔍 Avvio dell'analisi per data understanding ", color="cyan") as spinner:
-            understand_df(df_cleaned, do_scatters, do_hists)
+            understand_df(df_cleaned, do_scatters, do_hists, descriptors)
             spinner.ok("✅")
 
     print(f"{Colors.GREEN}📈 Analisi completata!{Colors.RESET}\n")
@@ -134,6 +134,11 @@ def main():
         action="store_true",
         help="GLORY TO THE HYPNO TOAD"
     )
+    parser.add_argument(
+    "-d", "--descriptors",
+    nargs="+",                # accetta uno o più valori
+    help="Filtra il dataset per le righe che contengono uno o più descrittori nella colonna 'Description'"
+)
 
     args = parser.parse_args()
 
@@ -159,19 +164,19 @@ def main():
         if not output_file.exists():
             print(f"{Colors.RED}❌ Errore: il file pulito non esiste. Esegui prima con -c o --cleaning.{Colors.RESET}")
             return
-        # Passa il flag --scatters come parametro
-        understand_data(output_file, args.scatters, args.hists, args.verbose)
+        understand_data(output_file, args.scatters, args.hists, args.descriptors, args.verbose)
+
 
     print(f"{Colors.BOLD}🏁 Operazione completata!{Colors.RESET} ✅")
 
     if args.hypnotoad:
         hypno_toad()
-
+    """
     # Compilo il file latex per manterlo aggiornato ai nuovi grafici prodotti (da capire se rendere opzionale)
     command = ["pdflatex", "main.tex"]
-
+	
     result = subprocess.run(command, capture_output=True, text=True)
-
+    
     # Printa l'output del compilatore latex
     if VERBOSE:
         print("STDOUT:\n", result.stdout)
@@ -181,6 +186,6 @@ def main():
         print("✅ Compilazione completata!")
     else:
         print("❌ Compilazione fallita.")
-
+    """
 if __name__ == "__main__":
     main()

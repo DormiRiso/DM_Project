@@ -54,11 +54,13 @@ def generate_scatterplots(df, columns=None, output_dir="figures/scatterplots", t
     # Crea tutte le coppie uniche di colonne
     pairs = list(itertools.combinations(numeric_cols, 2))
 
-    ncols = 9
+    #Definisco il numero di colonne come l'arrotondamento della radice del numero di grafi che devo fare, sembra funzionare bene
+    ncols = int(np.sqrt(len(pairs)))
     nrows = math.ceil(len(pairs) / ncols)
 
     fig, axes = plt.subplots(nrows, ncols, figsize=(5*ncols, 4*nrows))
-    axes = axes.flatten()
+    axes = np.array(axes).flatten()
+
 
     for i, (x_col, y_col) in enumerate(pairs):
         axes[i].scatter(df_numeric[x_col], df_numeric[y_col], alpha=0.6)
@@ -75,9 +77,9 @@ def generate_scatterplots(df, columns=None, output_dir="figures/scatterplots", t
 
     # Salva un’unica immagine
     if filter_outliers:
-        file_path = os.path.join(output_dir, "scatterplot_matrix_cleaned.png")
+        file_path = os.path.join(output_dir, "scatterplot_matrix_filtered.png")
     else:
-        file_path = os.path.join(output_dir, "scatterplot_matrix_unique.png")
+        file_path = os.path.join(output_dir, "scatterplot_matrix_unfiltered.png")
     plt.savefig(file_path, dpi=100, bbox_inches="tight")
     plt.close()
 
