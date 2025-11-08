@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 def save_figure(plot, title, folder="figures", extension=".png"):
 
@@ -93,53 +94,112 @@ def count_word_occurrences(df: pd.DataFrame, column_name: str, show_hist: bool =
 
     return word_occurrences
 
-
-def filter_column(df, colonne, by_percentile=False, by_threshold=False,
-                  percentiles=(0.05, 0.95), thresholds=(1, 100)):
+def outlier_bounds_iqr(df, column, k=1.5):
     """
-    Filtra un DataFrame mantenendo solo le righe in cui i valori
-    delle colonne specificate si trovano entro i percentili o soglie dati.
+        Calcola i limiti inferiore e superiore per individuare outlier
+        in una colonna di un DataFrame utilizzando il metodo IQR (Interquartile Range).
 
-    Parametri:
+        Parametri
+        ----------
+        df : pandas.DataFrame
+            Il DataFrame che contiene i dati.
+        column : str
+            Il nome della colonna numerica su cui calcolare i limiti degli outlier.
+        k : float, opzionale (default = 1.5)
+            Fattore di scala che determina quanto "larghi" devono essere i limiti.
+            Valori più piccoli rendono il metodo più sensibile (più outlier trovati),
+            mentre valori più grandi lo rendono più tollerante.
+    """
+
+    # Calcola il primo quartile (Q1) e terzo quartile (Q3)
+    Q1 = df[column].quantile(0.25)
+    Q3 = df[column].quantile(0.75)
+    # Calcola l'intervallo interquartile (IQR = Q3 - Q1),
+    IQR = Q3 - Q1
+    # Calcola il limite inferiore degli outlier
+    lower = Q1 - k * IQR
+    # Calcola il limite superiore degli outlier
+    upper = Q3 + k * IQR
+
+    return lower, upper
+
+
+def filter_columns(df, colonne=None, method="threshold", params=None, delete_row=False):
+    """
+    Filtra un DataFrame mantenendo solo i valori entro i limiti scelti:
+      - 'percentile' → usa 'params' con chiavi ('low', 'high')
+      - 'threshold'  → usa 'params' con chiavi ('low', 'high')
+      - 'iqr'        → usa 'params' con chiave ('k')
+
+    Parametri
     ----------
     df : pd.DataFrame
         Il DataFrame da filtrare.
-    colonne : list
-        Lista delle colonne su cui applicare il filtro.
-    by_percentile : bool
-        Se True, filtra la colonna per percentili.
-    by_threshold : bool
-        Se True, filtra la colonna per soglie numeriche.
-    percentiles : tuple (float, float)
-        Percentili inferiore e superiore (es. (0.05, 0.95) → 5° e 95° percentile).
-    thresholds : tuple (float, float)
-        Soglie inferiori e superiori (es. (1, 100) → valori tra 1 e 100).
+    colonne : list, opzionale
+        Colonne su cui applicare il filtro (se None → tutte quelle numeriche).
+    method : str
+        Metodo da utilizzare: 'percentile', 'threshold' o 'iqr'.
+    params : dict, opzionale
+        Dizionario di parametri specifici per il metodo scelto.
+    delete_row : bool
+        Se True elimina le righe con outlier; se False sostituisce solo gli outlier con NaN.
 
-    Ritorna:
-    --------
+    Ritorna
+    -------
     pd.DataFrame
-        Un nuovo DataFrame filtrato.
+        DataFrame filtrato secondo il metodo scelto.
     """
+
     df_filtrato = df.copy()
-    # Se colonna non è specificata, usa tutte le colonne numeriche
+
+    # Se non sono specificate colonne, usa tutte le numeriche
     if colonne is None:
-        df_filtrato = df_filtrato.select_dtypes(include=["number"])
-        colonne = df_filtrato.columns.tolist()
-        
-    if not by_percentile and not by_threshold:
-        raise ValueError("Devi specificare almeno una modalità di filtro: by_percentile=True o by_threshold=True")
+        colonne = df_filtrato.select_dtypes(include=["number"]).columns.tolist()
+
+    # Controllo metodo valido
+    method = method.lower()
+    metodi_validi = ["iqr", "percentile", "threshold"]
+    if method not in metodi_validi:
+        raise ValueError(f"Metodo non valido. Scegli tra: {metodi_validi}")
+
+    # Valori di default per params
+    if params is None:
+        params = {}
+    low = params.get("low", None)
+    high = params.get("high", None)
+    k = params.get("k", 1.5)
 
     for col in colonne:
-        if by_percentile:
-            low, high = percentiles
-            low_val = df[col].quantile(low)
-            high_val = df[col].quantile(high)
-            df_filtrato = df_filtrato[(df_filtrato[col] >= low_val) & (df_filtrato[col] <= high_val)]
+        if method == "percentile":
+            low_val = df[col].quantile(low if low is not None else 0.05)
+            high_val = df[col].quantile(high if high is not None else 0.95)
+        elif method == "threshold":
+            low_val = low if low is not None else df[col].min()
+            high_val = high if high is not None else df[col].max()
+        elif method == "iqr":
+            low_val, high_val = outlier_bounds_iqr(df, col, k=k)
 
-        elif by_threshold:
-            low_val, high_val = thresholds
-            df_filtrato = df_filtrato[(df_filtrato[col] >= low_val) & (df_filtrato[col] <= high_val)]
+        if delete_row:
+            # Rimuove le righe con outlier
+            df_filtrato = df_filtrato[
+                (df_filtrato[col] >= low_val) & (df_filtrato[col] <= high_val)
+            ]
+        else:
+            # Sostituisce solo i valori outlier con NaN
+            mask = (df_filtrato[col] < low_val) | (df_filtrato[col] > high_val)
+            df_filtrato.loc[mask, col] = np.nan
+
+    # --- Check finale: rimuovi colonne vuote e avvisa ---
+    colonne_valide = [col for col in df_filtrato.columns if not df_filtrato[col].dropna().empty]
+    colonne_rimosse = set(df_filtrato.columns) - set(colonne_valide)
+
+    if colonne_rimosse:
+        print(f"⚠️ Le seguenti colonne non hanno valori validi dopo il filtro e saranno rimosse: {colonne_rimosse}")
+
+    df_filtrato = df_filtrato[colonne_valide]
 
     return df_filtrato
+
+
 
 

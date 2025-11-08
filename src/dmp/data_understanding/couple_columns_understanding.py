@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import itertools
-from dmp.utils import save_figure, filter_column
+from dmp.utils import save_figure, filter_columns, outlier_bounds_iqr
 from dmp.config import VERBOSE
 
-def generate_scatterplots(df, columns=None, output_dir="figures/scatterplots", title="Scatterplot Matrix", filter_outliers=(0.05,0.95)):
+def generate_scatterplots(df, columns=None, output_dir="figures/scatterplots", file_name = "Scatterplots", title="Scatterplot Matrix"):
     """
     Genera una griglia di scatterplot per tutte le coppie uniche di colonne numeriche.
     (Non ripete coppie simmetriche e non include la diagonale.)
@@ -20,21 +20,14 @@ def generate_scatterplots(df, columns=None, output_dir="figures/scatterplots", t
         Colonne da includere. Se None, usa tutte le colonne numeriche.
     output_dir : str, default="figures/scatterplots"
         Directory dove salvare l'immagine.
+    file_name : str
+        Nome dell'immagine da generare
     title : str
         Titolo della figura.
-    filter_outliers : tuple(float, float)
-        Percentili per filtrare i dati (default: (0.05, 0.95)).
-
     Output
     ------
     Nessun ritorno. Salva un file PNG con la griglia di scatterplot.
     """
-
-     # Filtra outliers se specificato
-    if filter_outliers:
-        df = filter_column(df, columns, by_percentile=True, percentiles=filter_outliers)
-    else:
-        pass
 
     # Se columns non è specificato, usa tutte le colonne numeriche
     if columns is None:
@@ -75,18 +68,15 @@ def generate_scatterplots(df, columns=None, output_dir="figures/scatterplots", t
     plt.suptitle(title, fontsize=16)
     plt.tight_layout(rect=[0, 0, 1, 0.97])
 
-    # Salva un’unica immagine
-    if filter_outliers:
-        file_path = os.path.join(output_dir, "scatterplot_matrix_filtered.png")
-    else:
-        file_path = os.path.join(output_dir, "scatterplot_matrix_unfiltered.png")
+    file_path = os.path.join(output_dir, f"{file_name}.png")
     plt.savefig(file_path, dpi=100, bbox_inches="tight")
+
     plt.close()
 
     if VERBOSE:
         print(f"✅ Scatterplot matrix salvata in: {file_path}")
 
-def generate_correlation_heatmap(df, columns=None, output_dir="figures/heatmaps", title="Matrice_di_correlazione"):
+def generate_correlation_heatmap(df, columns=None, output_dir="figures/heatmaps", file_name = "Heatmap", title="Matrice_di_correlazione"):
     """
     Genera una heatmap della matrice di covarianza per le colonne specificate (o tutte le numeriche).
 
@@ -135,7 +125,7 @@ def generate_correlation_heatmap(df, columns=None, output_dir="figures/heatmaps"
     plt.tight_layout()
 
     # Salva il file
-    file_path = save_figure(plt, title, folder=output_dir, extension=".png")
+    file_path = save_figure(plt, file_name, folder=output_dir, extension=".png")
 
     if VERBOSE:
         print(f"✅ Heatmap di covarianza salvata in: {file_path}")

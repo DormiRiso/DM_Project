@@ -7,7 +7,7 @@ from dmp.utils import save_figure
 from dmp.config import VERBOSE
 from dmp.my_graphs import histo_box
 
-def plot_column_analysis(df, colonna, output_path, bins=30):
+def plot_column_analysis(df, df_filtered, colonna, output_path, bins=30):
     """
     Crea un grafico di analisi completo per una colonna numerica con:
     - Istogramma originale (in alto a sinistra)
@@ -21,12 +21,9 @@ def plot_column_analysis(df, colonna, output_path, bins=30):
 
     # Prendi dati e rimuovi Nan
     data = df[colonna].dropna()
-    # Calcola i percentili che si useranno per i box plot
-    percentiles = np.percentile(data, [5, 25, 50, 75, 95])
-    
     # Dati puliti
-    clean_mask = (data >= percentiles[0]) & (data <= percentiles[4])
-    clean_data = data[clean_mask]
+    clean_data = df_filtered[colonna].dropna()
+
     num_outliers = len(data) - len(clean_data)
     ax1 = fig.add_subplot(gs[0, 0])
     ax2 = fig.add_subplot(gs[0, 1])
@@ -41,14 +38,14 @@ def plot_column_analysis(df, colonna, output_path, bins=30):
         print(f"Analysis plot saved in: {file_path}")
     plt.close()
 
-def analizza_colonne_numeriche(df, output_path, columns=None):
+def analizza_colonne_numeriche(df, df_filtered, output_path, columns=None):
     """
     Crea grafici di analisi completi per le colonne numeriche specificate del DataFrame.
 
     Parametri:
         df (pd.DataFrame): Il DataFrame da analizzare.
         columns (list[str] | None): Lista di colonne da analizzare.
-                                    Se None, analizza tutte le colonne numeriche.
+            Se None, analizza tutte le colonne numeriche.
     """
     # Se non passo nessuna lista → prendo tutte le colonne numeriche
     if columns is None:
@@ -68,5 +65,5 @@ def analizza_colonne_numeriche(df, output_path, columns=None):
             continue
 
         # Se passa tutti i controlli → analizza la colonna
-        plot_column_analysis(df, col, output_path)
+        plot_column_analysis(df, df_filtered, col, output_path)
 

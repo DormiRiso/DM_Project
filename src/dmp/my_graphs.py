@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
-from dmp.utils import save_figure, filter_column
+from dmp.utils import save_figure, filter_columns
 
 def bar_graph(x_data, y_data, title: str, x_label: str, y_label:str, size: tuple=(8, 5), log_scale=False):
     """Funzione per creare dei grafici a colonne standardizzati e modulari
@@ -128,12 +128,7 @@ def histo_box(ax, data,colonna, summary=False, extra_info="No dati rimossi"):
     ax_box.get_yaxis().set_visible(False)
     return plt
 
-def histo_box_grid(df, columns=None, output_dir="figures/histograms", title= "Histo box grid", filter_outliers=(0.05,0.95)):
-
-    if filter_outliers:
-        df = filter_column(df, columns, by_percentile=True, percentiles=filter_outliers)
-    else:
-        pass
+def histo_box_grid(df, columns=None, output_dir="figures/histograms", file_name = "histo_box_matrix", title= "Histo box grid"):
 
     # Se colonna non è specificata, usa tutte le colonne numeriche
     if columns is None:
@@ -164,11 +159,7 @@ def histo_box_grid(df, columns=None, output_dir="figures/histograms", title= "Hi
 
     plt.suptitle(title, fontsize=16)
     plt.tight_layout(rect=[0, 0, 1, 0.97])
-
-    # Salva unica immagine
-    if filter_outliers:
-        file_path = os.path.join(output_dir, "histo_box_matrix_cleaned.png")
-    else:
-        file_path = os.path.join(output_dir, "histo_box_matrix.png")
+    
+    file_path = os.path.join(output_dir, f"{file_name}.png")
     plt.savefig(file_path, dpi=100, bbox_inches="tight")
 
