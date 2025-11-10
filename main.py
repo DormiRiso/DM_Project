@@ -7,14 +7,11 @@ Questo script consente di:
 - Analizzare il dataset pulito (`-u` o `--understanding`)
 - Fare entrambe le operazioni (`-c -u` oppure senza argomenti)
 - Opzionalmente generare scatterplot durante l'understanding (`-u -s`)
-- Opzionalmente generare istogrammi durante l'understanding (`-u -hi`)
 
 Esempi:
     python main.py -c
     python main.py -u
     python main.py -u -s
-    python main.py -u -hi
-    python main.py -u -hi -s
     python main.py -c -u
     python main.py      # esegue tutto
 """
@@ -25,8 +22,10 @@ from ast import literal_eval
 import argparse
 import pandas as pd
 from yaspin import yaspin
+from dmp.utils import filter_columns
 from dmp.data_cleaning import clean_df
 from dmp.data_understanding import understand_df
+from dmp.data_preparation import prepare_df
 from dmp import config
 from dmp.config import VERBOSE
 
@@ -41,7 +40,7 @@ class Colors:
     BOLD = "\033[1m"
     RESET = "\033[0m"
 
-def clean_data(input_file: Path, output_file: Path, verbose: bool):
+def clean_data(input_file: Path, cleaned_output_file: Path, filtered_output_file: Path, verbose: bool):
     """Esegue il data cleaning e salva il risultato."""
 
     print(f"{Colors.BLUE}📂 Caricamento dataset da:{Colors.RESET} {input_file}")
@@ -57,42 +56,57 @@ def clean_data(input_file: Path, output_file: Path, verbose: bool):
 
     print(f"{Colors.GREEN}✨ Pulizia completata con successo!{Colors.RESET}\n")
 
-    print(f"{Colors.YELLOW}💾 Salvataggio del dataset pulito in:{Colors.RESET} {output_file}")
-    df_cleaned.to_csv(output_file, index=False)
+    columns=[
+    "YearPublished", "GameWeight", "ComWeight",  
+    "ComAgeRec", "LanguageEase", "NumOwned", "NumWant", "NumWish","MfgPlaytime",
+    "ComMinPlaytime", "ComMaxPlaytime", "MfgAgeRec", "NumUserRatings",
+    ]
+    
+    # Definisco il df filtrato dagli outliers, posso chiamarla più volte per filtrare in modo modulare il df e lo salva.
+    df_filtered = filter_columns(df_cleaned, colonne=columns, method="percentile", params=None, delete_row=False)
 
-    return df_cleaned
+    print(f"{Colors.YELLOW}💾 Salvataggio del dataset pulito in:{Colors.RESET} {cleaned_output_file}")
+    df_cleaned.to_csv(cleaned_output_file, index=False)
+    print(f"{Colors.YELLOW}💾 Salvataggio del dataset pulito in:{Colors.RESET} {filtered_output_file}")
+    df_filtered.to_csv(filtered_output_file, index=False)
 
-def understand_data(input_file: Path, do_scatters, do_hists, descriptors, verbose: bool):
+def understand_data(cleaned_file: Path, filtered_file:Path, do_scatters, do_hists, descriptors, verbose: bool):
     """Esegue le analisi sul dataframe pulito necessarie per svolgere il data understanding."""
 
-    print(f"{Colors.BLUE}📊 Caricamento dataset pulito da:{Colors.RESET} {input_file}")
-    df_cleaned = pd.read_csv(input_file, converters={"Ranks": literal_eval}) #Leggi direttamente la colonna "Ranks" come python list e non stringa
+    print(f"{Colors.BLUE}📊 Caricamento dataset pulito da:{Colors.RESET} {cleaned_file}")
+    df_cleaned = pd.read_csv(cleaned_file, converters={"Ranks": literal_eval}) #Leggi direttamente la colonna "Ranks" come python list e non stringa
+
+    print(f"{Colors.BLUE}📊 Caricamento dataset filtrato da:{Colors.RESET} {filtered_file}")
+    df_filtered = pd.read_csv(filtered_file, converters={"Ranks": literal_eval})
 
     if verbose:
         print(f"{Colors.CYAN}🔍 Avvio dell'analisi per data understanding {Colors.RESET}")
-        understand_df(df_cleaned, do_scatters, do_hists, descriptors)
+        understand_df(df_cleaned, df_filtered, do_scatters, do_hists, descriptors)
     else:
         with yaspin(text="🔍 Avvio dell'analisi per data understanding ", color="cyan") as spinner:
-            understand_df(df_cleaned, do_scatters, do_hists, descriptors)
+            understand_df(df_cleaned, df_filtered, do_scatters, do_hists, descriptors)
             spinner.ok("✅")
 
     print(f"{Colors.GREEN}📈 Analisi completata!{Colors.RESET}\n")
 
-def prepare_data(input_file: Path, do_scatters, do_hists, descriptors, verbose: bool):
+def prepare_data(input_file: Path, output_file: Path, N_samples, descriptors, verbose: bool):
     """Esegue la preparazione del dataframe, prendendo un dataframe pulito e 
     riducendo ulteriormente la sua dimensione"""
-    pass #per ora, quando e pronto togliere commenti:
-    # print(f"{Colors.BLUE}📊 Caricamento dataset pulito da:{Colors.RESET} {input_file}")
-    # df_cleaned = pd.read_csv(input_file, converters={"Ranks": literal_eval}) #Leggi direttamente la colonna "Ranks" come python list e non stringa
+    
+    print(f"{Colors.BLUE}📊 Caricamento dataset pulito da:{Colors.RESET} {input_file}")
+    filtered_df = pd.read_csv(input_file, converters={"Ranks": literal_eval}) #Leggi direttamente la colonna "Ranks" come python list e non stringa
 
-    # if verbose:
-    #     print(f"{Colors.CYAN}🔍 Avvio della preparazione dei dati {Colors.RESET}")
-    #     prepare_df(df_cleaned)
-    # else:
-    #     with yaspin(text="🔍 Avvio della preparazione dei dati ", color="cyan") as spinner:
-    #         prepare_df(df_cleaned)
-    #         spinner.ok("✅")
-    # print(f"{Colors.GREEN}📈 Preparazione completata!{Colors.RESET}\n")  
+    if verbose:
+        print(f"{Colors.CYAN}🔍 Avvio della preparazione dei dati {Colors.RESET}")
+        prepared_df = prepare_df(filtered_df, N_samples, descriptors)
+    else:
+        with yaspin(text="🔍 Avvio della preparazione dei dati ", color="cyan") as spinner:
+            prepared_df = prepare_df(filtered_df, N_samples, descriptors)
+            spinner.ok("✅")
+    print(f"{Colors.GREEN}📈 Preparazione completata!{Colors.RESET}\n")  
+    
+    print(f"{Colors.YELLOW}💾 Salvataggio del dataset filtrato in:{Colors.RESET} {output_file}")
+    prepared_df.to_csv(output_file, index=False)
 
 def hypno_toad():
     print(r"""
@@ -135,8 +149,9 @@ def main():
     )
     parser.add_argument(
         "-p", "--preparation",
-        action="store_true",
-        help="Esegui solo la fase di data preparation"
+        type=int,
+        metavar="N",
+        help="Esegui la fase di data preparation specificando il numero di righe del campionamento"
     )
     parser.add_argument(
         "-s", "--scatters",
@@ -168,28 +183,33 @@ def main():
 
     config.set_verbose(args.verbose)
 
-    # Se non viene specificato nulla → esegui tutto
-    if not args.cleaning and not args.understanding:
+    # Se non viene specificato nessuno dei tre step → esegui tutto
+    if not args.cleaning and not args.understanding and not args.preparation:
         args.cleaning = args.understanding = True
+
 
     # Percorsi base
     data_dir = Path("data")
     data_dir.mkdir(exist_ok=True)
     input_file = data_dir / "DM1_game_dataset.csv"
-    output_file = data_dir / "cleaned_df.csv"
+    cleaned_output_file = data_dir / "cleaned_df.csv"
+    filtered_output_file = data_dir / "filtered_df.csv"
+    prepared_output_file = data_dir / "prepared_df.csv"
 
     print(f"{Colors.HEADER}{Colors.BOLD}🚀 Data Pipeline Avviata!{Colors.RESET}\n")
 
     # Esecuzione task
     if args.cleaning:
-        _ = clean_data(input_file, output_file, args.verbose)
+        clean_data(input_file, cleaned_output_file, filtered_output_file, args.verbose)
 
     if args.understanding:
-        if not output_file.exists():
+        if not cleaned_output_file.exists() and filtered_output_file.exists():
             print(f"{Colors.RED}❌ Errore: il file pulito non esiste. Esegui prima con -c o --cleaning.{Colors.RESET}")
             return
-        understand_data(output_file, args.scatters, args.hists, args.descriptors, args.verbose)
-
+        understand_data(cleaned_output_file, filtered_output_file, args.scatters, args.hists, args.descriptors, args.verbose)
+    
+    if args.preparation:
+        prepare_data(filtered_output_file, prepared_output_file, args.preparation, args.descriptors, args.verbose)
 
     print(f"{Colors.BOLD}🏁 Operazione completata!{Colors.RESET} ✅")
 
@@ -198,3 +218,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    

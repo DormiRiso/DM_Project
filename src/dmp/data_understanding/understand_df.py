@@ -7,12 +7,13 @@ from .analysis_by_descriptors import filter_df_by_descriptors, make_safe_descrip
 import os
 import pandas as pd
 
-def understand_df(df_cleaned, do_scatters, do_hists, descriptors= None):
+def understand_df(df_cleaned, df_filtered, do_scatters, do_hists, descriptors= None):
     """
     Funzione che esegue le operazioni di analisi necessarie per il data understanding.
     
     Input:
         df_cleaned: dataframe già pulito
+        df_filtered: dataframe già pulito e filtrato dagli outliers
         do_scatters: se True crea gli scatter plot
         do_hists: se True crea gli istogrammi
         descriptors: lista di parole (o singola stringa) per filtrare il df sulla colonna 'Description'
@@ -21,9 +22,10 @@ def understand_df(df_cleaned, do_scatters, do_hists, descriptors= None):
         ritorna True se non ci sono stati errori
     """
 
-      # Se specificati, filtra il dataframe in base ai descrittori
+    # Se specificati, filtra il dataframe in base ai descrittori
     if descriptors:
         df_cleaned = filter_df_by_descriptors(df_cleaned, descriptors, column="Description")
+        df_filtered = filter_df_by_descriptors(df_filtered, descriptors, column="Description")
 
     # Analisi della colonna riguardante le categorie dei giochi: 
         # Distribuzione categorie per gioco
@@ -41,18 +43,19 @@ def understand_df(df_cleaned, do_scatters, do_hists, descriptors= None):
     # "NumImplementations", "NumExpansions",  "NumAlternates",
     # 
     ####
+    #Colonne su cui fare l'analisi
     columns=[
-        "YearPublished", "GameWeight", "ComWeight",  
-        "ComAgeRec", "LanguageEase", "NumOwned", "NumWant", "NumWish","MfgPlaytime",
-        "ComMinPlaytime", "ComMaxPlaytime", "MfgAgeRec", "NumUserRatings",
-        ]
+    "YearPublished", "GameWeight", "ComWeight",  
+    "ComAgeRec", "LanguageEase", "NumOwned", "NumWant", "NumWish","MfgPlaytime",
+    "ComMinPlaytime", "ComMaxPlaytime", "MfgAgeRec", "NumUserRatings",
+    ]
         
     # Genera una heatmap per la correlazione di ogni coppia di colonne numeriche
     generate_correlation_heatmap(df_cleaned, columns=columns, output_dir="figures/heatmaps", file_name = "Correlation_Heatmap_unfiltered", title="Matrice di correlazione, dati originali")
-    # Definisco il df filtrato dagli outliers, posso chiamarla più volte per filtrare in modo modulare il df
-    df_filtered = filter_columns(df_cleaned, colonne=columns, method="percentile", params=None, delete_row=False)
+    # Definisco il df filtrato dagli outliers, posso chiamarla più volte per filtrare in modo modulare il df e lo salva.
     # Genera una heatmap per la correlazione di ogni coppia di colonne numeriche
     generate_correlation_heatmap(df_filtered, columns=columns, output_dir="figures/heatmaps", file_name = "Correlation_Heatmap_filtered", title="Matrice di correlazione, dati filtrati dagli outliers")
+    
     # Rimuovo una delle coppie di colonne correlate 1:1 per poter apprezzare le altre meglio
     uncorrelated_cols = [
         "YearPublished", "GameWeight",   
@@ -70,8 +73,6 @@ def understand_df(df_cleaned, do_scatters, do_hists, descriptors= None):
         generate_scatterplots(df_cleaned, columns, output_dir=output_path, file_name = f"Scatterplots_{desc_name}_unfiltered",
                             title=f"Cleaned Scatterplot Matrix ({desc_name})")
 
-        # Definisco il df filtrato dagli outliers, posso chiamarla più volte per filtrare in modo modulare il df
-        df_filtered = filter_columns(df_cleaned, colonne=columns, method="percentile", params=None, delete_row=False)
 
         # Faccio gli scatterplots del df filtrato dagli outliers
         generate_scatterplots(df_filtered, columns, output_dir=output_path, file_name = f"Scatterplots_{desc_name}_filtered",
@@ -92,8 +93,6 @@ def understand_df(df_cleaned, do_scatters, do_hists, descriptors= None):
         # Faccio gli istogrammi delle colonne non filtrate dagli outliers e filtrate dagli outliers, per tutte le colonne numeriche
         histo_box_grid(df_cleaned, columns=None, output_dir=output_path, file_name = f"Histogram_Matrix_{desc_name}_unfiltered",
                     title=f"Unfiltered Histo Boxplot Matrix ({desc_name})",summary=True, extra_info="Outliers non rimossi")
-        # Definisco il df filtrato dagli outliers, posso chiamarla più volte per filtrare in modo modulare il df
-        df_filtered = filter_columns(df_cleaned, colonne=None, method="percentile", params=None, delete_row=False)
 
         # Rifaccio il box_grid di istogrammi ma con le colonne filtrate, per tutte le colonne numeriche
         histo_box_grid(df_filtered, columns=None, output_dir=output_path, file_name = f"Histogram_Matrix_{desc_name}_filtered",
