@@ -163,9 +163,11 @@ def main():
     )
     parser.add_argument(
         "-p", "--preparation",
-        type=int,
+        nargs="?",            # rende l'argomento opzionale
+        const=None,           # valore usato se -p è presente ma senza numero
+        type=int,             # se viene passato un numero, viene convertito
         metavar="N",
-        help="Esegui la fase di data preparation specificando il numero di righe del campionamento"
+        help="Esegui la fase di data preparation (opzionale: specifica N per campionare le righe)"
     )
     parser.add_argument(
         "-s", "--scatters",
@@ -203,7 +205,7 @@ def main():
     set_verbose(args.verbose)
 
     # Se non viene specificato nessuno dei tre step → esegui tutto
-    if not args.cleaning and not args.understanding and not args.preparation:
+    if not args.cleaning and not args.understanding:
         args.cleaning = args.understanding = True
 
     # Percorsi base
@@ -219,6 +221,10 @@ def main():
     # Esecuzione task
     if args.cleaning:
         clean_data(input_file, cleaned_output_file, filtered_output_file, args.verbose)
+        if args.preparation is None or isinstance(args.preparation, int):
+            prepare_data(filtered_output_file, prepared_output_file, args.preparation, args.descriptors, args.verbose)
+
+
 
     if args.understanding:
         if not cleaned_output_file.exists() and filtered_output_file.exists():
@@ -226,8 +232,6 @@ def main():
             return
         understand_data(cleaned_output_file, filtered_output_file, args.scatters, args.hists, args.descriptors, args.verbose)
 
-    if args.preparation:
-        prepare_data(filtered_output_file, prepared_output_file, args.preparation, args.descriptors, args.verbose)
 
     if args.clustering:
         cluster_data(filtered_output_file, args.verbose)

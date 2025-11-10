@@ -23,7 +23,7 @@ def section(title: str, emoji: str = "🧩"):
     print(f"{Colors.HEADER}{'─' * (len(title) + 4)}{Colors.RESET}")
 
 
-def prepare_df(df, N_samples, descriptors):
+def prepare_df(df, N_samples=None, descriptors=None):
     """
     🧹 Opera sul DataFrame pulito e lo prepara per l'analisi, 
     tramite le tecninche di 'data preparation'.
@@ -52,8 +52,11 @@ def prepare_df(df, N_samples, descriptors):
     output_path = f"figures/sampling/{desc_name}"
 
     # Sampling delle rows
-    df_prepared = sample_df(df, N_samples, "random", "MfgPlaytime",  output_dir= output_path + "_random")
-    #df_prepared = sample_df(df, N_samples, method ="distribution", colonna ="MfgPlaytime", output_dir= output_path+"_distribution")
+    #df_prepared = sample_df(df, N_samples, "random", "MfgPlaytime",  output_dir= output_path + "_random")
+    if N_samples:
+        df_prepared = sample_df(df, N_samples, method ="distribution", colonna ="MfgPlaytime", output_dir= output_path+"_distribution")
+    else:
+        df_prepared = df
 
     #Creazione della colonna Weighted_Ratings seguendo l'algoritmo di IMDB e Stem
     df_prepared = add_weighted_rating(df_prepared, rating_col='Rating', votes_col='NumUserRatings', new_col='WeightedRating')
@@ -65,7 +68,6 @@ def prepare_df(df, N_samples, descriptors):
     #Normalizza la colonna "LanguageEase"
     columns_to_be_normalized = ["LanguageEase"]
     df_prepared = min_max_scaling(df_prepared, columns_to_be_normalized)
-
 
  
     # 🏁 Fine
