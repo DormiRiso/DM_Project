@@ -146,3 +146,48 @@ def k_means_scatter(x_column, y_column, k, max_iters=5, **kwargs):
         print(f"[INFO] Plotted {len(centroids)} clusters with their centroids. SSE: {sse:.2f}")
 
     return fig
+
+def sse_vs_k(x_column, y_column, ending_k, max_iters=5, **kwargs):
+    """Funzione che applica l'algoritmo K-means per crescenti valori di k e plotta il valore di sse in funzione di k
+
+    Input: 
+        x_column: colonna del dataframe corrispondende alla coordinata x
+        y_column: colonna del dataframe corrispondende alla coordinata y
+        ending_k: numero massimo di k
+        max_iters: numero massimo di terazioni dell'algoritmo, default a 5 per evitare inutili costi computazionali
+        title: titolo del grafico
+        x_label: etichetta dell'asse x
+        y_label: etichetta dell'asse y
+
+    Output: istanza di oggetto figure di matplotlib.pyplot e lista di valori di SSE
+    """
+
+    # Gestione degli errori ...
+
+    # Rendo leggibili i dati delle colonne, ignorando una coppia quando uno dei due valori è nan
+    x_data = []
+    y_data = []
+    x_column = [float(x) for x in x_column]
+    y_column = [float(x) for x in y_column]
+    for x, y in zip(x_column, y_column):
+        if np.isnan(x) or np.isnan(y):
+            continue
+        x_data.append(x)
+        y_data.append(y)
+
+    # Eseguo l'algoritmo
+    sse_list = []
+    for k in range(1, ending_k):
+        _, sse = k_means(x_data, y_data, k, max_iters)
+        sse_list.append(sse)
+
+    # Procedo con il plotting
+    plt.scatter(range(1, ending_k), sse_list, color="black")
+    plt.title(kwargs.get("title"))
+    plt.xlabel(kwargs.get("x_label"))
+    plt.ylabel(kwargs.get("y_label"))
+
+    if VERBOSE:
+        print(f"[INFO] Plottati i valori di SSE fino a {ending_k}")
+
+    return plt, sse_list

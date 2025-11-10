@@ -4,15 +4,32 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def save_figure(plot, title, folder="figures", extension=".png"):
-
+    
     # Crea la cartella "folder" se non esiste
     os.makedirs(folder, exist_ok=True)
 
     # Salvataggio del file
-    file_name = title
-    file_name = file_name.replace(" ", "_").lower() + extension
+    file_name = title.replace(" ", "_").lower() + extension
     file_path = os.path.join(folder, file_name)
-    plot.savefig(file_path, bbox_inches='tight')
+    
+    # Determina se 'plot' è il modulo plt o una figura
+    if hasattr(plot, 'savefig'):
+        # Se plot ha il metodo savefig, è probabilmente una figura o il modulo plt
+        plot.savefig(file_path, bbox_inches='tight')
+    else:
+        # Altrimenti usa plt per salvare
+        plt.savefig(file_path, bbox_inches='tight')
+
+    # Chiudi la figura appropriata
+    if hasattr(plot, 'gcf') and plot.__name__ == 'matplotlib.pyplot':
+        # Se 'plot' è il modulo plt
+        plt.close('all')
+    elif hasattr(plot, 'get_fignums'):
+        # Se 'plot' è una figura
+        plt.close(plot)
+    else:
+        # Chiudi la figura corrente
+        plt.close()
 
     return file_path
 
