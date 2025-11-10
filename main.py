@@ -7,11 +7,14 @@ Questo script consente di:
 - Analizzare il dataset pulito (`-u` o `--understanding`)
 - Fare entrambe le operazioni (`-c -u` oppure senza argomenti)
 - Opzionalmente generare scatterplot durante l'understanding (`-u -s`)
+- Opzionalmente generare istogrammi durante l'understanding (`-u -hi`)
 
 Esempi:
     python main.py -c
     python main.py -u
     python main.py -u -s
+    python main.py -u -hi
+    python main.py -u -hi -s
     python main.py -c -u
     python main.py      # esegue tutto
 """
