@@ -2,6 +2,10 @@
 *.aux
 *.pdf
 *.log
+*.toc
+*.out
+*.fls
+*.fdb_latexmk
 
 # Ignora il cleaned.csv per evitare conflitti nel versioning
 data/
