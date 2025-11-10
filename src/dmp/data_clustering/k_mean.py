@@ -105,6 +105,8 @@ def k_means_scatter(x_column, y_column, k, max_iters=5, **kwargs):
     # Rendo leggibili i dati delle colonne, ignorando una coppia quando uno dei due valori è nan
     x_data = []
     y_data = []
+    x_column = [float(x) for x in x_column]
+    y_column = [float(x) for x in x_column]
     for x, y in zip(x_column, y_column):
         if np.isnan(x) or np.isnan(y):
             continue

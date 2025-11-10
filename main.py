@@ -17,7 +17,6 @@ Esempi:
 """
 
 from pathlib import Path
-import subprocess
 from ast import literal_eval
 import argparse
 import pandas as pd
@@ -26,8 +25,8 @@ from dmp.utils import filter_columns
 from dmp.data_cleaning import clean_df
 from dmp.data_understanding import understand_df
 from dmp.data_preparation import prepare_df
-from dmp import config
-from dmp.config import VERBOSE
+from dmp.data_clustering import cluster_df
+from dmp.config import VERBOSE, set_verbose
 
 # 🎨 Colori ANSI per una stampa più leggibile
 class Colors:
@@ -108,6 +107,21 @@ def prepare_data(input_file: Path, output_file: Path, N_samples, descriptors, ve
     print(f"{Colors.YELLOW}💾 Salvataggio del dataset filtrato in:{Colors.RESET} {output_file}")
     prepared_df.to_csv(output_file, index=False)
 
+def cluster_data(input_file: Path, verbose: bool):
+    """Esegue la clusterizzazione di alcune colonne selezionate sul dataframe già pulite e filtrato"""
+
+    print(f"{Colors.BLUE}📊 Caricamento dataset pulito da:{Colors.RESET} {input_file}")
+    filtered_df = pd.read_csv(input_file, converters={"Ranks": literal_eval}) #Leggi direttamente la colonna "Ranks" come python list e non stringa
+
+    if verbose:
+        print(f"{Colors.CYAN}🔍 Avvio della clusterizzazione dei dati {Colors.RESET}")
+        cluster_data(filtered_df)
+    else:
+        with yaspin(text="🔍 Avvio della clusterizzazione dei dati ", color="cyan") as spinner:
+            cluster_df(filtered_df)
+            spinner.ok("✅")
+    print(f"{Colors.GREEN}📈 Clusterizzazione completata!{Colors.RESET}\n")  
+
 def hypno_toad():
     print(r"""
       ,'``.._   ,'``.
@@ -174,14 +188,19 @@ def main():
         help="GLORY TO THE HYPNO TOAD"
     )
     parser.add_argument(
-    "-d", "--descriptors",
-    nargs="+",                # accetta uno o più valori
-    help="Filtra il dataset per le righe che contengono uno o più descrittori nella colonna 'Description'"
+        "-d", "--descriptors",
+        nargs="+",                # accetta uno o più valori
+        help="Filtra il dataset per le righe che contengono uno o più descrittori nella colonna 'Description'"
+    )
+    parser.add_argument(
+        "-cl", "--clustering",
+        action="store_true",
+        help="Esegue il clutering di alcune colonne del DataFrame"
     )
 
     args = parser.parse_args()
 
-    config.set_verbose(args.verbose)
+    set_verbose(args.verbose)
 
     # Se non viene specificato nessuno dei tre step → esegui tutto
     if not args.cleaning and not args.understanding and not args.preparation:
@@ -209,6 +228,9 @@ def main():
 
     if args.preparation:
         prepare_data(filtered_output_file, prepared_output_file, args.preparation, args.descriptors, args.verbose)
+
+    if args.clustering:
+        cluster_data(filtered_output_file, args.verbose)
 
     print(f"{Colors.BOLD}🏁 Operazione completata!{Colors.RESET} ✅")
 

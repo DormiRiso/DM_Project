@@ -13,7 +13,6 @@ def save_figure(plot, title, folder="figures", extension=".png"):
     file_name = file_name.replace(" ", "_").lower() + extension
     file_path = os.path.join(folder, file_name)
     plot.savefig(file_path, bbox_inches='tight')
-    plot.close()
 
     return file_path
 
