@@ -177,7 +177,7 @@ def main():
     "-d", "--descriptors",
     nargs="+",                # accetta uno o più valori
     help="Filtra il dataset per le righe che contengono uno o più descrittori nella colonna 'Description'"
-)
+    )
 
     args = parser.parse_args()
 
@@ -187,14 +187,13 @@ def main():
     if not args.cleaning and not args.understanding and not args.preparation:
         args.cleaning = args.understanding = True
 
-
     # Percorsi base
     data_dir = Path("data")
     data_dir.mkdir(exist_ok=True)
     input_file = data_dir / "DM1_game_dataset.csv"
-    cleaned_output_file = data_dir / "cleaned_df.csv"
-    filtered_output_file = data_dir / "filtered_df.csv"
-    prepared_output_file = data_dir / "prepared_df.csv"
+    cleaned_output_file = data_dir / "cleaned_df.csv" # Percorso per dataset pulito
+    filtered_output_file = data_dir / "filtered_df.csv" # Percorso per dataset con rimozione outliers
+    prepared_output_file = data_dir / "prepared_df.csv" # Percorso per dataset con data prep
 
     print(f"{Colors.HEADER}{Colors.BOLD}🚀 Data Pipeline Avviata!{Colors.RESET}\n")
 
@@ -207,7 +206,7 @@ def main():
             print(f"{Colors.RED}❌ Errore: il file pulito non esiste. Esegui prima con -c o --cleaning.{Colors.RESET}")
             return
         understand_data(cleaned_output_file, filtered_output_file, args.scatters, args.hists, args.descriptors, args.verbose)
-    
+
     if args.preparation:
         prepare_data(filtered_output_file, prepared_output_file, args.preparation, args.descriptors, args.verbose)
 
@@ -218,4 +217,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
+
