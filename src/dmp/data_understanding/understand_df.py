@@ -4,6 +4,7 @@ from .couple_columns_understanding import generate_scatterplots, generate_correl
 from dmp.my_graphs import histo_box_grid
 from dmp.utils import filter_columns
 from .analysis_by_descriptors import filter_df_by_descriptors, make_safe_descriptor_name
+from .description_understanding import count_word_occurrences
 import os
 import pandas as pd
 
@@ -99,5 +100,8 @@ def understand_df(df_cleaned, df_filtered, do_scatters, do_hists, descriptors= N
                     title=f"Filtered Histo Boxplot Matrix ({desc_name})",summary=True, extra_info="Outliers rimossi")
 
         analizza_colonne_numeriche(df_cleaned, df_filtered, output_path, columns)
+
+    # Crea il bar plot per le parole più usate nella descrizione
+    _ = count_word_occurrences(df_cleaned, "Description", top_n=50)
 
     return True
