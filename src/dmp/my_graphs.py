@@ -19,7 +19,7 @@ def bar_graph(x_data, y_data, title: str, x_label: str, y_label:str, size: tuple
     Output: instanza di oggetto grafico di matplotlib
     """
     plt.figure(figsize=size)
-    plt.bar(x_data, y_data, color="skyblue", edgecolor="black")
+    plt.bar(x_data, y_data, edgecolor='black', alpha=0.7, align='center')
     plt.title(title)
     plt.xlabel(x_label)
     if log_scale:
@@ -46,7 +46,7 @@ def hist_graph(data, title: str, x_label: str, y_label:str, size: tuple=(8, 5), 
     """
 
     plt.figure(figsize=size)
-    plt.hist(data, bins="sturges", edgecolor='black', align='left')
+    plt.hist(data, bins="sturges", edgecolor='black', alpha=0.7, align='mid')
     plt.title(title)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
@@ -72,7 +72,7 @@ def draw_hist(ax, data, **kwargs):
     """
     if ax is None:
         fig, ax = plt.subplots()
-    n, bins_arr, patches = ax.hist(data, edgecolor='black', alpha=0.7, align='mid', **kwargs)
+    n, bins_arr, patches = ax.hist(data, edgecolor='black', alpha=0.7, align='mid', bins='sturges', **kwargs)
     return n, bins_arr, patches, ax
 
 
@@ -88,25 +88,37 @@ def box_plot(ax, data, horizontal=True, summary=False, extra_info="No dati rimos
     
     Output: 
     """
+    # sanitize input data: convert to numeric, coerce errors to NaN, drop missing
+    s = pd.to_numeric(pd.Series(data), errors='coerce')
+    clean = s.dropna().values
+
     if ax is None:
         fig, ax = plt.subplots()
-    bp = ax.boxplot(data, whis=[5,95], vert= not horizontal, medianprops=dict(color="red", linewidth=1.5), **kwargs)
 
-    # Aggiungi textbox con percentili se richiesto
+    # Draw boxplot using cleaned numeric values only
+    bp = ax.boxplot(clean if clean.size > 0 else [], whis=[5, 95], vert= not horizontal,
+                    medianprops=dict(color="red", linewidth=1.5), **kwargs)
+
+    # Aggiungi textbox con percentili se richiesto (use nan-aware percentile)
     if summary:
-        percentiles = np.percentile(data, [5, 25, 50, 75, 95])
-        pct_text_orig = (
-            f"Percentili:\n"
-            f"5%: {percentiles[0]:.2f}\n"
-            f"25%: {percentiles[1]:.2f}\n"
-            f"50%: {percentiles[2]:.2f}\n"
-            f"75%: {percentiles[3]:.2f}\n"
-            f"95%: {percentiles[4]:.2f}\n"
-            + str(extra_info)
-        )
+        if clean.size == 0:
+            pct_text_orig = "Percentili:\nNo numeric data"
+        else:
+            # use numpy.nanpercentile to be robust to any NaNs (shouldn't be any after dropna)
+            percentiles = np.nanpercentile(clean, [5, 25, 50, 75, 95])
+            pct_text_orig = (
+                f"Percentili:\n"
+                f"5%: {percentiles[0]:.2f}\n"
+                f"25%: {percentiles[1]:.2f}\n"
+                f"50%: {percentiles[2]:.2f}\n"
+                f"75%: {percentiles[3]:.2f}\n"
+                f"95%: {percentiles[4]:.2f}\n"
+                + str(extra_info)
+            )
+
         ax.text(0.98, 0.98, pct_text_orig, transform=ax.transAxes,
                 fontsize=9, va='top', ha='right', bbox=dict(facecolor='white', alpha=0.8))
-        
+
     return bp, ax
 
 def histo_box(ax, data,colonna, summary=False, extra_info="No dati rimossi"):
@@ -119,7 +131,7 @@ def histo_box(ax, data,colonna, summary=False, extra_info="No dati rimossi"):
     draw_hist(ax, data=data)
     ax.set_title(f'Istogramma di {colonna}')
     ax.grid(True, alpha=0.3)
-    ax.set_ylabel("Conteggi")
+    ax.set_ylabel("Occorrenze")
 
     ax_box=ax.twinx()
     ax_box.set_ylim(0, 1)
@@ -128,8 +140,19 @@ def histo_box(ax, data,colonna, summary=False, extra_info="No dati rimossi"):
     ax_box.get_yaxis().set_visible(False)
     return plt
 
-def histo_box_grid(df, columns=None, output_dir="figures/histograms", file_name = "histo_box_matrix", title= "Histo box grid"):
+def histo_box_grid(df, columns=None, output_dir="figures/histograms", file_name = "histo_box_matrix", title= "Histo box grid", summary=False, extra_info="No dati rimossi"):
+    """" Funzione per creare una griglia di istogrammi + boxplot per ogni colonna numerica del DataFrame
+    Input: 
+    df: pd.DataFrame contenente i dati
+    columns: lista di colonne numeriche da rappresentare. Se None usa tutte le colonne numer
+    output_dir: directory in cui salvare la figura
+    file_name: nome del file in cui salvare la figura
+    title: titolo della figura
+    summary: se True aggiunge una textbox con i percentili 5,25,50,75,95 in ogni boxplot
+    extra_info: Default: 'No dati rimossi'. Se vuoi aggiungere info alla textbox
 
+    Output: salva la figura in output_dir/file_name.png
+    """
     # Se colonna non è specificata, usa tutte le colonne numeriche
     if columns is None:
         df_numeric = df.select_dtypes(include=["number"])
@@ -151,7 +174,7 @@ def histo_box_grid(df, columns=None, output_dir="figures/histograms", file_name 
     axes = axes.flatten()
 
     for i in range(numfigs):
-        histo_box(axes[i], colonna=numeric_cols[i], data=df_numeric[numeric_cols[i]])
+        histo_box(axes[i], colonna=numeric_cols[i], data=df_numeric[numeric_cols[i]], summary=summary, extra_info=extra_info)
 
     # Rimuovi se la griglia non è piena
     for j in range(i + 1, len(axes)):

@@ -1,30 +1,369 @@
-\documentclass{article}
+\documentclass[12pt,twocolumn]{article}
+
 
 \usepackage[utf8]{inputenc}
+\usepackage{abstract}
+\usepackage{geometry}
+\usepackage{blindtext}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage[italian]{babel}
+\usepackage[colorlinks=true, linkcolor=black]{hyperref}
 
-\title{LaTeX Test Document}
-\author{Michelangelo Leoni}
+\graphicspath{ {./figures/} }
+
+\geometry{a4paper, top=2cm, bottom=2cm, left=2cm, right=2cm}
+\setlength{\absleftindent}{3cm}
+\setlength{\absrightindent}{3cm}
+
+\title{Data Mining: Fundamentals prima consegna}
+\author{Leonardo Amabile, Michelangelo Leoni, Jacopo Omodei}
 \date{\today}
+
 
 \begin{document}
 
-\maketitle
+\twocolumn[
+\maketitle % need full-width title
+\begin{onecolabstract}
+Perchè Jacopomo è un bot? Perchè è una busta e non odia Rugo, e tutti i miei felloni odiano Rugo. Michelangelo Bottacchioni se ti becco...
+\end{onecolabstract}
+]
 
-\section{Perchè Jacopomo è un bot?}
+\tableofcontents
 
-Perchè è una busta e non odia Rugo, e tutti i miei felloni odiano rugo. In ogni caso ecco un bel test:
+\section{Introduzione}
+\label{sec:intro}
 
-\subsection{Math example}
-Here is a simple equation:
-\[
-E = mc^2
-\]
+Il seguente progetto ha come obiettivo l'applicazione delle principali tecniche di analisi affrontate durante il corso \textit{Data Mining: Fundamentals}., utillizando un dataset (\textit{Board Game Geek (BGG)}) riguardante oltre 20{,}000  giochi da tavolo. Il dataset contiene la moltissima informazione per ogni gioco. 
+Nella seguente sezione andremo ad introdurre le variabili che si studieranno durante lo svolgimento del progetto.
 
-\subsection{List example}
-\begin{itemize}
-    \item ciccio
-    \item cicala
-    \item mandrake
-\end{itemize}
+\subsection{Semantica dei dati}
+\label{sec:semantica}
 
+Ogni riga del \textit{dataset} corrisponde a un gioco da tavolo, identificato univocamente dal suo codice identificativo (\textit{BGGId, int}) e dal suo nome (\textit{Name, str}). 
+Il campo \textit{Description} (\textit{str}) contiene una breve descrizione del gioco, fornita dalla comunità online di riferimento. 
+L’attributo \textit{YearPublished} (\textit{int}) indica l’anno di pubblicazione del gioco, che per certi giochi antichi viene stimato.
+
+\smallskip
+Le complessità del gioco è descritta da due variabili: \textit{GameWeight} e \textit{ComWeight} (\textit{float, intervallo 1--5}), che rappresentano rispettivamente la complessità stimata e quella votata dalla comunità. 
+Il numero di voti che hanno contribuito alla valutazione della complessità è fornito da \textit{NumWeightVotes} (\textit{int}). 
+Altri attributi legati alla fruibilità includono il numero minimo e massimo di giocatori (\textit{MinPlayers, MaxPlayers, int}), l’età minima consigliata dalla comunità (\textit{ComAgeRec, float}) e il livello di competenza linguistica richiesta (\textit{LanguageEase, float}). 
+
+\smallskip
+Le variabili \textit{BestPlayers} (\textit{int}) e \textit{GoodPlayers} (\textit{lista di interi}) sintetizzano le preferenze espresse dalla comunità riguardo ai numeri consigliati di giocatori (\textit{GoodPlayers}) o il numero ideale  (\textit{BestPlayers}) di giocatori per ciascun gioco. 
+Altre variabili descrivono la popolarità e la diffusione del gioco all’interno della piattaforma, come \textit{NumOwned}, \textit{NumWant} e \textit{NumWish} (\textit{int}), che indicano rispettivamente quanti utenti possiedono, desiderano o hanno aggiunto il gioco alla propria lista dei desideri.
+
+\smallskip
+Sono inoltre presenti variabili relative ai tempi di gioco: \textit{MfgPlayTime} (\textit{int}) rappresenta la durata media riportata dal produttore, mentre \textit{ComMinPlaytime} e \textit{ComMaxPlaytime} (\textit{int}) indicano le stime fornite dalla comunità. 
+L’età consigliata dal produttore è fornita da \textit{MfgAgeRec} (\textit{int}). 
+
+\smallskip
+Ulteriori informazioni quantitative riguardano l’attività della community: \textit{NumUserRatings} e \textit{NumComments} (\textit{int}) riportano rispettivamente il numero di valutazioni e commenti ricevuti, mentre \textit{NumAlternates}, \textit{NumExpansions} e \textit{NumImplementations} (\textit{int}) indicano il numero di versioni alternative, espansioni e implementazioni collegate al gioco. 
+Le variabili booleane \textit{IsReimplementation} e \textit{Kickstarted} (\textit{bool}) segnalano se il gioco rappresenta una reimplementazione di un altro titolo e se è stato finanziato tramite una campagna di \textit{crowdfunding}. 
+La variabile \textit{Family} (\textit{str}) indica invece la famiglia ludica di appartenenza, quando disponibile. Un \textit{ImagePath (str)} viene fornito per poter accedere alla foto del gioco.
+
+\smallskip
+I giochi inoltre vengono divisi in otto categorie:  (\textit{Thematic, Strategy, War, Family, CGS, Abstract, Party, Childrens}) e vengono anche classificati rispetto a tutti gli altri giochi in base alla categoria (\textit{Rank:strategygames}, \textit{Rank:abstracts}, \textit{Rank:familygames}, \textit{Rank:thematic}, \textit{Rank:cgs}, \textit{Rank:wargames}, \textit{Rank:partygames} e \textit{Rank:childrensgames}). 
+
+\smallskip
+Infine, la variabile \textit{Rating} (\textit{Low, Medium, High}) rappresenta una classificazione generale del punteggio complessivo assegnato al gioco dalla comunity, distinguendo tra valutazioni basse, medie e alte.
+
+\section{Preparazione e comprensione dei dati}
+
+Date tutte queste variabili, il primo passo per iniziare a individuare relazioni interessanti nei dati consiste nel pulire il \textit{dataset}, con l’obiettivo di renderlo coerente e di facilitare le operazioni successive. 
+Si è verificato che ogni colonna contenesse valori di un solo tipo, che la gestione degli zeri fosse corretta e che eventuali valori errati venissero eliminati. 
+Infine, sono state combinate alcune colonne e rimosse quelle non utili ai fini dello studio del presente \textit{dataset}.
+
+\subsection{Pulizia dei dati}
+\label{sec:pulizia}
+
+Come prima operazione, sono state eliminate le colonne \textit{ImagePath}, \textit{BGGId} e \textit{NumComments}, poiché non era di nostro interesse analizzare l’immagine del gioco, e il codice identificativo serviva unicamente a distinguere i giochi in modo univoco. 
+È stato osservato che in alcuni casi rari (circa 420 su 22{,}000) diversi giochi da tavolo presentavano lo stesso nome; in tali casi, l’identificativo numerico sarebbe stato necessario per distinguerli. 
+Tuttavia, poiché non si intende svolgere un’analisi sui singoli giochi, la presenza di questi duplicati non influisce sulla natura statistica dello studio, anche considerando che rappresentano meno del 2\% del \textit{dataset} complessivo.
+La colonna \textit{NumComments}, contenente esclusivamente zeri, e quidni è stata rimossa.
+
+\smallskip
+
+Successivamente, si è intervenuti sulle colonne numeriche, decidendo di utilizzare \textit{NaN} come valore identificativo per i dati mancanti. 
+Per le colonne in cui lo zero non è un valore ammesso dal dominio della variabile, tutti gli zeri e gli altri valori errati sono stati convertiti in \textit{NaN}. 
+Più precisamente, le variabili \textit{GameWeight} e \textit{ComWeight} sono definite nell’intervallo $[1,5]$; pertanto, qualsiasi valore esterno a tale dominio è stato sostituito con \textit{NaN}. 
+Le variabili \textit{ComAgeRec}, \textit{LanguageEase}, \textit{MfgPlaytime} e \textit{MfgAgeRec} possono assumere solo valori maggiori di zero, perciò gli zeri presenti sono stati sostituiti con \textit{NaN}.
+
+\smallskip
+
+Per le colonne \textit{MinPlayers}, \textit{MaxPlayers}, \textit{ComMinPlaytime} e \textit{ComMaxPlaytime}, è stato effettuato un controllo per verificare che il valore minimo fosse inferiore a quello massimo. In caso contrario, i due valori sono stati scambiati, e anche in questo caso gli zeri sono stati sostituiti con \textit{NaN}. 
+Si è inoltre verificato che tutti i valori della lista \textit{GoodPlayers} fossero compresi nell’intervallo definito da \textit{MinPlayers} e \textit{MaxPlayers}, e che \textit{BestPlayers} fosse contenuto all’interno della lista \textit{GoodPlayers}. 
+Ogni violazione di queste condizioni è stata sostituita con \textit{NaN}.
+
+\smallskip
+
+Le 16 colonne relative alle categorie e classificazioni dei giochi sono state condensate in una singola colonna vettoriale di lunghezza 8. 
+In sintesi, a ciascun gioco è stato assegnato un vettore che rappresenta la sua classificazione in ognuna delle otto categorie. 
+Se un gioco risultava classificato in posizione $21926$ (pari alla lunghezza del dataset), esso è stato considerato come non classificato e l’elemento corrispondente è stato posto a zero. Infatti, abbiamo verificato che ciò avviene solo quando un gioco non appartiene a quella categoria. 
+Per le categorie di appartenenza, invece, il valore del \textit{ranking} è stato inserito come elemento del vettore. 
+Questa strategia consente di considerare anche i giochi che appartengono a nessuna o a più categorie, senza perdita di generalità.
+
+\smallskip
+
+La colonna \textit{Description} è stata convertita in una lista di stringhe, separando parola per parola ed eliminando i duplicati. 
+Infine, la colonna \textit{Rating} è stata trasformata in una colonna contenente solo i valori $\{-1, 0, 1\}$, mappando direttamente \textit{Low $\rightarrow$ -1}, \textit{Medium $\rightarrow$ 0} e \textit{High $\rightarrow$ 1}.
+
+
+\subsection{Studio delle singole variabili}
+\label{sec:studio_singole}
+\subsubsection{Distribuzione delle colonne numeriche}
+\label{sec:histos}
+
+Come prima analisi, abbiamo studiato ciascun attributo numerico singolarmente, creando un istogramma per visualizzarne la distribuzione. 
+Utilizzando il criterio di \textit{Sturges} per determinare il \textit{binning}, ci siamo accorti che, per la maggior parte delle colonne numeriche, la presenza di pochi \textit{outlier} dominava il grafico, rendendo gli istogrammi poco leggibili e ostacolando l’analisi dei dati. 
+Per migliorare la qualità della visualizzazione, abbiamo deciso di calcolare i percentili ($5, 25, 50, 75, 95\%$) e di mantenere solo i dati compresi tra i percentili $5\%$ e $95\%$. 
+Questo metodo si basa sulla tecnica dello \textit{scarto interquantile}, che rappresenta una statistica robusta rispetto agli \textit{outlier} per distribuzioni sufficientemente popolate, come nel nostro caso. 
+
+Un esempio di distribuzione prima e dopo questa pulizia è mostrato in figura \ref{fig:histo_YearPublished}, dove nella colonna \textit{YearPublished} sono stati rimossi tutti i giochi pubblicati prima del $1978$ e dopo il $2020$, considerati \textit{outlier} secondo questa metrica. 
+Solo il $7.88\%$ dei dati è stato rimosso, ma la leggibilità della distribuzione è migliorata in modo significativo. 
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{/histograms/all_data/analisi_singola_yearpublished.png}
+	\centering
+	\caption{Distribuzione della colonna \textit{YearPublished} prima e dopo la rimozione degli \textit{outlier} (considerando solo i valori compresi tra i percentili $5\%$ e $95\%$). Il \textit{binning} è stato scelto utilizzando il criterio di \textit{Sturges}.}
+	\label{fig:histo_YearPublished}
+\end{figure}
+
+Abbiamo svolto un’analisi analoga per tutte le colonne numeriche, creando un \textit{box plot} sovrapposto a un istogramma per i dati originali e ripetendo la procedura per i dati filtrati secondo il criterio descritto in precedenza (mantenendo solo i valori tra i percentili $5\%$ e $95\%$). 
+La figura \ref{fig:histo_box_not_cleaned} riporta tutti gli istogrammi generati utilizzando i dati grezzi, mentre la figura \ref{fig:histo_box_cleaned} mostra gli stessi istogrammi dopo la pulizia applicata con il metodo discusso.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{/histograms/all_data/Histogram_Matrix_all_data_unfiltered.png}
+	\centering
+	\caption{Distribuzioni delle variabili numeriche senza alcuna filtratura sul \textit{dataset} pulito. 
+	La visualizzazione è ottenuta tramite istogrammi sovrapposti a \textit{box plot}. 
+	I percentili corrispondono al $5, 25, 50, 75, 95\%$ dei dati originali. 
+	Il \textit{binning} è stato determinato utilizzando il criterio di \textit{Sturges}.}
+	\label{fig:histo_box_not_cleaned}
+\end{figure}
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{/histograms/all_data/Histogram_Matrix_all_data_filtered.png}
+	\centering
+	\caption{Distribuzioni delle variabili singole dopo la rimozione degli \textit{outlier} (considerando solo i valori compresi tra i percentili $5\%$ e $95\%$). La visualizzazione è ottenuta tramite istogrammi sovrapposti a \textit{box plot}. I percentili corrispondono al $5, 25, 50, 75, 95\%$ dei dati filtrati. Il \textit{binning} è stato determinato utilizzando il criterio di \textit{Sturges}.}
+	\label{fig:histo_box_cleaned}
+\end{figure}
+
+Si osserva che la maggior parte delle distribuzioni presenta una forte asimmetria verso valori bassi, con un picco concentrato in prossimità del minimo. 
+Più precisamente, i giochi più semplici (sia in termini di complessità del gioco sia di linguaggio) e con una durata più breve risultano più frequenti. 
+Inoltre, i giochi che prevedono un numero ridotto di partecipanti (tipicamente da 2 a 4 giocatori) sono i più comuni, pur rimanendo superiori a uno, quindi non si tratta di giochi solitari. 
+Questo suggerisce che, nel mondo dei giochi da tavolo, vengono prodotti più frequentemente titoli semplici e accessibili, che richiedono un numero relativamente basso di giocatori per essere apprezzati. 
+Si nota inoltre che la maggior parte dei giochi è destinata a un pubblico di ragazzi tra gli 8 e i 12 anni.
+
+\smallskip
+Negli ultimi anni si osserva una crescita significativa del numero di giochi presenti nel \textit{dataset}, indicando che l’industria continua a espandersi. 
+Nel 2020, tuttavia, si registra un calo rispetto all’anno precedente, probabilmente dovuto all’impatto della quarantena. 
+
+\smallskip
+Per quanto riguarda le colonne \textit{booleane}, si nota che la maggior parte dei giochi non presenta implementazioni, versioni alternative o espansioni, e non è stata finanziata tramite campagne di \textit{crowdfunding}.  
+Inoltre, la maggior parte dei giochi risulta posseduta da meno di mille persone (secondo i dati riportati nel \textit{dataset}). 
+Le variabili legate all’\textit{engagement} degli utenti sul sito mostrano distribuzioni fortemente asimmetriche verso zero: \textit{NumWant}, \textit{NumWish} e \textit{NumWeightVotes} seguono tutte questo andamento, con la maggior parte dei valori inferiori al centinaio. 
+
+Bisogna tenere conto del fatto che noi possiamo solo trarre conclusioni sui dati che abbiamo, e che il \textit{dataset} non è necessariamente descrittivo della realtà in maniera completa. Tuttavia, con questi dati si riescono comunque a trovare degli andamenti interessanti nelle singole colonne numeriche. 
+
+\subsubsection{Distribuzione delle categorie}
+\label{sec:categorie}
+
+Abbiamo effettuato anche uno studio completo delle categorie dei giochi. 
+Come prima analisi, abbiamo verificato quanti giochi appartengono a più di una categoria e quante categorie sono coinvolte in media. 
+Questa informazione è riportata in figura \ref{fig:num_cats}, dove si osserva che la maggior parte dei giochi non è categorizzata oppure appartiene solo a una o due categorie.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{/category_figures/distribuzione_del_numero_di_categorie_per_gioco.png}
+	\centering
+	\caption{Numero di categorie a cui appartiene ogni gioco, in scala logaritmica. Ogni gioco è stato contato una sola volta, indipendentemente dal numero di categorie al quale apparteneva.}
+	\label{fig:num_cats}
+\end{figure}
+
+Abbiamo inoltre analizzato la distribuzione delle singole categorie, contando quante volte ciascuna compare nel \textit{dataset}. 
+I risultati sono mostrati in figura \ref{fig:distr_cats}. 
+Si nota immediatamente che i giochi di guerra sono i più comuni, seguiti da quelli di strategia e da quelli di famiglia.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{/category_figures/distribuzione_delle_categorie.png}
+	\centering
+	\caption{Distribuzione delle categorie di classificazione dei giochi.}
+	\label{fig:distr_cats}
+\end{figure}
+
+Successivamente, abbiamo studiato la distribuzione delle categorie prese a coppie. 
+Ci siamo chiesti se esistesse una correlazione tra le categorie per i giochi che appartengono contemporaneamente a due di esse. 
+Abbiamo quindi creato una \textit{heatmap} che visualizza il numero di co-occorrenze per ogni possibile coppia di categorie, mostrata in figura \ref{fig:heatmap_cats}. 
+In questa figura, la diagonale rappresenta il numero totale di giochi appartenenti a ciascuna categoria singola, mentre gli elementi fuoir diagonale indicano il numero di giochi che condividono entrambe le categorie. 
+La scala dei colori è stata impostata su base logaritmica, poiché i dati coprono diversi ordini di grandezza.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{/category_figures/category_couples_heatmap.png}
+	\centering
+	\caption{Occorrenze delle varie coppie di categorie per i giochi appartenenti a due categorie. 
+	La diagonale rappresenta il numero di occorrenze della singola categoria. 
+	La scala dei colori è logaritmica.}
+	\label{fig:heatmap_cats}
+\end{figure}
+
+La figura \ref{fig:heatmap_cats} mostra solo il numero assoluto di co-occorrenze per ciascuna coppia; tuttavia, le categorie più popolose singolarmente (come \textit{war}, \textit{strategy} e \textit{family}) tendono naturalmente ad avere anche più co-occorrenze. 
+Per tenere conto di questo effetto, abbiamo introdotto un fattore di normalizzazione definito come
+
+\begin{equation}
+	\centering
+	M_{i,j}^\prime = \frac{M_{i,j}}{\sqrt{M_{i,i}\cdot M_{j,j}}}
+	\label{eq:norm_cat}
+\end{equation}
+
+dove ogni elemento della matrice è normalizzato in base al numero di occorrenze delle categorie singole. 
+Per costruzione, l’equazione (\ref{eq:norm_cat}) impone che la diagonale valga 1, mentre tutti gli elementi fuori diagonale risultino compresi normalizzati nell’intervallo $[0,1]$. 
+La \textit{heatmap} normalizzata è mostrata in figura \ref{fig:heatmap_cats_norm}, dove la diagonale è stata eliminata (posta uguale a zero) per mettere in risalto i valori non banali.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{/category_figures/category_couples_heatmap_norm.png}
+	\centering
+	\caption{Co-occorrenze normalizzate delle varie coppie di categorie per i giochi appartenenti a due categorie, secondo l’equazione (\ref{eq:norm_cat}). 
+	La diagonale è stata posta uguale a zero per chiarezza. 
+	I valori fuori diagonale perdono significatività dopo la normalizzazione e sono stati quindi omessi.}
+	\label{fig:heatmap_cats_norm}
+\end{figure}
+
+Dalla figura \ref{fig:heatmap_cats_norm} si osserva che la coppia \textit{strategy–family} rimane la più frequente, ma ora è evidente che ciò non è dovuto unicamente all’elevata numerosità delle due categorie. 
+Si nota inoltre che, mentre nel conteggio grezzo le coppie \textit{family–party} e \textit{thematic–war} presentavano quasi lo stesso numero di co-occorrenze ($156$ e $157$ rispettivamente), la coppia \textit{family–party} risulta più correlata una volta tenuto conto del numero molto elevato di giochi di guerra presenti nel \textit{dataset}. 
+
+\smallskip
+Non abbiamo analizzato le co-occorrenze tra tre o più categorie poiché un numero trascurabile di giochi appartiene contemporaneamente a tre categorie, come già mostrato in figura \ref{fig:num_cats}. 
+
+\smallskip
+Nel complesso, le figure \ref{fig:num_cats}, \ref{fig:distr_cats}, \ref{fig:heatmap_cats} e \ref{fig:heatmap_cats_norm} forniscono un quadro completo della distribuzione e delle correlazioni tra le categorie dei giochi da tavolo.
+
+\subsubsection{Distribuzione delle descrizioni}
+\label{sec:distro_descriz}
+SINGOLE COLONNE DESCRIPTION PLOT DI MICHI QUELLO VERDE PLEASE
+
+\subsection{Studio delle variabili a coppia}
+\label{sec:coppie}
+Avendo studiato gli attributi dei giochi singolarmente, il prossimo passo nella nostra comprensione del \textit{dataset} è di analizzare le colonne numeriche due a due, generando vari \textit{scatterplots} e matrici di correlazione per identificare pattern che ci potrebbero essere sfuggiti nell'analisi precedente. 
+
+\subsubsection{Visualizzazione delle coppie di variabili}
+\label{sec:scatters}
+
+Come primo passo, abbiamo generato un insieme di \textit{scatterplot} per alcune colonne numeriche. 
+Abbiamo escluso le variabili \textit{booleane}, come \textit{IsReimplementation}, \textit{Kickstarted} e \textit{Rating}, e quelle con varianza molto bassa, come \textit{MinPlayers}, \textit{MaxPlayers}, \textit{BestPlayers}, \textit{GoodPlayers}, \textit{NumImplementations}, \textit{NumExpansions}, \textit{NumAlternates} e \textit{NumWeightVotes}. 
+Queste colonne, assumendo pochi valori discreti, non sono adatte a essere rappresentate tramite \textit{scatterplot}; pertanto, per ridurre la dimensione dell’insieme di grafici, non sono state confrontate con le altre. 
+La figura \ref{fig:scatter_unfiltered} mostra tutte le coppie tra le variabili numeriche rimanenti, considerando ciascuna combinazione una sola volta.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{/scatterplots/all_data/Scatterplots_all_data_unfiltered}
+	\centering
+	\caption{\textit{Scatterplot} delle variabili numeriche di interesse. 
+	I dati non sono stati filtrati in alcun modo e ogni coppia compare una sola volta.}
+	\label{fig:scatter_unfiltered}
+\end{figure}
+
+Utilizzando lo stesso criterio di pulizia dei dati discusso nella sezione \ref{sec:histos} (basato sulla rimozione dei valori al di fuori dei percentili $5\%$ e $95\%$), abbiamo generato un secondo insieme di \textit{scatterplot} utilizzando i dati depurati dagli \textit{outlier}. 
+Questo consente di visualizzare meglio le zone più dense e centrali delle distribuzioni, come mostrato in figura \ref{fig:scatter_filtered}.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{/scatterplots/all_data/Scatterplots_all_data_filtered}
+	\centering
+	\caption{\textit{Scatterplot} delle variabili numeriche di interesse. 
+	I dati sono stati filtrati rimuovendo i valori al di fuori dei percentili più esterni ($5\%$ e $95\%$). 
+	Ogni coppia compare una sola volta.}
+	\label{fig:scatter_filtered}
+\end{figure}
+
+La maggior parte delle coppie di variabili risulta distribuita in modo apparentemente scorrelato, con punti distribuiti uniformemente sul piano. 
+Alcune coppie, tuttavia, mostrano una chiara correlazione positiva, evidenziata da un andamento lineare nei rispettivi \textit{scatterplot}. 
+Queste correlazioni verranno discusse più nel dettaglio nella prossima sezione (\ref{sec:correlazioni}), ma già da ora si può osservare una correlazione quasi 1:1 tra \textit{ComWeight} e \textit{GameWeight}.
+
+\subsubsection{Correlazione tra coppie di variabili}
+\label{sec:correlazioni}
+
+Per approfondire quanto osservato nella sezione precedente, abbiamo creato una \textit{heatmap} basata sull’indice di correlazione di Pearson tra le variabili considerate. 
+Il criterio di selezione delle colonne numeriche è lo stesso adottato nella sezione \ref{sec:scatters}. 
+La \textit{heatmap} di correlazione è mostrata in figura \ref{fig:heatmap_corr}.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{/heatmaps/correlation_heatmap_unfiltered.png}
+	\centering
+	\caption{Matrice di correlazione tra le colonne numeriche analizzate. 
+	I dati non sono stati filtrati in alcun modo.}
+	\label{fig:heatmap_corr}
+\end{figure}
+
+Come di consueto, abbiamo applicato il nostro criterio di filtraggio basato sulla tecnica descritta nelle sezioni precedenti, e il risultato della pulizia è riportato in figura \ref{fig:heatmap_corr_filt}.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{/heatmaps/correlation_heatmap_filtered.png}
+	\centering
+	\caption{Matrice di correlazione tra le colonne numeriche analizzate. 
+	I dati sono stati filtrati rimuovendo i valori al di fuori dei percentili più esterni ($5\%$ e $95\%$).}
+	\label{fig:heatmap_corr_filt}
+\end{figure}
+
+Come anticipato, la correlazione tra \textit{ComWeight} e \textit{GameWeight} risulta massima nell’indice di Pearson. 
+Questo risultato non sorprende, poiché entrambe le variabili rappresentano due stime della stessa misura e sono quindi strettamente correlate. 
+Di conseguenza, qualsiasi variabile correlata a una di esse risulterà correlata anche all’altra nello stesso modo.
+
+\smallskip 
+Un comportamento analogo si osserva tra \textit{ComAgeRec} e \textit{MfgAgeRec}, che rappresentano rispettivamente l’età consigliata dalla comunità e quella proposta dal produttore; anche in questo caso la correlazione è praticamente 1:1. 
+
+Le variabili \textit{NumUserRatings} e \textit{NumOwned} sono fortemente correlate, poiché un utente può lasciare una valutazione solo per un gioco che possiede. 
+Analogamente, \textit{NumWish} e \textit{NumWant} risultano strettamente correlate, in quanto entrambe misurano l’interesse dell’utenza verso un gioco. 
+
+Infine, \textit{ComMaxPlaytime} e \textit{MfgPlaytime} sono anch’esse fortemente correlate, suggerendo che i produttori tendono a utilizzare il tempo massimo di gioco stimato dalla comunità come riferimento per la durata indicata ufficialmente.
+
+\smallskip
+In tutti questi casi, le correlazioni derivano dal fatto che le variabili rappresentano misure equivalenti o strettamente connesse dello stesso concetto. 
+Pertanto, ai fini dell’analisi, tali variabili possono essere considerate ridondanti. 
+Per ridurre la dimensionalità e mettere meglio in evidenza le altre relazioni, abbiamo rimosso le variabili \textit{ComWeight}, \textit{ComAgeRec}, \textit{NumUserRatings}, \textit{MfgPlaytime} e \textit{NumWish}. 
+La nuova matrice di correlazione è riportata in figura \ref{fig:heatmap_corr_filt_dim}.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{/heatmaps/correlation_heatmap_filtered_diminished.png}
+	\centering
+	\caption{Matrice di correlazione tra le colonne numeriche analizzate, dopo la rimozione di una variabile per ciascuna coppia correlata 1:1. 
+	I dati sono stati filtrati rimuovendo i valori al di fuori dei percentili più esterni ($5\%$ e $95\%$).}
+	\label{fig:heatmap_corr_filt_dim}
+\end{figure}
+
+Dopo la pulizia del \textit{dataset}, emergono nuove correlazioni precedentemente nascoste dagli \textit{outlier}. 
+Ad esempio, si osserva una relazione positiva tra la complessità del gioco, il tempo di gioco e l’età consigliata. 
+Questo risultato è intuitivo: i giochi più complessi tendono a richiedere più tempo e sono destinati a un pubblico più maturo. 
+Di conseguenza, si evidenzia una correlazione diretta tra età e durata del gioco.
+
+Anche il tempo minimo e quello massimo di gioco risultano fortemente correlati: per definizione il tempo massimo deve essere maggiore del minimo, ma l’intensità della correlazione suggerisce che i giochi più lunghi presentano in generale tempi elevati in entrambe le misure.
+
+Infine, il numero di utenti che desiderano un gioco (\textit{NumWant}) è positivamente correlato con il numero di utenti che lo possiedono (\textit{NumOwned}). 
+
+\smallskip
+Queste ultime correlazioni, pur non essendo perfettamente 1:1, forniscono comunque informazioni utili sulla struttura del \textit{dataset}. 
+Esse mostrano, ad esempio, come alcuni valori riportati dai produttori riflettano direttamente le stime fornite dalla comunità - come nel caso del tempo di gioco indicato, fortemente correlato con il tempo massimo riportato dagli utenti - e come diversi indicatori di popolarità descrivano aspetti complementari dello stesso fenomeno.
+
+
+
+
+
+
+
+\subsection{Preparazione finale dei dati}
+\label{sec:prep}
+
+\section{Clustering}
+\label{sec:clustering}
+
+Cazzo merda cazzo mancano 5 giorni e non abbiamo ancora iniziato questa parte LOCK IN
+\subsection{Density-based}
+\label{sec:density}
+
+\subsection{Centroid-based}
+\label{sec:centroid}
+
+\subsection{Hierarchical clustering}
+\label{sec:hierarchical}
+
+\section{Conclusioni}
+Ma raga una bibliografia? Non si è usato niente se non i nostri cervelloni, mamma mia che bravi
 \end{document}
