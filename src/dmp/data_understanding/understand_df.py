@@ -102,6 +102,6 @@ def understand_df(df_cleaned, df_filtered, do_scatters, do_hists, descriptors= N
         analizza_colonne_numeriche(df_cleaned, df_filtered, output_path, columns)
 
     # Crea il bar plot per le parole più usate nella descrizione
-    _ = count_word_occurrences(df_cleaned, "Description", top_n=50)
+    _ = count_word_occurrences(df_cleaned, "Description", top_n=25)
 
     return True
