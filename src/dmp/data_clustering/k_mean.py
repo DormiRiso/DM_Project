@@ -106,7 +106,7 @@ def k_means_scatter(x_column, y_column, k, max_iters=5, **kwargs):
     x_data = []
     y_data = []
     x_column = [float(x) for x in x_column]
-    y_column = [float(x) for x in x_column]
+    y_column = [float(x) for x in y_column]
     for x, y in zip(x_column, y_column):
         if np.isnan(x) or np.isnan(y):
             continue
