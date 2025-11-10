@@ -52,8 +52,8 @@ def prepare_df(df, N_samples, descriptors):
     output_path = f"figures/sampling/{desc_name}"
 
     # Sampling delle rows
-    #df_prepared = sample_df(df, N_samples, "random", "MfgPlaytime",  output_dir= output_path + "_random")
-    df_prepared = sample_df(df, N_samples, method ="distribution", colonna ="MfgPlaytime", output_dir= output_path+"_distribution")
+    df_prepared = sample_df(df, N_samples, "random", "MfgPlaytime",  output_dir= output_path + "_random")
+    #df_prepared = sample_df(df, N_samples, method ="distribution", colonna ="MfgPlaytime", output_dir= output_path+"_distribution")
 
     #Creazione della colonna Weighted_Ratings seguendo l'algoritmo di IMDB e Stem
     df_prepared = add_weighted_rating(df_prepared, rating_col='Rating', votes_col='NumUserRatings', new_col='WeightedRating')
