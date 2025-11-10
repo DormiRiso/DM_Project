@@ -20,7 +20,6 @@ def filter_df_by_descriptors(df, descriptors, column="Description"):
     
     return df[mask]
 
-
 # Utility per creare un nome sicuro di cartella
 def make_safe_descriptor_name(descriptors):
     if descriptors is None:
@@ -32,7 +31,3 @@ def make_safe_descriptor_name(descriptors):
     # Rimuovi caratteri non alfanumerici o spazi
     name = re.sub(r'[^a-zA-Z0-9_-]', '', name)
     return name or "filtered"
-
-
-
-
