@@ -1,7 +1,7 @@
 from .k_mean import k_means_scatter, sse_vs_k
 from dmp.config import VERBOSE
 from dmp.utils import save_figure
-from sklearn.cluster import DBSCAN
+#from sklearn.cluster import DBSCAN
 
 def cluster_df(df):
     """Funzione che esegue la clusterizzazione dei dati
