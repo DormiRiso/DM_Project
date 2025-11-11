@@ -1,13 +1,13 @@
 from .k_mean import k_means_scatter, sse_vs_k
 from dmp.config import VERBOSE
 from dmp.utils import save_figure
-import matplotlib.pyplot as plt
+from sklearn.cluster import DBSCAN
 
 def cluster_df(df):
     """Funzione che esegue la clusterizzazione dei dati
     """
 
-    # Applico il k-means e plot a più combinazioni di colonne del dataset:
+    # Applico il k-means, sse vs k e dbscan a più combinazioni di colonne del dataset:
     x_columns = ["ComAgeRec", "MfgPlaytime", "GameWeight"]
     y_columns = ["GameWeight", "LanguageEase", "LanguageEase"]
     k_list = [5, 5, 5]
@@ -21,3 +21,4 @@ def cluster_df(df):
         file_path = save_figure(plt2, f'sse_vs_k_{x_column}_vs_{y_column}', folder="figures/clustered_scatters", extension=".png")
         if VERBOSE:
             print(f'Plot SSE vs k salvato in: {file_path}')
+

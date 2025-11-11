@@ -32,3 +32,10 @@ TODO:
         - Heatmap nxn di min vs max players
             - Pensare come inserire anche info su best e good players vicino
         - Heatmap nxn di min vs max playtime
+
+# Michelangelo:
+
+## Clustering:
+
+    - Implementa DBSCAN e hierarchical clustering
+    - Tornare indietro e produrre tutti i grafici come su notebook lezione lab
