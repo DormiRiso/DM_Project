@@ -60,7 +60,7 @@ def k_means(x_data, y_data, k, max_iters=5):
         raise ValueError("La lunghezza delle due liste di valori non corriponde, impossibile eseguire il k-means")
 
     if not (len(x_data) and len(y_data)):
-        raise ValueError("Una delle liste di valori è vuota")
+        raise ValueError(f"Una delle liste {x_data} e {y_data} di valori è vuota. ")
 
     n_points = len(x_data)
     k = min(k, n_points) # Evita di avere più centroidi che punti

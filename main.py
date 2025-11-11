@@ -97,10 +97,10 @@ def prepare_data(input_file: Path, output_file: Path, N_samples, descriptors, ve
 
     if verbose:
         print(f"{Colors.CYAN}🔍 Avvio della preparazione dei dati {Colors.RESET}")
-        prepared_df = prepare_df(filtered_df, N_samples, descriptors)
+        prepared_df = prepare_df(filtered_df, N_samples, descriptors, hists=True)
     else:
         with yaspin(text="🔍 Avvio della preparazione dei dati ", color="cyan") as spinner:
-            prepared_df = prepare_df(filtered_df, N_samples, descriptors)
+            prepared_df = prepare_df(filtered_df, N_samples, descriptors, hists=True)
             spinner.ok("✅")
     print(f"{Colors.GREEN}📈 Preparazione completata!{Colors.RESET}\n")  
     
@@ -205,7 +205,7 @@ def main():
     set_verbose(args.verbose)
 
     # Se non viene specificato nessuno dei tre step → esegui tutto
-    if not args.cleaning and not args.understanding:
+    if not args.cleaning and not args.understanding and not args.clustering:
         args.cleaning = args.understanding = True
 
     # Percorsi base
@@ -234,7 +234,7 @@ def main():
 
 
     if args.clustering:
-        cluster_data(filtered_output_file, args.verbose)
+        cluster_data(prepared_output_file, args.verbose)
 
     print(f"{Colors.BOLD}🏁 Operazione completata!{Colors.RESET} ✅")
 

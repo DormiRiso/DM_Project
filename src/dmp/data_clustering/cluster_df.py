@@ -8,8 +8,8 @@ def cluster_df(df):
     """
 
     # Applico il k-means e plot a più combinazioni di colonne del dataset:
-    x_columns = ["GameWeight", "LanguageEase", "GameWeight"]
-    y_columns = ["ComWeight", "NumOwned", "LanguageEase"]
+    x_columns = ["ComAgeRec", "MfgPlaytime", "GameWeight"]
+    y_columns = ["GameWeight", "LanguageEase", "LanguageEase"]
     k_list = [5, 5, 5]
     for x_column, y_column, k in zip(x_columns, y_columns, k_list):
         plt1 = k_means_scatter(df[x_column], df[y_column], k, max_iters=5, x_label=x_column, y_label=y_column)

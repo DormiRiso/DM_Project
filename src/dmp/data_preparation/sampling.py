@@ -47,13 +47,43 @@ def distributed_sampling(df: pd.DataFrame, colonna: str, n: int, bins: int = 10,
     campione_idx = np.random.choice(df.index, size=n, replace=False, p=pesi.values)
     return df.loc[campione_idx].reset_index(drop=True)
 
+def descriptor_weighted_sampling(df: pd.DataFrame, descriptors: list, N: int, seed: int = 42) -> pd.DataFrame:
+    """
+    Campionamento ponderato basato sui descrittori.
+    La probabilità di selezionare una riga è proporzionale al numero di descrittori presenti nella riga.
+    """
+    import numpy as np
+
+    if not descriptors:
+        return df.sample(n=N, random_state=seed).reset_index(drop=True)
+
+    # Conta quante volte ciascun descrittore è presente in ogni riga
+    def count_matches(row):
+        # Assumiamo che row['Description'] sia un set o lista
+        return sum(1 for d in descriptors if d in row)
+
+    pesi = df['Description'].apply(count_matches).astype(float)
+
+    # Se tutte le righe hanno peso zero, fallback a campionamento casuale
+    if pesi.sum() == 0:
+        print("⚠️ Nessuna riga contiene i descrittori, sampling casuale eseguito.")
+        return df.sample(n=N, random_state=seed).reset_index(drop=True)
+
+    # Normalizza i pesi in probabilità
+    pesi /= pesi.sum()
+
+    # Campiona le righe in base ai pesi
+    np.random.seed(seed)
+    sample_idx = np.random.choice(df.index, size=N, replace=False, p=pesi.values)
+    return df.loc[sample_idx].reset_index(drop=True)
+
 
 def sample_df(df: pd.DataFrame, 
               N: int, 
               method: str, 
-              colonna: str, 
+              colonna: str = None, 
               bins: int = None, 
-              seed: int = None, 
+              seed: int = 42, 
               valutation: bool = True, 
               descriptors: list = None,
               plot: bool = True,
@@ -86,17 +116,24 @@ def sample_df(df: pd.DataFrame,
         bins = int(np.log2(len(df)) + 1)
 
     # --- Campionamento ---
-    df_clean = df.dropna(subset=[colonna]).copy()
     if method == "random":
-        sample = random_sampling(df_clean, N)
+        sample = random_sampling(df, N, seed)
     elif method == "distribution":
-        sample = distributed_sampling(df_clean, colonna, N, bins)
+        if colonna is None:
+            raise ValueError("Per 'distribution' devi fornire la colonna numerica")
+        sample = distributed_sampling(df, colonna, N, bins, seed)
+    elif method == "descriptors":
+        if descriptors is None or len(descriptors) == 0:
+            raise ValueError("Per 'descriptor_distribution' devi fornire almeno un descrittore")
+        sample = descriptor_weighted_sampling(df, descriptors, N, seed)
     else:
-        raise ValueError("❌ Metodo non riconosciuto. Usa 'random' o 'distribution'.")
+        raise ValueError("Metodo non riconosciuto. Usa 'random', 'distribution' o 'descriptor_distribution'.")
+
 
     # --- Valutazione ---
-    if valutation:
-        print(f"\nℹ Numero righe iniziale: {len(df)}, numero righe campione: {len(sample)}\n")
+    if valutation and colonna is not None:
+        x_originale = df[colonna].dropna()
+        x_sample = sample[colonna].dropna()
 
         def stats(x):
             return {
@@ -110,9 +147,6 @@ def sample_df(df: pd.DataFrame,
                 'p100': np.percentile(x, 100)
             }
 
-        x_originale = df[colonna].dropna()
-        x_sample = sample[colonna].dropna()
-
         stats_originale = stats(x_originale)
         stats_sample = stats(x_sample)
 
@@ -121,7 +155,7 @@ def sample_df(df: pd.DataFrame,
         print(confronto.round(4))
 
     # --- Creazione istogrammi ---
-    if plot:
+    if plot and colonna is not None:
         os.makedirs(output_dir, exist_ok=True)
 
         plt.figure(figsize=(12,5))
