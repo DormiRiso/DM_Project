@@ -9,6 +9,7 @@
 \usepackage{graphicx}
 \usepackage[italian]{babel}
 \usepackage[colorlinks=true, linkcolor=black]{hyperref}
+\usepackage{amsmath}
 
 \graphicspath{ {./figures/} }
 
@@ -240,7 +241,17 @@ Nel complesso, le figure \ref{fig:num_cats}, \ref{fig:distr_cats}, \ref{fig:heat
 
 \subsubsection{Distribuzione delle descrizioni}
 \label{sec:distro_descriz}
-SINGOLE COLONNE DESCRIPTION PLOT DI MICHI QUELLO VERDE PLEASE
+Infine, abbiamo studiato la distribuzione delle descrizioni dei giochi. Dopo aver convertito ogni colonna in una lista di stringhe, e assicurandoci che ogni parola comparisse una sola volta per lista, abbiamo creato un grafico a barre per visualizzare le occorrenze delle parole singole. Questo grafico si vede in figura \ref{fig:top_words}.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{/top_words/occorrenza_delle_parole_più_usate_nelle_descrizioni.png}
+	\centering
+	\caption{Grafico a barre delle occorrenze delle singole parole nella colonna \textit{Descriptions} del dataset.
+Ci siamo assicurarti di eliminare le occorrenze doppie delle parole.}
+	\label{fig:top_words}
+\end{figure}
+
+Non ci sorprende che le parole più comuni nelle descrizioni sono "game", "player", "win", "turn", e altre parole simili che si riferiscono ad un gioco in generale.
 
 \subsection{Studio delle variabili a coppia}
 \label{sec:coppie}
@@ -341,15 +352,58 @@ Infine, il numero di utenti che desiderano un gioco (\textit{NumWant}) è positi
 \smallskip
 Queste ultime correlazioni, pur non essendo perfettamente 1:1, forniscono comunque informazioni utili sulla struttura del \textit{dataset}. 
 Esse mostrano, ad esempio, come alcuni valori riportati dai produttori riflettano direttamente le stime fornite dalla comunità - come nel caso del tempo di gioco indicato, fortemente correlato con il tempo massimo riportato dagli utenti - e come diversi indicatori di popolarità descrivano aspetti complementari dello stesso fenomeno.
-
-
-
-
-
-
-
 \subsection{Preparazione finale dei dati}
 \label{sec:prep}
+
+Ora che abbiamo compreso il comportamento generale dei dati, vogliamo intervenire sul \textit{dataset} per renderlo più leggero, coerente e analizzabile. 
+Sono state quindi applicate tecniche di aggregazione per ridurre il numero di colonne, di \textit{sampling} per diminuire il numero di righe e trasformazioni di variabili per migliorarne la compatibilità e l’interpretabilità.
+
+\smallskip
+
+L’intero \textit{dataset} è stato filtrato rimuovendo, da ogni colonna numerica, i valori considerati \textit{outlier}, utilizzando il consueto metodo di selezione: sono stati eliminati tutti i valori al di fuori dei percentili $5\%$ e $95\%$.
+
+\subsubsection{Aggregazione dei dati}
+\label{sec:aggr}
+
+Come primo passo nella fase di preparazione finale del \textit{dataset}, abbiamo utilizzato i risultati ottenuti nella sezione \ref{sec:correlazioni} per identificare quali attributi fossero ridondanti in base alla loro correlazione reciproca. 
+Come già discusso, sono state individuate quattro coppie di variabili altamente correlate: \textit{ComAgeRec} e \textit{MfgAgeRec}, \textit{NumWish} e \textit{NumWant}, \textit{ComWeight} e \textit{GameWeight}, e infine \textit{MfgPlaytime} e \textit{ComMaxPlaytime}. 
+Data l’elevata correlazione tra le variabili di ciascuna coppia, abbiamo applicato una \textit{Principal Component Analysis (PCA)} per sostituire ogni coppia con una singola colonna che ne descrivesse la tendenza principale. 
+Le nuove colonne sono state denominate \textit{AgeRec}, \textit{NumDesires}, \textit{Weight} e \textit{Playtime}, rispettivamente. 
+In questo modo, otto colonne sono state aggregate in quattro.\footnote{Poiché la correlazione tra le coppie di variabili è prossima a 1, si potrebbe anche eliminare una delle due colonne e mantenere l’altra. Tuttavia, l’approccio con PCA evita una scelta arbitraria e rende l’analisi più generale.}
+Tutte le nuove colonne sono state normalizzate tramite \textit{min–max scaling}, riportando i valori nell’intervallo $[0,1]$.
+
+\smallskip
+Un’altra coppia di variabili fortemente correlate è costituita da \textit{NumUserRatings} e \textit{NumOwned}. 
+Invece di applicare nuovamente la \textit{PCA}, abbiamo scelto di aggregarle tramite una trasformazione che combinasse l’informazione contenuta in entrambe. 
+Per ottenere una stima del \textit{rating} pesata in base al numero di voti, abbiamo impiegato la tecnica del \textit{Bayesian shrinkage}, comunemente utilizzata da siti che classificano film, giochi o prodotti in base alle valutazioni degli utenti. 
+La formula utilizzata è la seguente:
+
+\begin{equation}
+	\text{score} = \frac{n \cdot s + m \cdot \sigma}{n + m}
+	\label{eq:weighted_score}
+\end{equation}
+
+dove $n$ rappresenta il numero di voti, $s$ il punteggio del gioco ($\{-1, 0, 1\}$), $m$ il numero medio di voti e $\sigma$ la media globale del punteggio su tutto il \textit{dataset}. 
+Abbiamo quindi sostituito le colonne \textit{NumUserRatings} e \textit{NumOwned} con una singola colonna, denominata \textit{WeightedRatings}, riducendo la dimensionalità del \textit{dataset} e, allo stesso tempo, arricchendo l’informazione contenuta nella variabile \textit{Rating}. 
+Anche questa colonna è stata infine normalizzata nell’intervallo $[0,1]$ tramite \textit{min–max scaling}.
+
+\smallskip
+
+Infine, la colonna \textit{LanguageEase} è stata trasformata applicando una funzione logaritmica, per rendere la distribuzione più simmetrica, e successivamente normalizzata nell’intervallo $[0,1]$ con \textit{min–max scaling}.  
+Le distribuzioni delle colonne trasformate e aggregate sono mostrate in figura \ref{fig:histoboxmatrix_transformed}.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{/columns_transformed/all_data/histo_box_matrix_transformed_all_data.png}
+	\centering
+	\caption{Distribuzioni delle variabili numeriche trasformate e aggregate. 
+	La visualizzazione è ottenuta tramite istogrammi sovrapposti a \textit{box plot}. 
+	I percentili corrispondono al $5, 25, 50, 75, 95\%$ dei dati originali. 
+	Il \textit{binning} è stato determinato utilizzando il criterio di \textit{Sturges}.}
+	\label{fig:histoboxmatrix_transformed}
+\end{figure}
+
+Come si può osservare, le distribuzioni risultano ora più centralizzate e leggibili, permettendo di analizzare con maggiore chiarezza l’andamento delle variabili, pur avendo ridotto la dimensionalità complessiva del \textit{dataset}.
+
 
 \section{Clustering}
 \label{sec:clustering}
