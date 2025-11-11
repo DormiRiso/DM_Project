@@ -74,7 +74,7 @@ def prepare_df(df, N_samples=None, descriptors=None, hists=False):
                                       votes_col='NumUserRatings', new_col='WeightedRating')
     
     # Trasforma colonne in scala logaritmica 
-    columns_to_be_tranformed_in_log = ["LanguageEase", "NumOwned", "NumUserRatings", "NumWant", "NumWish"]
+    columns_to_be_tranformed_in_log = ["LanguageEase"]
     df_prepared = log_transform(df_prepared, columns_to_be_tranformed_in_log)
 
     # Normalizza la colonna "LanguageEase"
@@ -91,7 +91,7 @@ def prepare_df(df, N_samples=None, descriptors=None, hists=False):
             print(f"{Colors.YELLOW}📊 Generazione istogrammi in: {output_path}{Colors.RESET}")
 
         # Seleziona solo le colonne da plottare
-        numeric_cols = ["LanguageEase", "NumOwned", "NumUserRatings", "NumWant", "NumWish"]
+        numeric_cols = ["LanguageEase", "WeightedRating", "NumDesires"]
 
         for col in numeric_cols:
             titolo = f"Istogramma di {col}_({desc_name}_transformed)"
