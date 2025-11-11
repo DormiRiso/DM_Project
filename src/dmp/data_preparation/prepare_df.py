@@ -5,6 +5,7 @@ from .transform_columns import min_max_scaling, log_transform
 from .merge_ratings_columns import add_weighted_rating
 from dmp.data_understanding.analysis_by_descriptors import filter_df_by_descriptors, make_safe_descriptor_name
 from dmp.data_understanding import make_hist
+from dmp.my_graphs import histo_box_grid
 from dmp.data_preparation.pca import pca
 import os
 import matplotlib.pyplot as plt
@@ -78,7 +79,7 @@ def prepare_df(df, N_samples=None, descriptors=None, hists=False):
     df_prepared = log_transform(df_prepared, columns_to_be_tranformed_in_log)
 
     # Normalizza la colonna "LanguageEase"
-    columns_to_be_normalized = ["LanguageEase"]
+    columns_to_be_normalized = ["LanguageEase", "WeightedRating", "Playtime", "NumDesires", "AgeRec", "Weight"]
     df_prepared = min_max_scaling(df_prepared, columns_to_be_normalized)
 
     # 🧩 Creazione istogrammi (se richiesto)
@@ -91,16 +92,16 @@ def prepare_df(df, N_samples=None, descriptors=None, hists=False):
             print(f"{Colors.YELLOW}📊 Generazione istogrammi in: {output_path}{Colors.RESET}")
 
         # Seleziona solo le colonne da plottare
-        numeric_cols = ["LanguageEase", "WeightedRating", "NumDesires"]
-
+        numeric_cols = ["LanguageEase", "WeightedRating", "Playtime", "NumDesires", "AgeRec", "Weight"]
+        histo_box_grid(df_prepared, columns=numeric_cols, output_dir=output_path, 
+                        file_name = f"histo_box_matrix_transformed_{desc_name}", 
+                        title= f"Istogrammi e boxplot colonne trasformate ({desc_name})", 
+                        summary=True)
         for col in numeric_cols:
             titolo = f"Istogramma di {col}_({desc_name}_transformed)"
             plt.close('all')  # Previene overlap di figure
             make_hist(df_prepared, colonna=col, bins='sturges', folder = output_path, titolo=titolo)
-        
-        #Plotto l'istogramma della colonna "WeightedRating"
-        make_hist(df_prepared, colonna="WeightedRating", bins='sturges', folder = output_path, titolo="Istogramma WeightedRating")
-        
+            
         if VERBOSE:
             print(f"{Colors.GREEN}✅ Istogrammi creati per {len(numeric_cols)} colonne.{Colors.RESET}")
 
