@@ -5,6 +5,7 @@ from .transform_columns import min_max_scaling, log_transform
 from .merge_ratings_columns import add_weighted_rating
 from dmp.data_understanding.analysis_by_descriptors import filter_df_by_descriptors, make_safe_descriptor_name
 from dmp.data_understanding import make_hist
+from dmp.data_preparation.pca import pca
 import os
 import matplotlib.pyplot as plt
 
@@ -45,10 +46,13 @@ def prepare_df(df, N_samples=None, descriptors=None, hists=False):
     print(f"\n{Colors.BOLD}{Colors.BLUE}🚀 Inizio processo di Data Preparation...{Colors.RESET}")
     print(f"{'=' * 60}\n")
 
-    # 🗑️ Rimozione colonne inutili
+    # 🗑️ Rimozione colonne inutili tramite PCA, rimpiazzandole con colonne nuove (2->1)
     section("Rimozione colonne che sono strettamente correlate con altre", "🧺")
-    df = remove_columns(df, 'ComWeight')
-    print(f"{Colors.GREEN}✅ Rimosse colonna 'ComWeight'.{Colors.RESET}")
+    df = pca(df, columns=["ComWeight", "GameWeight"], newcolumntitle='Weight')
+    df = pca(df, columns=["ComAgeRec", "MfgAgeRec"], newcolumntitle='AgeRec')
+    df = pca(df, columns=["NumWish", "NumWant"], newcolumntitle='NumDesires')
+    df = pca(df, columns=["ComMaxPlaytime", "MfgPlaytime"], newcolumntitle='Playtime')
+    print(f"{Colors.GREEN}✅ Rimosse colonne ridondanti.{Colors.RESET}")
 
     # Make safe name for images
     desc_name = make_safe_descriptor_name(descriptors)
@@ -65,6 +69,7 @@ def prepare_df(df, N_samples=None, descriptors=None, hists=False):
         df_prepared = df
 
     # Creazione della colonna Weighted_Ratings (algoritmo IMDB)
+    # Note: rimuove anche le colonne originali dei voti 
     df_prepared = add_weighted_rating(df_prepared, rating_col='Rating',
                                       votes_col='NumUserRatings', new_col='WeightedRating')
     

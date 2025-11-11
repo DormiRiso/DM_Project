@@ -1,8 +1,10 @@
 import pandas as pd
+from dmp.data_cleaning.remove_columns import remove_columns
 
 def add_weighted_rating(df: pd.DataFrame, rating_col='Rating', votes_col='NumUserRatings', new_col='WeightedRating', m=None) -> pd.DataFrame:
     """
     Aggiunge una nuova colonna con il rating ponderato simile a IMDB/Steam.
+    Rimuove le colonne originali dei voti.
     
     Parametri:
         df (pd.DataFrame): DataFrame contenente i voti.
@@ -24,5 +26,6 @@ def add_weighted_rating(df: pd.DataFrame, rating_col='Rating', votes_col='NumUse
         m = df[votes_col].mean()  # soglia media
     
     df[new_col] = (v / (v + m)) * R + (m / (v + m)) * C
-    
+    df = remove_columns(df, [rating_col, votes_col])
+
     return df
