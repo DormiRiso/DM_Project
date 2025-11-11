@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from dmp.data_cleaning.remove_columns import remove_columns
+from sklearn.decomposition import PCA
 
 def pca(data, columns, newcolumntitle):
     """
@@ -14,21 +15,13 @@ def pca(data, columns, newcolumntitle):
     Returns:
         pd.DataFrame: DataFrame with principal components added.
     """
+    #pca non accetta i nan quindi rimpiazza con la media della colonna
+    X = data[columns].fillna(data[columns].mean())
+    pca = PCA(n_components=1)  # keep only the first principal component
+    X_pca = pca.fit_transform(X)
 
-    X = data[columns]
-    X_centered = X - X.mean(axis=0)
-    cov = np.cov(X_centered, rowvar=False)
-    eigvals, eigvecs = np.linalg.eigh(cov)
 
-    # Sort eigenvalues descending
-    idx = np.argsort(eigvals)[::-1]
-    eigvals = eigvals[idx]
-    eigvecs = eigvecs[:, idx]
-
-    # Project data onto the first principal component
-    PC1 = X_centered @ eigvecs[:, 0]
-
-    data[f'{newcolumntitle}'] = PC1
+    data[newcolumntitle] = X_pca
     # Pass the columns list directly to remove_columns (don't stringify it)
     data = remove_columns(data, columns)
 
