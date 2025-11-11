@@ -16,7 +16,6 @@ def pca(data, columns, newcolumntitle):
     """
 
     X = data[columns]
-    print("pippo")
     X_centered = X - X.mean(axis=0)
     cov = np.cov(X_centered, rowvar=False)
     eigvals, eigvecs = np.linalg.eigh(cov)
@@ -30,6 +29,7 @@ def pca(data, columns, newcolumntitle):
     PC1 = X_centered @ eigvecs[:, 0]
 
     data[f'{newcolumntitle}'] = PC1
-    data = remove_columns(data, f'{columns}')
+    # Pass the columns list directly to remove_columns (don't stringify it)
+    data = remove_columns(data, columns)
 
     return data

@@ -5,7 +5,7 @@ def add_weighted_rating(df: pd.DataFrame, rating_col='Rating', votes_col='NumUse
     """
     Aggiunge una nuova colonna con il rating ponderato simile a IMDB/Steam.
     Rimuove le colonne originali dei voti.
-    
+
     Parametri:
         df (pd.DataFrame): DataFrame contenente i voti.
         rating_col (str): Colonna con i voti medi (-1 a 1 nel tuo caso).
@@ -21,11 +21,10 @@ def add_weighted_rating(df: pd.DataFrame, rating_col='Rating', votes_col='NumUse
     v = df[votes_col]
     
     C = df[rating_col].mean()  # voto medio globale
-    
     if m is None:
         m = df[votes_col].mean()  # soglia media
     
     df[new_col] = (v / (v + m)) * R + (m / (v + m)) * C
-    df = remove_columns(df, [rating_col, votes_col])
 
+    df.drop(columns=[rating_col, votes_col], inplace=True, axis=1)
     return df
