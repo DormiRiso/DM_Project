@@ -21,4 +21,3 @@ def cluster_df(df):
         file_path = save_figure(plt2, f'sse_vs_k_{x_column}_vs_{y_column}', folder="figures/clustered_scatters", extension=".png")
         if VERBOSE:
             print(f'Plot SSE vs k salvato in: {file_path}')
-
