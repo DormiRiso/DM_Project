@@ -8,7 +8,7 @@ from dmp.data_understanding import make_hist
 from dmp.data_preparation.pca import pca
 import os
 import matplotlib.pyplot as plt
-
+from dmp.config import VERBOSE
 
 # 🎨 Colori ANSI per un output chiaro e leggibile
 class Colors:
@@ -44,7 +44,6 @@ def prepare_df(df, N_samples=None, descriptors=None, hists=False):
         df = filter_df_by_descriptors(df, descriptors, column="Description")
 
     print(f"\n{Colors.BOLD}{Colors.BLUE}🚀 Inizio processo di Data Preparation...{Colors.RESET}")
-    print(f"{'=' * 60}\n")
 
     # 🗑️ Rimozione colonne inutili tramite PCA, rimpiazzandole con colonne nuove (2->1)
     section("Rimozione colonne che sono strettamente correlate con altre", "🧺")
@@ -52,7 +51,8 @@ def prepare_df(df, N_samples=None, descriptors=None, hists=False):
     df = pca(df, columns=["ComAgeRec", "MfgAgeRec"], newcolumntitle='AgeRec')
     df = pca(df, columns=["NumWish", "NumWant"], newcolumntitle='NumDesires')
     df = pca(df, columns=["ComMaxPlaytime", "MfgPlaytime"], newcolumntitle='Playtime')
-    print(f"{Colors.GREEN}✅ Rimosse colonne ridondanti.{Colors.RESET}")
+    if VERBOSE:    
+        print(f"{Colors.GREEN}✅ Rimosse colonne ridondanti.{Colors.RESET}")
 
     # Make safe name for images
     desc_name = make_safe_descriptor_name(descriptors)
@@ -87,7 +87,8 @@ def prepare_df(df, N_samples=None, descriptors=None, hists=False):
         output_path = f"figures/columns_transformed/{desc_name}"
 
         os.makedirs(output_path, exist_ok=True)
-        print(f"{Colors.YELLOW}📊 Generazione istogrammi in: {output_path}{Colors.RESET}")
+        if VERBOSE:
+            print(f"{Colors.YELLOW}📊 Generazione istogrammi in: {output_path}{Colors.RESET}")
 
         # Seleziona solo le colonne da plottare
         numeric_cols = ["LanguageEase", "NumOwned", "NumUserRatings", "NumWant", "NumWish"]
@@ -100,10 +101,10 @@ def prepare_df(df, N_samples=None, descriptors=None, hists=False):
         #Plotto l'istogramma della colonna "WeightedRating"
         make_hist(df_prepared, colonna="WeightedRating", bins='sturges', folder = output_path, titolo="Istogramma WeightedRating")
         
-        print(f"{Colors.GREEN}✅ Istogrammi creati per {len(numeric_cols)} colonne.{Colors.RESET}")
+        if VERBOSE:
+            print(f"{Colors.GREEN}✅ Istogrammi creati per {len(numeric_cols)} colonne.{Colors.RESET}")
 
     # 🏁 Fine
     print(f"\n{Colors.BOLD}{Colors.CYAN}🏁 Preparazione completata con successo!{Colors.RESET}")
-    print(f"{'=' * 60}\n")
 
     return df_prepared
