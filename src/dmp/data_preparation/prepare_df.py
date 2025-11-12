@@ -55,6 +55,7 @@ def prepare_df(df, N_samples=None, descriptors=None, hists=False):
     if VERBOSE:    
         print(f"{Colors.GREEN}✅ Rimosse colonne ridondanti.{Colors.RESET}")
 
+
     # Make safe name for images
     desc_name = make_safe_descriptor_name(descriptors)
     output_path = f"figures/sampling/{desc_name}"

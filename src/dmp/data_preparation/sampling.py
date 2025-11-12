@@ -50,32 +50,62 @@ def distributed_sampling(df: pd.DataFrame, colonna: str, n: int, bins: int = 10,
 def descriptor_weighted_sampling(df: pd.DataFrame, descriptors: list, N: int, seed: int = 42) -> pd.DataFrame:
     """
     Campionamento ponderato basato sui descrittori.
-    La probabilità di selezionare una riga è proporzionale al numero di descrittori presenti nella riga.
+    La probabilità di selezionare una riga è proporzionale
+    al numero di descrittori presenti nella colonna 'Description'.
+
+    Stampa anche il numero di elementi campionati per ogni descrittore.
     """
     import numpy as np
 
     if not descriptors:
-        return df.sample(n=N, random_state=seed).reset_index(drop=True)
+        sample = df.sample(n=N, random_state=seed).reset_index(drop=True)
+    else:
+        if N is None:
+            N = len(df)
 
-    # Conta quante volte ciascun descrittore è presente in ogni riga
-    def count_matches(row):
-        # Assumiamo che row['Description'] sia un set o lista
-        return sum(1 for d in descriptors if d in row)
+        # Conta quante volte ciascun descrittore è presente in 'Description'
+        def count_matches(desc):
+            if isinstance(desc, (list, set)):
+                return sum(1 for d in descriptors if d in desc)
+            elif isinstance(desc, str):
+                return sum(1 for d in descriptors if d.lower() in desc.lower())
+            else:
+                return 0
 
-    pesi = df['Description'].apply(count_matches).astype(float)
+        pesi = df['Description'].apply(count_matches).astype(float)
 
-    # Se tutte le righe hanno peso zero, fallback a campionamento casuale
-    if pesi.sum() == 0:
-        print("⚠️ Nessuna riga contiene i descrittori, sampling casuale eseguito.")
-        return df.sample(n=N, random_state=seed).reset_index(drop=True)
+        # Se tutte le righe hanno peso zero, fallback a campionamento casuale
+        if pesi.sum() == 0:
+            print("⚠️ Nessuna riga contiene i descrittori, sampling casuale eseguito.")
+            sample = df.sample(n=N, random_state=seed).reset_index(drop=True)
+        else:
+            # Normalizza i pesi in probabilità
+            pesi /= pesi.sum()
 
-    # Normalizza i pesi in probabilità
-    pesi /= pesi.sum()
+            # Campiona le righe in base ai pesi
+            np.random.seed(seed)
+            sample_idx = np.random.choice(df.index, size=min(N, len(df)), replace=False, p=pesi.values)
+            sample = df.loc[sample_idx].reset_index(drop=True)
 
-    # Campiona le righe in base ai pesi
-    np.random.seed(seed)
-    sample_idx = np.random.choice(df.index, size=N, replace=False, p=pesi.values)
-    return df.loc[sample_idx].reset_index(drop=True)
+    # --- Conta quanti elementi per descrittore nel campione ---
+    descr_counts = {}
+    for d in descriptors:
+        def check_desc(desc):
+            if isinstance(desc, (list, set)):
+                return d in desc
+            elif isinstance(desc, str):
+                return d.lower() in desc.lower()
+            else:
+                return False
+        descr_counts[d] = sample['Description'].apply(check_desc).sum()
+    
+    print("📊 Numero di righe campionate per descrittore:")
+    for d, count in descr_counts.items():
+        print(f"   - {d}: {count}")
+
+    return sample
+
+
 
 
 def sample_df(df: pd.DataFrame, 
