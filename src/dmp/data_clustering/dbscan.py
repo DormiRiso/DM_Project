@@ -52,8 +52,8 @@ def dbscan(x_column, y_column, eps=0.3, min_samples=5, **kwargs):
             color = palette[label % len(palette)]
             label_name = f'Cluster {label}'
         ax.scatter(
-            X[labels == label, 0],
-            X[labels == label, 1],
+            x_zipped[labels == label, 0],
+            x_zipped[labels == label, 1],
             s=50, c=[color], label=label_name, alpha=0.6, edgecolors='none'
         )
 
