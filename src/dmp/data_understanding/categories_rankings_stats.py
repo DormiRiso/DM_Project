@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LogNorm
 from dmp.config import VERBOSE
+from collections import Counter
 
 CATEGORY_ANALYSIS_FIGURES_FOLDER = "figures/category_figures"
 
@@ -15,20 +16,31 @@ def number_of_categories_dist(ranks_column):
     Output: lengths_list: lista di numero di categorie per ogni record
     """
 
-    lengths_list = []
+    # Calcola la lunghezza di ogni lista non-zero
+    lengths_list = [len([x for x in entry if x != 0]) for entry in ranks_column]
 
-    for entry in ranks_column:
-        #strippo la lista in entrata dagli 0
-        rank_list = [x for x in entry if x != 0]
-        #aggiungo la sua lunghezza a lenght_lsit
-        lengths_list.append(len(rank_list))
+    # Conta le occorrenze di ogni numero di categorie
+    lengths_dict = Counter(lengths_list)
 
-    #creo un hist per length_list
-    plot = hist_graph(lengths_list, "Distribuzione del numero di categorie per gioco", "Numero di categorie", "Occorrenze", log_scale=True)
+    # Ordina per numero di categorie (asse X)
+    sorted_lengths = sorted(lengths_dict.items())
+    x_vals, y_vals = zip(*sorted_lengths)
 
-    file_path = save_figure(plot, "Distribuzione del numero di categorie per gioco", CATEGORY_ANALYSIS_FIGURES_FOLDER, ".png")
+    # Crea grafico a barre logaritmico
+    plot = bar_graph(
+        x_vals,
+        y_vals,
+        "Distribuzione del numero di categorie per gioco",
+        "Numero di categorie",
+        "Occorrenze",
+        log_scale=True
+    )
+
+    # Salva la figura
+    file_path = save_figure(plot, "Distribuzione_numero_categorie_per_gioco", CATEGORY_ANALYSIS_FIGURES_FOLDER, ".png")
+
     if VERBOSE:
-        print(f'Istogramma per la distribuzione del numero di categorie salvato come: {file_path}')
+        print(f"Istogramma per la distribuzione del numero di categorie salvato come: {file_path}")
 
     return lengths_list
 
