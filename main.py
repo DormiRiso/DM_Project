@@ -88,7 +88,7 @@ def understand_data(cleaned_file: Path, filtered_file:Path, do_scatters, do_hist
 
     print(f"{Colors.GREEN}📈 Analisi completata!{Colors.RESET}\n")
 
-def prepare_data(input_file: Path, output_file: Path, N_samples, descriptors, verbose: bool):
+def prepare_data(input_file: Path, output_file: Path, N_samples, descriptors, colonne, verbose: bool):
     """Esegue la preparazione del dataframe, prendendo un dataframe pulito e 
     riducendo ulteriormente la sua dimensione"""
     
@@ -100,7 +100,7 @@ def prepare_data(input_file: Path, output_file: Path, N_samples, descriptors, ve
         prepared_df = prepare_df(filtered_df, N_samples, descriptors, hists=True)
     else:
         with yaspin(text="🔍 Avvio della preparazione dei dati ", color="cyan") as spinner:
-            prepared_df = prepare_df(filtered_df, N_samples, descriptors, hists=True)
+            prepared_df = prepare_df(filtered_df, N_samples, descriptors, colonne = colonne, hists=True)
             spinner.ok("✅")
     print(f"{Colors.GREEN}📈 Preparazione completata!{Colors.RESET}\n")  
     
@@ -247,7 +247,8 @@ def main():
     if args.cleaning:
         clean_data(input_file, cleaned_output_file, filtered_output_file, args.verbose)
         if args.preparation is None or isinstance(args.preparation, int):
-            prepare_data(filtered_output_file, prepared_output_file, args.preparation, args.descriptors, args.verbose)
+            colonne_check_filtro = ["NumDesires", "AgeRec"]
+            prepare_data(filtered_output_file, prepared_output_file, args.preparation, args.descriptors, colonne_check_filtro, args.verbose)
 
 
 

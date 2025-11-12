@@ -111,7 +111,7 @@ def descriptor_weighted_sampling(df: pd.DataFrame, descriptors: list, N: int, se
 def sample_df(df: pd.DataFrame, 
               N: int, 
               method: str, 
-              colonna: str = None, 
+              colonne: list = None, 
               bins: int = None, 
               seed: int = 42, 
               valutation: bool = True, 
@@ -119,24 +119,8 @@ def sample_df(df: pd.DataFrame,
               plot: bool = True,
               output_dir: str = "figures") -> pd.DataFrame:
     """
-    Esegue il campionamento del DataFrame usando il metodo scelto ('random' o 'distribution'),
-    valuta la bontà del campionamento confrontando statistiche base con l’originale e
-    opzionalmente genera istogrammi + boxplot.
-
-    Parametri:
-        df (pd.DataFrame): Dataset originale.
-        N (int): Numero di righe da estrarre.
-        method (str): 'random' per campionamento casuale, 'distribution' per ponderato.
-        colonna (str): Colonna numerica di riferimento.
-        bins (int, opzionale): Numero di bin per la discretizzazione (solo per 'distribution').
-        seed (int, opzionale): Random seed per riproducibilità.
-        valutation (bool): se True stampa media, varianza etc. delle distribuzioni prima e dopo il sampling
-        descriptors (list): lista di descrittori della colonna "Description" su cui fare filtro (opzionale)
-        plot (bool): se True genera istogrammi + boxplot
-        output_dir (str): directory in cui salvare le figure
-
-    Ritorna:
-        pd.DataFrame: campione del DataFrame
+    Esegue il campionamento del DataFrame usando il metodo scelto ('random', 'distribution' o 'descriptors'),
+    valuta la bontà del campionamento e opzionalmente genera istogrammi e boxplot.
     """
 
     np.random.seed(seed)
@@ -149,62 +133,72 @@ def sample_df(df: pd.DataFrame,
     if method == "random":
         sample = random_sampling(df, N, seed)
     elif method == "distribution":
-        if colonna is None:
-            raise ValueError("Per 'distribution' devi fornire la colonna numerica")
-        sample = distributed_sampling(df, colonna, N, bins, seed)
+        if colonne is None or len(colonne) == 0:
+            raise ValueError("Per 'distribution' devi fornire almeno una colonna numerica")
+        # Usiamo solo la prima colonna come riferimento (oppure puoi farne una media ponderata)
+        colonna_rif = colonne[0]
+        sample = distributed_sampling(df, colonna_rif, N, bins, seed)
     elif method == "descriptors":
-        if descriptors is None or len(descriptors) == 0:
-            raise ValueError("Per 'descriptor_distribution' devi fornire almeno un descrittore")
+        if not descriptors:
+            raise ValueError("Per 'descriptors' devi fornire almeno un descrittore")
         sample = descriptor_weighted_sampling(df, descriptors, N, seed)
     else:
-        raise ValueError("Metodo non riconosciuto. Usa 'random', 'distribution' o 'descriptor_distribution'.")
+        raise ValueError("Metodo non riconosciuto. Usa 'random', 'distribution' o 'descriptors'.")
 
+    # --- Valutazione e grafici ---
+    if colonne is not None:
+        for colonna in colonne:
+            if colonna not in df.columns:
+                print(f"⚠️ Colonna '{colonna}' non trovata nel DataFrame.")
+                continue
 
-    # --- Valutazione ---
-    if valutation and colonna is not None:
-        x_originale = df[colonna].dropna()
-        x_sample = sample[colonna].dropna()
+            x_originale = df[colonna].dropna()
+            x_sample = sample[colonna].dropna()
 
-        def stats(x):
-            return {
-                'media': x.mean(),
-                'mediana': x.median(),
-                'stddev': x.std(),
-                'p0': np.percentile(x, 0),
-                'p25': np.percentile(x, 25),
-                'p50': np.percentile(x, 50),
-                'p75': np.percentile(x, 75),
-                'p100': np.percentile(x, 100)
-            }
+            if x_originale.empty or x_sample.empty:
+                print(f"⚠️ Colonna '{colonna}' vuota dopo la pulizia.")
+                continue
 
-        stats_originale = stats(x_originale)
-        stats_sample = stats(x_sample)
+            # --- Statistiche ---
+            if valutation:
+                def stats(x):
+                    return {
+                        'media': x.mean(),
+                        'mediana': x.median(),
+                        'stddev': x.std(),
+                        'p0': np.percentile(x, 0),
+                        'p25': np.percentile(x, 25),
+                        'p50': np.percentile(x, 50),
+                        'p75': np.percentile(x, 75),
+                        'p100': np.percentile(x, 100)
+                    }
 
-        confronto = pd.DataFrame([stats_originale, stats_sample], index=['Originale', 'Campione']).T
-        print("📈 Statistiche confronto per la colonna:", colonna)
-        print(confronto.round(4))
+                confronto = pd.DataFrame([stats(x_originale), stats(x_sample)], 
+                                         index=['Originale', 'Campione']).T
+                print(f"\n📈 Statistiche confronto per la colonna: {colonna}")
+                print(confronto.round(4))
 
-    # --- Creazione istogrammi ---
-    if plot and colonna is not None:
-        os.makedirs(output_dir, exist_ok=True)
+            # --- Plot ---
+            if plot:
+                os.makedirs(output_dir, exist_ok=True)
 
-        plt.figure(figsize=(12,5))
-        plt.subplot(1,2,1)
-        plt.hist(x_originale, bins='sturges', edgecolor='black', alpha=0.7)
-        plt.title(f"Istogramma originale: {colonna}")
-        plt.xlabel(colonna)
-        plt.ylabel("Occorrenze")
+                plt.figure(figsize=(12,5))
+                plt.subplot(1,2,1)
+                plt.hist(x_originale, bins='sturges', edgecolor='black', alpha=0.7)
+                plt.title(f"Istogramma originale: {colonna}")
+                plt.xlabel(colonna)
+                plt.ylabel("Occorrenze")
 
-        plt.subplot(1,2,2)
-        plt.hist(x_sample, bins='sturges', edgecolor='black', alpha=0.7, color='orange')
-        plt.title(f"Istogramma campione: {colonna}")
-        plt.xlabel(colonna)
-        plt.ylabel("Occorrenze")
+                plt.subplot(1,2,2)
+                plt.hist(x_sample, bins='sturges', edgecolor='black', alpha=0.7, color='orange')
+                plt.title(f"Istogramma campione: {colonna}")
+                plt.xlabel(colonna)
+                plt.ylabel("Occorrenze")
 
-        plt.tight_layout()
-        file_path = os.path.join(output_dir, f"{colonna}_histogram_comparison.png")
-        plt.savefig(file_path, dpi=100, bbox_inches="tight")
-        plt.close()
-        print(f"📊 Istogrammi salvati in: {file_path}")
+                plt.tight_layout()
+                file_path = os.path.join(output_dir, f"{colonna}_histogram_comparison.png")
+                plt.savefig(file_path, dpi=100, bbox_inches="tight")
+                plt.close()
+                print(f"📊 Istogrammi salvati in: {file_path}")
 
     return sample.reset_index(drop=True)

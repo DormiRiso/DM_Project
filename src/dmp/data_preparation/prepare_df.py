@@ -29,7 +29,7 @@ def section(title: str, emoji: str = "🧩"):
     print(f"{Colors.HEADER}{'─' * (len(title) + 4)}{Colors.RESET}")
 
 
-def prepare_df(df, N_samples=None, descriptors=None, hists=False):
+def prepare_df(df, N_samples=None, descriptors=None, colonne=None, hists=False):
     """
     🧹 Opera sul DataFrame pulito e lo prepara per l'analisi,
     tramite le tecniche di 'data preparation'.
@@ -60,15 +60,7 @@ def prepare_df(df, N_samples=None, descriptors=None, hists=False):
     desc_name = make_safe_descriptor_name(descriptors)
     output_path = f"figures/sampling/{desc_name}"
 
-    # Sampling delle rows
-    if descriptors and len(descriptors) > 1:
-        df_prepared = sample_df(df, N_samples, method="descriptors", 
-        descriptors = descriptors, output_dir=output_path)
-    elif N_samples:
-        df_prepared = sample_df(df, N_samples, method="random", 
-        descriptors = descriptors, output_dir=output_path)
-    else:
-        df_prepared = df
+    df_prepared = df.copy()
 
     # Creazione della colonna Weighted_Ratings (algoritmo IMDB)
     # Note: rimuove anche le colonne originali dei voti 
@@ -82,6 +74,16 @@ def prepare_df(df, N_samples=None, descriptors=None, hists=False):
     # Normalizza la colonna "LanguageEase"
     columns_to_be_normalized = ["LanguageEase", "WeightedRating", "Playtime", "NumDesires", "AgeRec", "Weight"]
     df_prepared = min_max_scaling(df_prepared, columns_to_be_normalized)
+
+    # Sampling delle rows
+    if descriptors and len(descriptors) > 1:
+        df_prepared = sample_df(df_prepared, N_samples, method="descriptors", 
+        descriptors = descriptors, colonne = colonne, output_dir=output_path)
+    elif N_samples:
+        df_prepared = sample_df(df_prepared, N_samples, method="random", 
+        descriptors = descriptors, colonne = colonne, output_dir=output_path)
+    else:
+        df_prepared = df
 
     # 🧩 Creazione istogrammi (se richiesto)
     if hists:

@@ -15,13 +15,7 @@ class Point:
         self.y = np.random.normal(mean_y, sigma_y)
 
 class Cluster:
-    """Un cluster rappresentato dal suo centroide e dalla lista dei punti che contiene.
-    Contiene metodi per:
-        - aggiungere un punto al cluster
-        - calcolare il punto medio del cluster
-        - aggiornare la posizione del centroide
-        - calcolare l'errore quadratico su ogni punto del cluster
-    """
+    """Un cluster rappresentato dal suo centroide e dalla lista dei punti che contiene."""
 
     def __init__(self, x, y):
         self.x = x
@@ -44,67 +38,56 @@ class Cluster:
     def square_mean_error(self):
         return np.sum([(p.x - self.x)**2 + (p.y - self.y)**2 for p in self.points])
 
-def k_means(x_data, y_data, k, max_iters=5):
-    """Funzione che applica l'algoritmo di K-means clustering
-    
-    Input:
-        x_data: lista di coordinate x dei dati da clusterizzare
-        y_data: lista di coordinate y dei dati da clusterizzare
-        k: numero di centroidi
-        max_iters: numero massimo di terazioni dell'algoritmo, default a 5 per evitare inutili costi computazionali
 
-    Output: restituisce la lista delle posizioni dei centroidi ed il valore dell'errore SSE (somma degli errori quadratici)
-    """
+def k_means(x_data, y_data, k, max_steps=5, n_iter=1):
+    """Esegue il K-means più volte (n_iter) e restituisce il risultato con SSE più basso."""
 
     if (len(x_data) != len(y_data)):
-        raise ValueError("La lunghezza delle due liste di valori non corriponde, impossibile eseguire il k-means")
+        raise ValueError("La lunghezza delle due liste di valori non corrisponde.")
 
     if not (len(x_data) and len(y_data)):
-        raise ValueError(f"Una delle liste {x_data} e {y_data} di valori è vuota. ")
+        raise ValueError(f"Una delle liste {x_data} e {y_data} è vuota.")
 
     n_points = len(x_data)
-    k = min(k, n_points) # Evita di avere più centroidi che punti
+    k = min(k, n_points)
 
-    indices = np.random.choice(n_points, k, replace=False)
-    centroids = [Cluster(x_data[i], y_data[i]) for i in indices]
+    best_sse = np.inf
+    best_centroids = None
 
-    for _ in range(max_iters):
-        for c in centroids:
-            c.points = []
+    for _ in range(n_iter):
+        # Inizializza centroidi casuali
+        indices = np.random.choice(n_points, k, replace=False)
+        centroids = [Cluster(x_data[i], y_data[i]) for i in indices]
 
-        for x, y in zip(x_data, y_data):
-            distances = np.sqrt((x - np.array([c.x for c in centroids]))**2 +
-                                (y - np.array([c.y for c in centroids]))**2)
-            nearest = np.argmin(distances)
-            centroids[nearest].add_point(Point(x, y))
+        for _ in range(max_steps):
+            for c in centroids:
+                c.points = []
 
-        sse = 0
-        for c in centroids:
-            c.update_centroid()
-            sse += c.square_mean_error()
+            for x, y in zip(x_data, y_data):
+                distances = np.sqrt((x - np.array([c.x for c in centroids]))**2 +
+                                    (y - np.array([c.y for c in centroids]))**2)
+                nearest = np.argmin(distances)
+                centroids[nearest].add_point(Point(x, y))
 
-    return centroids, sse
+            sse = 0
+            for c in centroids:
+                c.update_centroid()
+                sse += c.square_mean_error()
 
-def k_means_scatter(x_column, y_column, k, max_iters=5, **kwargs):
-    """Funzione che applica l'algoritmo K-means ad un insieme di dati e successivamente produce uno scatter plot per la visualizzazione
-    
-    Input: 
-        x_column: colonna del dataframe corrispondende alla coordinata x
-        y_column: colonna del dataframe corrispondende alla coordinata y
-        k: numero di centroidi
-        max_iters: numero massimo di terazioni dell'algoritmo, default a 5 per evitare inutili costi computazionali
-        title: titolo del grafico
-        x_label: etichetta dell'asse x
-        y_label: etichetta dell'asse y
-    
-    Output: istanza di oggetto figure di matplotlib.pyplot
-    """
+        # Se questa iterazione è migliore, la salvo
+        if sse < best_sse:
+            best_sse = sse
+            best_centroids = [Cluster(c.x, c.y) for c in centroids]
+            for i, c in enumerate(centroids):
+                best_centroids[i].points = c.points.copy()
 
-    # Gestione degli errori ...
+    return best_centroids, best_sse
 
-    # Rendo leggibili i dati delle colonne, ignorando una coppia quando uno dei due valori è nan
-    x_data = []
-    y_data = []
+
+def k_means_scatter(x_column, y_column, k, max_steps=5, n_iter=1, **kwargs):
+    """Applica K-means (con n_iter) e produce uno scatter plot con confronto SSE random."""
+
+    x_data, y_data = [], []
     x_column = [float(x) for x in x_column]
     y_column = [float(x) for x in y_column]
     for x, y in zip(x_column, y_column):
@@ -113,14 +96,20 @@ def k_means_scatter(x_column, y_column, k, max_iters=5, **kwargs):
         x_data.append(x)
         y_data.append(y)
 
-    # Eseguo l'algoritmo
-    centroids, sse = k_means(x_data, y_data, k, max_iters)
+    # --- K-means su dati reali ---
+    centroids, sse = k_means(x_data, y_data, k, max_steps, n_iter)
 
-    # Procedo con il plotting
+    # --- K-means su dati random (stesso range) ---
+    x_min, x_max = np.min(x_data), np.max(x_data)
+    y_min, y_max = np.min(y_data), np.max(y_data)
+    rand_x = np.random.uniform(x_min, x_max, len(x_data))
+    rand_y = np.random.uniform(y_min, y_max, len(y_data))
+    _, sse_random = k_means(rand_x, rand_y, k, max_steps, n_iter)
+
+    # --- Plot ---
     colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
     fig, ax = plt.subplots(figsize=(8, 6))
 
-    # Punti dei cluster
     for idx, c in enumerate(centroids):
         cluster_points = c.points
         ax.scatter([p.x for p in cluster_points],
@@ -128,45 +117,31 @@ def k_means_scatter(x_column, y_column, k, max_iters=5, **kwargs):
                    color=colors[idx % len(colors)],
                    alpha=0.6)
 
-    # Centroidi
     ax.scatter([c.x for c in centroids],
                [c.y for c in centroids],
                color='black', marker='X', s=120, label='Centroids')
 
-    # Aggiungo il valore di SSE come voce della legenda
-    ax.scatter([], [], color='none', label=f'SSE = {sse:.2f}')
-
-    ax.set_title(kwargs.get("title"))
-    ax.set_xlabel(kwargs.get("x_label"))
-    ax.set_ylabel(kwargs.get("y_label"))
+    # --- Legenda con SSE reali e random ---
+    ax.scatter([], [], color='none', label=f"SSE reale = {sse:.2f}")
+    ax.scatter([], [], color='none', label=f"SSE random = {sse_random:.2f}")
+    
+    ax.set_title(kwargs.get("title", f"K-means con k={k}"))
+    ax.set_xlabel(kwargs.get("x_label", "X"))
+    ax.set_ylabel(kwargs.get("y_label", "Y"))
     ax.grid(True)
     ax.legend()
 
     if VERBOSE:
-        print(f"[INFO] Plotted {len(centroids)} clusters with their centroids. SSE: {sse:.2f}")
+        print(f"[INFO] Plotted {len(centroids)} clusters (best of {n_iter} runs). "
+              f"SSE: {sse:.2f} | Random SSE: {sse_random:.2f}")
 
     return fig
 
-def sse_vs_k(x_column, y_column, ending_k, max_iters=5, **kwargs):
-    """Funzione che applica l'algoritmo K-means per crescenti valori di k e plotta il valore di sse in funzione di k
 
-    Input: 
-        x_column: colonna del dataframe corrispondende alla coordinata x
-        y_column: colonna del dataframe corrispondende alla coordinata y
-        ending_k: numero massimo di k
-        max_iters: numero massimo di terazioni dell'algoritmo, default a 5 per evitare inutili costi computazionali
-        title: titolo del grafico
-        x_label: etichetta dell'asse x
-        y_label: etichetta dell'asse y
+def sse_vs_k(x_column, y_column, ending_k, max_steps=5, n_iter=1, **kwargs):
+    """Calcola SSE per k crescenti, eseguendo più run di K-means per ciascun k."""
 
-    Output: istanza di oggetto figure di matplotlib.pyplot e lista di valori di SSE
-    """
-
-    # Gestione degli errori ...
-
-    # Rendo leggibili i dati delle colonne, ignorando una coppia quando uno dei due valori è nan
-    x_data = []
-    y_data = []
+    x_data, y_data = [], []
     x_column = [float(x) for x in x_column]
     y_column = [float(x) for x in y_column]
     for x, y in zip(x_column, y_column):
@@ -175,19 +150,17 @@ def sse_vs_k(x_column, y_column, ending_k, max_iters=5, **kwargs):
         x_data.append(x)
         y_data.append(y)
 
-    # Eseguo l'algoritmo
     sse_list = []
     for k in range(1, ending_k):
-        _, sse = k_means(x_data, y_data, k, max_iters)
+        _, sse = k_means(x_data, y_data, k, max_steps, n_iter)
         sse_list.append(sse)
 
-    # Procedo con il plotting
     plt.scatter(range(1, ending_k), sse_list, color="black")
     plt.title(kwargs.get("title"))
     plt.xlabel(kwargs.get("x_label"))
     plt.ylabel(kwargs.get("y_label"))
 
     if VERBOSE:
-        print(f"[INFO] Plottati i valori di SSE fino a {ending_k}")
+        print(f"[INFO] Plottati i valori di SSE fino a {ending_k} (best of {n_iter} per k).")
 
     return plt, sse_list
