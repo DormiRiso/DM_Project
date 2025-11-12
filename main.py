@@ -97,7 +97,7 @@ def prepare_data(input_file: Path, output_file: Path, N_samples, descriptors, co
 
     if verbose:
         print(f"{Colors.CYAN}🔍 Avvio della preparazione dei dati {Colors.RESET}")
-        prepared_df = prepare_df(filtered_df, N_samples, descriptors, hists=True)
+        prepared_df = prepare_df(filtered_df, N_samples, descriptors, colonne = colonne, hists=True)
     else:
         with yaspin(text="🔍 Avvio della preparazione dei dati ", color="cyan") as spinner:
             prepared_df = prepare_df(filtered_df, N_samples, descriptors, colonne = colonne, hists=True)
@@ -247,7 +247,7 @@ def main():
     if args.cleaning:
         clean_data(input_file, cleaned_output_file, filtered_output_file, args.verbose)
         if args.preparation is None or isinstance(args.preparation, int):
-            colonne_check_filtro = ["NumDesires", "AgeRec"]
+            colonne_check_filtro = ["NumDesires", "AgeRec", "Weight"]
             prepare_data(filtered_output_file, prepared_output_file, args.preparation, args.descriptors, colonne_check_filtro, args.verbose)
 
 

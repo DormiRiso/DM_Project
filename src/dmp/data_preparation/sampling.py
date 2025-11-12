@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 from dmp.my_graphs import box_plot
+from dmp.my_graphs import histo_box_grid
 
 def random_sampling(df: pd.DataFrame, n: int, seed: int = None) -> pd.DataFrame:
     """
@@ -181,24 +182,15 @@ def sample_df(df: pd.DataFrame,
             # --- Plot ---
             if plot:
                 os.makedirs(output_dir, exist_ok=True)
-
-                plt.figure(figsize=(12,5))
-                plt.subplot(1,2,1)
-                plt.hist(x_originale, bins='sturges', edgecolor='black', alpha=0.7)
-                plt.title(f"Istogramma originale: {colonna}")
-                plt.xlabel(colonna)
-                plt.ylabel("Occorrenze")
-
-                plt.subplot(1,2,2)
-                plt.hist(x_sample, bins='sturges', edgecolor='black', alpha=0.7, color='orange')
-                plt.title(f"Istogramma campione: {colonna}")
-                plt.xlabel(colonna)
-                plt.ylabel("Occorrenze")
-
-                plt.tight_layout()
                 file_path = os.path.join(output_dir, f"{colonna}_histogram_comparison.png")
-                plt.savefig(file_path, dpi=100, bbox_inches="tight")
-                plt.close()
+                df = pd.DataFrame({
+                    'originale': x_originale,
+                    'sampled': x_sample
+                })
+                histo_box_grid(df, columns=["originale","sampled"], output_dir=output_dir, 
+                                file_name = f"{colonna}_histogram_comparison.png", 
+                                title= f"Confronto tra sampled e non per: {colonna}", 
+                                summary=True)
                 print(f"📊 Istogrammi salvati in: {file_path}")
 
     return sample.reset_index(drop=True)
