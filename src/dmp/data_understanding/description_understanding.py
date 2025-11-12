@@ -1,3 +1,5 @@
+import re
+import ast
 import pandas as pd
 from dmp.utils import save_figure
 from dmp.config import VERBOSE
@@ -21,45 +23,44 @@ def count_word_occurrences(df: pd.DataFrame, column_name: str, top_n: int = 50):
         if pd.isna(entry):
             continue
 
-        # Se la riga è una stringa che rappresenta un set o lista, la convertiamo in oggetto Python
+        # Se la riga è una stringa che rappresenta un set o lista, prova a convertirla
         if isinstance(entry, str):
             try:
                 entry = ast.literal_eval(entry)
             except Exception:
-                # Se non è parsabile come set/list, la dividiamo come testo
                 entry = entry.split()
 
-        # Ora ci assicuriamo che sia iterabile
+        # Assicurati che sia iterabile
         if isinstance(entry, (set, list, tuple)):
             words = entry
         else:
             words = str(entry).split()
 
-        # Conta le parole
+        # Conta le parole pulite
         for word in words:
-            word = word.strip().lower()
-            if word:
-                word_occurrences[word] = word_occurrences.get(word, 0) + 1
+            # Converti in minuscolo e tieni solo caratteri alfanumerici
+            cleaned_word = re.sub(r"[^a-z0-9]+", "", word.lower())
+            if cleaned_word:
+                word_occurrences[cleaned_word] = word_occurrences.get(cleaned_word, 0) + 1
 
-    # Ordina per frequenza decrescente
+    # Ordina per frequenza
     sorted_words = sorted(word_occurrences.items(), key=lambda x: x[1], reverse=True)
     top_words = dict(sorted_words[:top_n])
 
-    # Crea il grafico con bar_graph
+    # Crea il grafico
     plt = bar_graph(
         x_data=list(top_words.keys()),
         y_data=list(top_words.values()),
-        title=f"Top {top_n} Words in '{column_name}'",
-        x_label="Word",
-        y_label="Occurrences",
+        title=f"{top_n} parole più usate in '{column_name}'",
+        x_label="Parole",
+        y_label="Occorrenze",
         size=(12, 6),
         log_scale=False
     )
 
     file_path = save_figure(plt, "Occorrenza delle parole più usate nelle descrizioni", "figures/top_words", extension=".png")
 
-    # Salva il grafico se richiesto
     if VERBOSE:
-        print(f'Grafico delle top words salvato in: {file_path}')
+        print(f"Grafico delle top words salvato in: {file_path}")
 
     return top_words
