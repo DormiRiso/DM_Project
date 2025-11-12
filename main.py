@@ -204,8 +204,28 @@ def main():
         action="store_true",
         help="Esegue il calcolo del SSE di clustering in funzione di k"
     )
+    parser.add_argument(
+        "-hand_warmer", "--hand_warmer",
+        action="store_true",
+        help="Esegue ogni funzione del programma di analisi dati (ATTENZIONE) e ti scalda le mani ;)"
+    )
 
     args = parser.parse_args()
+
+    if args.hand_warmer:
+        response = input("Sei sicuro di voler eseguire tutto? (potrebbe esplodere il pc): [y/n]")
+        if response == "y" or response == "Y":
+            # Activate everything
+            args.cleaning = True
+            args.understanding = True
+            args.preparation = None
+            args.clustering = True
+            args.sse_vs_k = True
+            args.scatters = True
+            args.hists = True
+            args.hypno = True
+        else:
+            pass
 
     set_verbose(args.verbose)
 
