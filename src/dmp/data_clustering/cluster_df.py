@@ -1,9 +1,9 @@
 from .k_mean import k_means_scatter, sse_vs_k
+from .dbscan import dbscan
 from dmp.config import VERBOSE
 from dmp.utils import save_figure
-#from sklearn.cluster import DBSCAN
 
-def cluster_df(df):
+def cluster_df(df, sse: bool):
     """Funzione che esegue la clusterizzazione dei dati
     """
 
@@ -17,9 +17,8 @@ def cluster_df(df):
         if VERBOSE:
             print(f'Scatter plot del k-means salvato in: {file_path}')
         # ATTENZIONE: la scelta di ending_k e max_iters potrebbe portare a runtime elevati
-        """
-        plt2, _ = sse_vs_k(df[x_column], df[y_column], ending_k=10, max_iters=10, x_label="k", y_label="SSE", title=f'SSE vs k per {x_column} vs {y_column}')
-        file_path = save_figure(plt2, f'sse_vs_k_{x_column}_vs_{y_column}', folder="figures/clustered_scatters", extension=".png")
-        """
+        if sse:
+            plt2, _ = sse_vs_k(df[x_column], df[y_column], ending_k=10, max_iters=10, x_label="k", y_label="SSE", title=f'SSE vs k per {x_column} vs {y_column}')
+            file_path = save_figure(plt2, f'sse_vs_k_{x_column}_vs_{y_column}', folder="figures/clustered_scatters", extension=".png")
         if VERBOSE:
             print(f'Plot SSE vs k salvato in: {file_path}')

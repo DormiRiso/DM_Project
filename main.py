@@ -107,7 +107,7 @@ def prepare_data(input_file: Path, output_file: Path, N_samples, descriptors, ve
     print(f"{Colors.YELLOW}💾 Salvataggio del dataset filtrato in:{Colors.RESET} {output_file}")
     prepared_df.to_csv(output_file, index=False)
 
-def cluster_data(input_file: Path, verbose: bool):
+def cluster_data(input_file: Path, verbose: bool, sse: bool):
     """Esegue la clusterizzazione di alcune colonne selezionate sul dataframe già pulite e filtrato"""
 
     print(f"{Colors.BLUE}📊 Caricamento dataset pulito da:{Colors.RESET} {input_file}")
@@ -115,10 +115,10 @@ def cluster_data(input_file: Path, verbose: bool):
 
     if verbose:
         print(f"{Colors.CYAN}🔍 Avvio della clusterizzazione dei dati {Colors.RESET}")
-        cluster_data(filtered_df)
+        cluster_df(filtered_df, sse)
     else:
         with yaspin(text="🔍 Avvio della clusterizzazione dei dati ", color="cyan") as spinner:
-            cluster_df(filtered_df)
+            cluster_df(filtered_df, sse)
             spinner.ok("✅")
     print(f"{Colors.GREEN}📈 Clusterizzazione completata!{Colors.RESET}\n")  
 
@@ -199,6 +199,11 @@ def main():
         action="store_true",
         help="Esegue il clutering di alcune colonne del DataFrame"
     )
+    parser.add_argument(
+        "-sse", "--sse_vs_k",
+        action="store_true",
+        help="Esegue il calcolo del SSE di clustering in funzione di k"
+    )
 
     args = parser.parse_args()
 
@@ -234,7 +239,7 @@ def main():
 
 
     if args.clustering:
-        cluster_data(prepared_output_file, args.verbose)
+        cluster_data(prepared_output_file, args.verbose, args.sse_vs_k)
 
     print(f"{Colors.BOLD}🏁 Operazione completata!{Colors.RESET} ✅")
 
