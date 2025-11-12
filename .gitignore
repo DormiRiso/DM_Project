@@ -6,6 +6,7 @@
 *.out
 *.fls
 *.fdb_latexmk
+*.synctex.gz
 
 # Ignora il cleaned.csv per evitare conflitti nel versioning
 data/
