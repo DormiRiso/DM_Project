@@ -1,5 +1,6 @@
 from .k_mean import k_means_scatter, sse_vs_k
 from .dbscan import dbscan
+from .hierarchical import hierarchical_clustering, plot_dendrogram
 from dmp.config import VERBOSE
 from dmp.utils import save_figure
 
@@ -27,3 +28,9 @@ def cluster_df(df, sse: bool):
         # Applico l'algoritmo dbscan
         fig, labels = dbscan(x_column=df[x_column], y_column=df[y_column], eps=0.05, min_samples=3, title=f'DBSCAN Clustering di {x_column} vs {y_column}', x_label=x_column, y_label=y_column)
         file_path = save_figure(fig, f'dbscan_{x_column}_vs_{y_column}', folder="figures/clustered_scatters", extension=".png")
+        # Applico l'algoritmo hierarchical
+        fig1, labels = hierarchical_clustering(x_column=df[x_column], y_column=df[y_column], n_clusters=4, linkage='average', title="Hierarchical Clustering Example", x_label="Feature X", y_label="Feature Y")
+        file_path = save_figure(fig1, f'hierarchical_{x_column}_vs_{y_column}', folder="figures/clustered_scatters", extension=".png")
+        # Dendrogramma corrispondente
+        fig_dendro = plot_dendrogram(x_column=df[x_column], y_column=df[y_column], linkage_method='ward', truncate_mode='lastp', title=f'Dendrogramma - Metodo Ward di {x_column} vs {y_column}')
+        file_path = save_figure(fig_dendro, f'Dendrogram_{x_column}_vs_{y_column}', folder="figures/clustered_scatters", extension=".png")
