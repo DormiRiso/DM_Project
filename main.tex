@@ -27,7 +27,13 @@
 \twocolumn[
 \maketitle % need full-width title
 \begin{onecolabstract}
-Perchè Jacopomo è un bot? Perchè è una busta e non odia Rugo, e tutti i miei felloni odiano Rugo. Michelangelo Bottacchioni se ti becco...
+
+
+In questo progetto abbiamo pulito, analizzato e trasformato il \textit{dataset} di BoardGameGeek, correggendo valori errati, riducendo la dimensionalità tramite tecniche di aggregazione e creando un insieme di dati più coerente e interpretabile. Abbiamo studiato distribuzioni, correlazioni e categorie, e applicato varie tecniche di \textit{clustering}, che non hanno evidenziato gruppi distinti ma suggeriscono uno spettro continuo di caratteristiche nei giochi da tavolo. Il \textit{dataset} finale risulta adatto ad ulteriori analisi di classificazione e regressione.
+
+
+
+
 \end{onecolabstract}
 ]
 
@@ -159,7 +165,7 @@ Si nota inoltre che la maggior parte dei giochi è destinata a un pubblico di ra
 
 \smallskip
 Negli ultimi anni si osserva una crescita significativa del numero di giochi presenti nel \textit{dataset}, indicando che l’industria continua a espandersi. 
-Nel 2020, tuttavia, si registra un calo rispetto all’anno precedente, probabilmente dovuto all’impatto della quarantena. \textcolor{red}{Sei sicuro?}
+Nel 2020, tuttavia, si registra un calo rispetto all’anno precedente, probabilmente dovuto all’impatto della quarantena.
 
 \smallskip
 Per quanto riguarda le colonne \textit{booleane}, si nota che la maggior parte dei giochi non presenta implementazioni, versioni alternative o espansioni, e non è stata finanziata tramite campagne di \textit{crowdfunding}.  
@@ -176,7 +182,7 @@ Come prima analisi, abbiamo verificato quanti giochi appartengono a più di una 
 Questa informazione è riportata in figura \ref{fig:num_cats}, dove si osserva che la maggior parte dei giochi non è categorizzata oppure appartiene solo a una o due categorie.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{/category_figures/distribuzione_del_numero_di_categorie_per_gioco.png}
+	\includegraphics[width=0.9\linewidth]{/category_figures/distribuzione_numero_categorie_per_gioco.png}
 	\centering
 	\caption{Numero di categorie a cui appartiene ogni gioco, in scala logaritmica. Ogni gioco è stato contato una sola volta, indipendentemente dal numero di categorie al quale apparteneva.}
 	\label{fig:num_cats}
@@ -404,20 +410,144 @@ Le distribuzioni delle colonne trasformate e aggregate sono mostrate in figura \
 
 Come si può osservare, le distribuzioni risultano ora più centralizzate e leggibili, permettendo di analizzare con maggiore chiarezza l’andamento delle variabili, pur avendo ridotto la dimensionalità complessiva del \textit{dataset}.
 
+\subsubsection{Sampling}
+\label{sec:sampl}
 
+Come prossimo passo, abbiamo deciso di implementare delle tecniche di \textit{sampling} per ridurre la quantità di dati con lo scopo di perdere il numero minimo di informazione. Abbiamo usato un \textit{random sampling}, selezionando randomicamente con rimozione da tutte le righe possibile, con una probabilità uniforme per ogni riga. Abbiamo confrontato la distribuzione di alcune colonne \textit{sampled} randomicamente con $2000$ righe rispetto a no sampling. Si vede in figura \ref{fig:sampling_comparison_agerec} il confronto tra la distribuzione della colonna \textit{AgeRec} prima e dopo del \textit{sampling}.
+
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{/sampling/all_data/AgeRec_histogram_comparison.png}
+	\centering
+	\caption{Distribuzione della colonna \textit{AgeRec} prima e dopo del \textit{sampling} randomico.
+	Sono stati presi \textit{2000} righe randomiche, con rimozione. 
+	Il \textit{binning} è stato determinato utilizzando il criterio di \textit{Sturges}.}
+	\label{fig:sampling_comparison_agerec}
+\end{figure}
+
+Come si vede in figura, i percentili dei dati sono rimasti per lo più inalterati, e la forma della distribuzione rimane simile. Questo ci dimostra che un \textit{sampling} randomico può essere un'ottimo metodo per ridurre la quantità di dati pur mantenedo le caratteristiche importanti della distribuzione, almeno per quanto riguarda $2000$ \textit{samples}. 
 \section{Clustering}
 \label{sec:clustering}
 
-Cazzo merda cazzo mancano 5 giorni e non abbiamo ancora iniziato questa parte LOCK IN
+Nel trattamento del \textit{dataset} abbiamo applicato diverse tecniche di \textit{clustering} per cercare relazioni tra coppie di variabili. Sono stati utilizzati vari metodi, tra cui \textit{density-based clustering}, \textit{k-means} (analizzando anche il variare della \textit{SSE} al variare di $k$) e \textit{hierarchical clustering}. 
+L’analisi si è concentrata principalmente sulla relazione tra \textit{WeightedRating} e \textit{NumDesires}, e tra \textit{WeightedRating} e \textit{AgeRec}.
+
 \subsection{Density-based}
 \label{sec:density}
 
-\subsection{Centroid-based}
-\label{sec:centroid}
+Come prima analisi abbiamo utilizzato un algoritmo di \textit{density-based clustering}, come mostrato nelle figure \ref{fig:db_numdes_weightedr} e \ref{fig:db_weightedr_agerec}. 
+Tutte le analisi sono state eseguite sul \textit{dataset} filtrato e sottoposto a \textit{sampling} a $2000$ righe. I valori \textit{NaN} sono stati rimossi.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/dbscan_numdesires_vs_weightedrating.png}
+	\centering
+	\caption{Density-based clustering di weighted rating vs numdesires}
+	\label{fig:db_numdes_weightedr}
+\end{figure}
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/dbscan_weightedrating_vs_agerec.png}
+	\centering
+	\caption{Density-based clustering di weighted rating vs agerec}
+	\label{fig:db_weightedr_agerec}
+\end{figure}
+
+Come si osserva, i \textit{clusters} individuati non riportano informazioni particolarmente significative, suggerendo che questa tecnica non sia la più adatta allo studio di queste variabili. 
+Tuttavia, tra le varie coppie analizzate, queste presentavano i \textit{clusters} più separati e interpretabili. 
+Per esempio, in figura \ref{fig:db_weightedr_agerec} si nota un cluster che copre valori medi di \textit{WeightedRating} per quasi tutte le età considerate. Questo suggerisce che esistono giochi valutati in maniera neutra indipendentemente dalla fascia d’età, mentre altri giochi — pensati per categorie di età più specifiche — presentano valutazioni differenti, come mostrato dagli altri \textit{clusters}.
+
+\subsection{K-means}
+\label{sec:kmeans}
+
+Abbiamo poi effettuato un’analisi analoga utilizzando l’algoritmo di \textit{k-means clustering}. Come riportato nelle figure \ref{fig:kmeans_numdes_weightedr} e \ref{fig:kmeans_weightedr_agerec}, abbiamo fissato $k=4$.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/k_means_numdesires_vs_weightedrating.png}
+	\centering
+	\caption{K-means clustering weighted rating vs numdesires, 4 \textit{clusters}}
+	\label{fig:kmeans_numdes_weightedr}
+\end{figure}
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/k_means_weightedrating_vs_agerec.png}
+	\centering
+	\caption{K-means clustering weighted rating vs agerec, 4 \textit{clusters}}
+	\label{fig:kmeans_weightedr_agerec}
+\end{figure}
+
+In questo caso i \textit{clusters} si separano in base alla fascia d’età (figura \ref{fig:kmeans_weightedr_agerec}) o principalmente in base al punteggio pesato (figura \ref{fig:kmeans_numdes_weightedr}). 
+Inoltre, diversamente dagli algoritmi basati sulla densità, il metodo \textit{k-means} non gestisce il rumore: i punti che prima venivano classificati come rumore vengono forzati in uno dei \textit{clusters}.
+
+\smallskip
+
+È stato inoltre studiato l’andamento della \textit{Sum Squared Error (SSE)} al variare di $k$. I risultati sono mostrati in figura \ref{fig:sse_numdes_weightedr} e \ref{fig:sse_weightedr_agerec}, e sono il criterio utilizzato per fissare il valore ottimale di $k$ nelle figure precedenti.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/sse_vs_k_numdesires_vs_weightedrating.png}
+	\centering
+	\caption{SSE del K-means clustering weighted rating vs numdesires, al variare di \textit{k}}
+	\label{fig:sse_numdes_weightedr}
+\end{figure}
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/sse_vs_k_weightedrating_vs_agerec.png}
+	\centering
+	\caption{SSE del K-means clustering weighted rating vs agerec, al variare di \textit{k}}
+	\label{fig:sse_weightedr_agerec}
+\end{figure}
+
+Come atteso, la \textit{SSE} diminuisce all’aumentare del numero di centroidi, e le figure confermano questo andamento. 
+Per evitare \textit{overfitting}, abbiamo scelto $k=4$, corrispondente al punto di “gomito” della curva.
 
 \subsection{Hierarchical clustering}
 \label{sec:hierarchical}
 
+Come ultima tecnica, abbiamo applicato l’\textit{hierarchical clustering} alle stesse variabili considerate finora. I risultati sono riportati nelle figure \ref{fig:hie_numdes_weightedr} e \ref{fig:hie_weightedr_agerec}.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/hierarchical_numdesires_vs_weightedrating.png}
+	\centering
+	\caption{Hierarchical clustering weighted rating vs numdesires}
+	\label{fig:hie_numdes_weightedr}
+\end{figure}
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/hierarchical_weightedrating_vs_agerec.png}
+	\centering
+	\caption{Hierarchical clustering weighted rating vs agerec}
+	\label{fig:hie_weightedr_agerec}
+\end{figure}
+
+Sono inoltre riportati i rispettivi \textit{dendrogram} in figure \ref{fig:ddg_numdes_weightedr} e \ref{fig:ddg_weightedr_agerec}.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/dendrogram_numdesires_vs_weightedrating.png}
+	\centering
+	\caption{Dendrogram dell’hierarchical clustering weighted rating vs numdesires}
+	\label{fig:ddg_numdes_weightedr}
+\end{figure}
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/dendrogram_weightedrating_vs_agerec.png}
+	\centering
+	\caption{Dendrogram dell’hierarchical clustering weighted rating vs agerec}
+	\label{fig:ddg_weightedr_agerec}
+\end{figure}
+
 \section{Conclusioni}
-Ma raga una bibliografia? Non si è usato niente se non i nostri cervelloni, mamma mia che bravi
+
+In questo progetto abbiamo svolto un’analisi completa del \textit{dataset} proveniente da BoardGameGeek, affrontando in modo sistematico tutte le fasi del processo di preparazione ed esplorazione dei dati. A partire da una prima comprensione delle variabili, abbiamo identificato criticità strutturali e incoerenze semantiche, applicando una pulizia approfondita che ha permesso di rimuovere valori impossibili, gestire correttamente i dati mancanti e uniformare gli attributi secondo il loro dominio.
+
+La fase di analisi univariata e bivariata ci ha permesso di evidenziare le tendenze generali del \textit{dataset}: una forte asimmetria nelle variabili legate alla popolarità e all’engagement, la predominanza di giochi semplici e adatti a pochi giocatori, e pattern chiari nella distribuzione delle categorie di classificazione. L’analisi tramite istogrammi, \textit{scatterplots} e matrici di correlazione ha inoltre confermato l’esistenza di gruppi di variabili sostanzialmente ridondanti, spesso legate allo stesso concetto o derivate da misure analoghe.
+
+Questi risultati hanno guidato la fase successiva di \textit{data preparation and filtering}, in cui abbiamo ridotto la dimensionalità del \textit{dataset} tramite tecniche di aggregazione, tra cui \textit{PCA} per le coppie fortemente correlate e una trasformazione basata sul \textit{Bayesian shrinkage} per sintetizzare il comportamento dei punteggi degli utenti, ed un \textit{sampling} randomico finale per ridurre la dimensione del \textit{dataset}. Le trasformazioni applicate hanno permesso di ottenere un \textit{dataset} più compatto, interpretabile e pronto per essere analizzato. 
+
+
+Infine, abbiamo applicato diverse tecniche di \textit{clustering}, tra cui \textit{density-based}, \textit{k-means} e \textit{hierarchical}. Pur individuando alcuni \textit{clusters} con tutti e tre i metodi, la clusterizzazione non ha rivelato informazioni realmente nuove, suggerendo che, per come sono state applicate, queste tecniche non risultano particolarmente efficaci nello studio di questo \textit{dataset}. 
+
+Tuttavia, la mancanza di \textit{clusters} ben separati e convincenti rappresenta essa stessa un risultato: indica infatti che i giochi da tavolo coprono uno spettro sostanzialmente continuo di caratteristiche, e che per ogni tipologia di utente esistono molteplici giochi potenzialmente adatti, senza che emergano gruppi nettamente distinti.
+
+
+Nel complesso, il lavoro svolto ha portato alla costruzione di un \textit{dataset} più coerente e informativo rispetto all’originale, facilitando le analisi successive e rivelando diverse dinamiche interne al mondo dei giochi da tavolo. Questa base potrà essere ulteriormente sfruttata per future analisi tramite regressioni, classificazioni, e altri studi più approfonditi.
+
 \end{document}
