@@ -33,7 +33,7 @@ def cluster_df(df, sse: bool):
         if VERBOSE:
             print(f'Plot SSE vs k salvato in: {file_path}')
         # Applico l'algoritmo dbscan
-        fig, labels = dbscan(x_column=df[x_column], y_column=df[y_column], eps=0.03, min_samples=20, title=f'DBSCAN Clustering di {x_column} vs {y_column}', x_label=x_column, y_label=y_column)
+        fig, labels = dbscan(x_column=df[x_column], y_column=df[y_column], eps=0.05, min_samples=20, title=f'DBSCAN Clustering di {x_column} vs {y_column}', x_label=x_column, y_label=y_column)
         file_path = save_figure(fig, f'dbscan_{x_column}_vs_{y_column}', folder="figures/clustered_scatters", extension=".png")
         # Applico l'algoritmo hierarchical
         fig1, labels = hierarchical_clustering(x_column=df[x_column], y_column=df[y_column], n_clusters=4, linkage='average', title="Hierarchical Clustering Example", x_label="Feature X", y_label="Feature Y")

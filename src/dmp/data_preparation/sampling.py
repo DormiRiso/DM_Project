@@ -109,6 +109,7 @@ def descriptor_weighted_sampling(df: pd.DataFrame, descriptors: list, N: int, se
 
 
 
+
 def sample_df(df: pd.DataFrame, 
               N: int, 
               method: str, 
@@ -124,6 +125,8 @@ def sample_df(df: pd.DataFrame,
     valuta la bontà del campionamento e opzionalmente genera istogrammi e boxplot.
     """
 
+    # ✅ Lavora sempre su una copia per evitare effetti collaterali
+    df = df.copy()
     np.random.seed(seed)
 
     # Numero di bin di default
@@ -134,9 +137,8 @@ def sample_df(df: pd.DataFrame,
     if method == "random":
         sample = random_sampling(df, N, seed)
     elif method == "distribution":
-        if colonne is None or len(colonne) == 0:
+        if not colonne:
             raise ValueError("Per 'distribution' devi fornire almeno una colonna numerica")
-        # Usiamo solo la prima colonna come riferimento (oppure puoi farne una media ponderata)
         colonna_rif = colonne[0]
         sample = distributed_sampling(df, colonna_rif, N, bins, seed)
     elif method == "descriptors":
@@ -150,7 +152,7 @@ def sample_df(df: pd.DataFrame,
     if colonne is not None:
         for colonna in colonne:
             if colonna not in df.columns:
-                print(f"⚠️ Colonna '{colonna}' non trovata nel DataFrame.")
+                print(f"⚠️ Colonna '{colonna}' non trovata nel DataFrame originale.")
                 continue
 
             x_originale = df[colonna].dropna()
@@ -183,14 +185,22 @@ def sample_df(df: pd.DataFrame,
             if plot:
                 os.makedirs(output_dir, exist_ok=True)
                 file_path = os.path.join(output_dir, f"{colonna}_histogram_comparison.png")
-                df = pd.DataFrame({
+
+                # ✅ Usa un nome diverso per non sovrascrivere df!
+                df_compare = pd.DataFrame({
                     'originale': x_originale,
                     'sampled': x_sample
                 })
-                histo_box_grid(df, columns=["originale","sampled"], output_dir=output_dir, 
-                                file_name = f"{colonna}_histogram_comparison.png", 
-                                title= f"Confronto tra sampled e non per: {colonna}", 
-                                summary=True)
+
+                histo_box_grid(
+                    df_compare,
+                    columns=["originale", "sampled"],
+                    output_dir=output_dir,
+                    file_name=f"{colonna}_histogram_comparison.png",
+                    title=f"Confronto tra sampled e non per: {colonna}",
+                    summary=True
+                )
                 print(f"📊 Istogrammi salvati in: {file_path}")
 
+    print(f"\n✅ Campionamento completato con metodo '{method}' su {len(sample)} righe.")
     return sample.reset_index(drop=True)

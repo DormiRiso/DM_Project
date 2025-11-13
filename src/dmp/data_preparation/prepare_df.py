@@ -9,6 +9,7 @@ from dmp.my_graphs import histo_box_grid
 from dmp.data_preparation.pca import pca
 import os
 import matplotlib.pyplot as plt
+import numpy as np
 from dmp.config import VERBOSE
 
 # 🎨 Colori ANSI per un output chiaro e leggibile
@@ -71,7 +72,8 @@ def prepare_df(df, N_samples=None, descriptors=None, colonne=None, hists=False):
     columns_to_be_tranformed_in_log = ["LanguageEase"]
     df_prepared = log_transform(df_prepared, columns_to_be_tranformed_in_log)
 
-    # Normalizza la colonna "LanguageEase"
+
+    # Normalizza le colonne
     columns_to_be_normalized = ["LanguageEase", "WeightedRating", "Playtime", "NumDesires", "AgeRec", "Weight"]
     df_prepared = min_max_scaling(df_prepared, columns_to_be_normalized)
 
@@ -83,7 +85,7 @@ def prepare_df(df, N_samples=None, descriptors=None, colonne=None, hists=False):
         df_prepared = sample_df(df_prepared, N_samples, method="random", 
         descriptors = descriptors, colonne = colonne, output_dir=output_path)
     else:
-        df_prepared = df
+        df_prepared = df_prepared
 
     # 🧩 Creazione istogrammi (se richiesto)
     if hists:
