@@ -72,6 +72,10 @@ def prepare_df(df, N_samples=None, descriptors=None, colonne=None, hists=False):
     columns_to_be_tranformed_in_log = ["LanguageEase"]
     df_prepared = log_transform(df_prepared, columns_to_be_tranformed_in_log)
 
+    """
+    #Trasforma la colonna "NumDesires" in legge di potenza (in quanto molto piccata in 0)
+    df_prepared["NumDesires"] = np.power(df_prepared["NumDesires"], 0.5)   # radice quadrata
+    """
 
     # Normalizza le colonne
     columns_to_be_normalized = ["LanguageEase", "WeightedRating", "Playtime", "NumDesires", "AgeRec", "Weight"]
