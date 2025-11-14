@@ -518,6 +518,17 @@ Come ultima tecnica, abbiamo applicato l’\textit{hierarchical clustering} alle
 	\label{fig:hie_weightedr_agerec}
 \end{figure}
 
+I risultati ottenuti non sono molto soddisfacenti, tuttavia modificando leggermente i parametri è stato possibile ottenere una clusterizzazione più efficace:
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{../static_images/hierarchical_numdesires_vs_weightedrating_average.png}
+	\centering
+	\caption{Hierarchical clustering weighted rating vs agerec}
+	\label{fig:hie_weightedr_agerec}
+\end{figure}
+
+Dall’immagine emergono cinque cluster ben distinti: in azzurro compaiono i giochi poco apprezzati e poco desiderati; in giallo quelli mediamente valutati ma con scarso interesse da parte degli utenti (la categoria più numerosa); in viola i giochi molto desiderati ma con valutazioni nella media, come titoli minori diventati popolari grazie alla notorietà della casa produttrice o varianti meno riuscite; in rosa i giochi ben valutati ma poco desiderati, magari titoli di nicchia molto apprezzati; infine, in verde, i giochi più popolari e meglio valutati.
+
 Sono inoltre riportati i rispettivi \textit{dendrogram} in figure \ref{fig:ddg_numdes_weightedr} e \ref{fig:ddg_weightedr_agerec}.
 
 \begin{figure}[h]
@@ -533,6 +544,8 @@ Sono inoltre riportati i rispettivi \textit{dendrogram} in figure \ref{fig:ddg_n
 	\caption{Dendrogram dell’hierarchical clustering weighted rating vs agerec}
 	\label{fig:ddg_weightedr_agerec}
 \end{figure}
+
+Osservando i diagrammi ad albero, si nota come la scelta di suddividere le due coppie di categorie in 4-5 cluster risulti appropriata: tracciando una linea orizzontale sull’albero è infatti possibile ottenere una suddivisione significativa dell’intero set di dati.
 
 \section{Conclusioni}
 
