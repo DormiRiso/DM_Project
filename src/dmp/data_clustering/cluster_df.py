@@ -20,6 +20,7 @@ def cluster_df(df, sse: bool):
     k_list = [4, 4]
 
     for x_column, y_column, k in zip(x_columns, y_columns, k_list):
+
         # Applico l'aloritmo K-means
         plt1 = k_means_scatter(df[x_column], df[y_column], k, max_steps=10, n_iter = 10, x_label=x_column, y_label=y_column)
         file_path = save_figure(plt1, f'k_means_{x_column}_vs_{y_column}', folder="figures/clustered_scatters", extension=".png")
@@ -32,12 +33,16 @@ def cluster_df(df, sse: bool):
             file_path = save_figure(plt2, f'sse_vs_k_{x_column}_vs_{y_column}', folder="figures/clustered_scatters", extension=".png")
         if VERBOSE:
             print(f'Plot SSE vs k salvato in: {file_path}')
+
         # Applico l'algoritmo dbscan
-        fig, labels = dbscan(x_column=df[x_column], y_column=df[y_column], eps=0.05, min_samples=20, title=f'DBSCAN Clustering di {x_column} vs {y_column}', x_label=x_column, y_label=y_column)
+        fig, labels = dbscan(x_column=df[x_column], y_column=df[y_column], eps=0.03, min_samples=20, title=f'DBSCAN Clustering di {x_column} vs {y_column}', x_label=x_column, y_label=y_column)
         file_path = save_figure(fig, f'dbscan_{x_column}_vs_{y_column}', folder="figures/clustered_scatters", extension=".png")
+     
         # Applico l'algoritmo hierarchical
-        fig1, labels = hierarchical_clustering(x_column=df[x_column], y_column=df[y_column], n_clusters=4, linkage='average', title="Hierarchical Clustering Example", x_label="Feature X", y_label="Feature Y")
+        fig1, labels = hierarchical_clustering(x_column=df[x_column], y_column=df[y_column], n_clusters=5, linkage="complete", title="Hierarchical Clustering Example", x_label=x_column, y_label=y_column)
         file_path = save_figure(fig1, f'hierarchical_{x_column}_vs_{y_column}', folder="figures/clustered_scatters", extension=".png")
+        
         # Dendrogramma corrispondente
         fig_dendro = plot_dendrogram(x_column=df[x_column], y_column=df[y_column], linkage_method='ward', truncate_mode='lastp', title=f'Dendrogramma - Metodo Ward di {x_column} vs {y_column}')
         file_path = save_figure(fig_dendro, f'Dendrogram_{x_column}_vs_{y_column}', folder="figures/clustered_scatters", extension=".png")
+
