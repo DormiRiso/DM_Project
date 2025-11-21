@@ -27,6 +27,7 @@ from dmp.data_understanding import understand_df
 from dmp.data_preparation import prepare_df
 from dmp.data_clustering import cluster_df
 from dmp.config import VERBOSE, set_verbose
+from dmp.data_classification import classificate_df
 
 # 🎨 Colori ANSI per una stampa più leggibile
 class Colors:
@@ -110,7 +111,7 @@ def prepare_data(input_file: Path, output_file: Path, N_samples, descriptors, co
 def cluster_data(input_file: Path, verbose: bool, sse: bool):
     """Esegue la clusterizzazione di alcune colonne selezionate sul dataframe già pulite e filtrato"""
 
-    print(f"{Colors.BLUE}📊 Caricamento dataset pulito da:{Colors.RESET} {input_file}")
+    print(f"{Colors.BLUE}📊 Caricamento dataset pulito e preparato da:{Colors.RESET} {input_file}")
     filtered_df = pd.read_csv(input_file, converters={"Ranks": literal_eval}) #Leggi direttamente la colonna "Ranks" come python list e non stringa
 
     if verbose:
@@ -121,6 +122,20 @@ def cluster_data(input_file: Path, verbose: bool, sse: bool):
             cluster_df(filtered_df, sse)
             spinner.ok("✅")
     print(f"{Colors.GREEN}📈 Clusterizzazione completata!{Colors.RESET}\n")  
+
+def classificate_data(input_file: Path, percentage, verbose = False):
+    print(f"{Colors.BLUE}📊 Caricamento dataset pulito e preparato da:{Colors.RESET} {input_file}")
+    prepared_df = pd.read_csv(input_file, converters={"Ranks": literal_eval}) #Leggi direttamente la colonna "Ranks" come python list e non stringa
+
+    if verbose:
+        print(f"{Colors.CYAN}🔍 Avvio della classificazione dei dati {Colors.RESET}")
+        classificate_df(prepared_df, percentage, save_dfs = True)
+    else:
+        with yaspin(text="🔍 Avvio della classificazione dei dati ", color="cyan") as spinner:
+            classificate_df(prepared_df, percentage, save_dfs = True)
+            spinner.ok("✅")
+    print(f"{Colors.GREEN}📈 classificazione completata!{Colors.RESET}\n")  
+
 
 def hypno_toad():
     print(r"""
@@ -195,7 +210,7 @@ def main():
         help="Filtra il dataset per le righe che contengono uno o più descrittori nella colonna 'Description'"
     )
     parser.add_argument(
-        "-cl", "--clustering",
+        "-clu", "--clustering",
         action="store_true",
         help="Esegue il clutering di alcune colonne del DataFrame"
     )
@@ -203,6 +218,11 @@ def main():
         "-sse", "--sse_vs_k",
         action="store_true",
         help="Esegue il calcolo del SSE di clustering in funzione di k"
+    )
+    parser.add_argument(
+    "-cla", "--classification",
+    action="store_true",
+    help="Esegue il processo di classificazione del df preparato"
     )
     parser.add_argument(
         "-hand_warmer", "--hand_warmer",
@@ -229,9 +249,6 @@ def main():
 
     set_verbose(args.verbose)
 
-    # Se non viene specificato nessuno dei tre step → esegui tutto
-    if not args.cleaning and not args.understanding and not args.clustering:
-        args.cleaning = args.understanding = True
 
     # Percorsi base
     data_dir = Path("data")
@@ -246,10 +263,8 @@ def main():
     # Esecuzione task
     if args.cleaning:
         clean_data(input_file, cleaned_output_file, filtered_output_file, args.verbose)
-        if args.preparation is None or isinstance(args.preparation, int):
-            colonne_check_filtro = ["NumDesires", "AgeRec", "Weight"]
-            prepare_data(filtered_output_file, prepared_output_file, args.preparation, args.descriptors, colonne_check_filtro, args.verbose)
-
+        colonne_check_filtro = ["NumDesires", "AgeRec", "Weight"]
+        prepare_data(filtered_output_file, prepared_output_file, args.preparation, args.descriptors, colonne_check_filtro, args.verbose)
 
 
     if args.understanding:
@@ -258,9 +273,12 @@ def main():
             return
         understand_data(cleaned_output_file, filtered_output_file, args.scatters, args.hists, args.descriptors, args.verbose)
 
-
     if args.clustering:
         cluster_data(prepared_output_file, args.verbose, args.sse_vs_k)
+    
+    if args.classification:
+        percentage_for_split = 0.7
+        classificate_data(prepared_output_file, percentage_for_split)
 
     print(f"{Colors.BOLD}🏁 Operazione completata!{Colors.RESET} ✅")
 
