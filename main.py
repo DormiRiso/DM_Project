@@ -123,16 +123,16 @@ def cluster_data(input_file: Path, verbose: bool, sse: bool):
             spinner.ok("✅")
     print(f"{Colors.GREEN}📈 Clusterizzazione completata!{Colors.RESET}\n")  
 
-def classificate_data(input_file: Path, percentage, verbose = False):
+def classificate_data(input_file: Path, percentage, descriptors = None, verbose = False):
     print(f"{Colors.BLUE}📊 Caricamento dataset pulito e preparato da:{Colors.RESET} {input_file}")
     prepared_df = pd.read_csv(input_file, converters={"Ranks": literal_eval}) #Leggi direttamente la colonna "Ranks" come python list e non stringa
 
     if verbose:
         print(f"{Colors.CYAN}🔍 Avvio della classificazione dei dati {Colors.RESET}")
-        classificate_df(prepared_df, percentage, save_dfs = True)
+        classificate_df(prepared_df, percentage, save_dfs = True, descriptors = descriptors)
     else:
         with yaspin(text="🔍 Avvio della classificazione dei dati ", color="cyan") as spinner:
-            classificate_df(prepared_df, percentage, save_dfs = True)
+            classificate_df(prepared_df, percentage, save_dfs = True, descriptors = descriptors)
             spinner.ok("✅")
     print(f"{Colors.GREEN}📈 classificazione completata!{Colors.RESET}\n")  
 
@@ -278,7 +278,7 @@ def main():
     
     if args.classification:
         percentage_for_split = 0.7
-        classificate_data(prepared_output_file, percentage_for_split)
+        classificate_data(prepared_output_file, percentage_for_split, descriptors = args.descriptors)
 
     print(f"{Colors.BOLD}🏁 Operazione completata!{Colors.RESET} ✅")
 
