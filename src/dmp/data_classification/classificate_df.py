@@ -1,7 +1,8 @@
 from .split_df import split_df
+from .KNN import knn
 import os
 
-def classificate_df(df, percentuale, save_dfs=False):
+def classificate_df(df, percentuale, save_dfs=False, descriptors = None):
     """
     Funzione di base per tutto il data classification:
     - Divide il dataset in test e train
@@ -28,5 +29,6 @@ def classificate_df(df, percentuale, save_dfs=False):
         
         print(f"File salvati correttamente in: {cartella_destinazione}")
 
-    # È buona prassi restituire i dataframe per usarli nel resto del codice
-    return df_train, df_test
+
+    #Faccio il KNN per le colonne "NumDesires" e "YearPublished"
+    knn(df_train, df_test, ["NumDesires", "YearPublished"], "Rating", k=30, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
