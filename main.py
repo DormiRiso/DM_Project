@@ -244,6 +244,7 @@ def main():
             args.scatters = True
             args.hists = True
             args.hypno = True
+            args.classification = True
         else:
             pass
 
