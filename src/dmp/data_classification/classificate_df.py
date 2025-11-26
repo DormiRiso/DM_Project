@@ -30,5 +30,9 @@ def classificate_df(df, percentuale, save_dfs=False, descriptors = None):
         print(f"File salvati correttamente in: {cartella_destinazione}")
 
 
-    #Faccio il KNN per le colonne "NumDesires" e "YearPublished"
-    knn(df_train, df_test, ["NumDesires", "YearPublished"], "Rating", k=30, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
+    #Faccio il KNN per le colonne "NumDesires" e "YearPublished" (Funziona bene con Rating)
+    knn(df_train, df_test, ["NumDesires", "YearPublished"], "Rating", k=200, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
+    
+    #Faccio il KNN per le colonne "Weight" e "AgeRec"(funziona bene sia con Rating che con "-d roll action")
+    knn(df_train, df_test, ["Weight", "AgeRec"], "Rating", k=200, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
+    
