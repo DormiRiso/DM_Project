@@ -138,7 +138,7 @@ def knn(train_df, test_df, feature_cols, target_col, k=3, print_metrics=False, m
     # --- C. ANALISI BASELINE E INCERTEZZA ---
     # ==============================================================================
     if check_baseline:
-        print(f"\n--- 📊 ANALISI COMPARATIVA E INCERTEZZA (k={k}) ---")
+        print(f"\n--- 📊 ANALISI COMPARATIVA E INCERTEZZA SU {feature_cols} con (k={k}) ---")
         
         # Cross-Validation stratificata (mantiene le proporzioni delle classi)
         n_splits = 10
@@ -215,10 +215,9 @@ def knn(train_df, test_df, feature_cols, target_col, k=3, print_metrics=False, m
         # 1. Costruzione percorso file sicuro
         base_dir = "figures/classification"
         sub_dir_features = "_".join(feature_cols)
-        sub_dir_target = str(target_col)
         
-        # Percorso completo: figures/classification/FeatureA_FeatureB/Target/KNN_Nome.png
-        output_path = os.path.join(base_dir, sub_dir_features, sub_dir_target, f"KNN_{desc_name}.png")
+        # Percorso completo: figures/classification/FeatureA_FeatureB/KNN_Nome.png
+        output_path = os.path.join(base_dir, sub_dir_features, f"KNN_{desc_name}.png")
 
         # 2. Creazione Directory (CORREZIONE IMPORTANTE)
         # os.makedirs con exist_ok=True crea ricorsivamente tutte le cartelle mancanti
@@ -232,8 +231,8 @@ def knn(train_df, test_df, feature_cols, target_col, k=3, print_metrics=False, m
             x=feature_cols[0], 
             y=feature_cols[1], 
             hue=actual_target_col, 
-            palette='viridis',
-            s=100,
+            palette='tab10',
+            s=50,
             edgecolor='black',
             alpha=0.8
         )
