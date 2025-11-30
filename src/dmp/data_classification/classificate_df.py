@@ -1,5 +1,6 @@
 from .split_df import split_df
 from .KNN import knn
+from .Naive_Bayes import naive_bayes_classifier
 import os
 
 def classificate_df(df, percentuale, save_dfs=False, descriptors = None):
@@ -31,8 +32,24 @@ def classificate_df(df, percentuale, save_dfs=False, descriptors = None):
 
 
     #Faccio il KNN per le colonne "NumDesires" e "YearPublished" (Funziona bene con Rating)
-    knn(df_train, df_test, ["NumDesires", "YearPublished"], "Rating", k=200, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
+    knn(df_train, df_test, num_feats = ["NumDesires", "YearPublished"], target_col="Rating", k=200, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
     
     #Faccio il KNN per le colonne "Weight" e "AgeRec"(funziona bene sia con Rating che con "-d roll action")
-    knn(df_train, df_test, ["Weight", "AgeRec"], "Rating", k=200, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
+    knn(df_train, df_test, num_feats =["Weight", "AgeRec"], target_col="Rating", k=200, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
+
+    # Algoritmo di Naive-Bayes per alcune colonne
+    numeric_cols = ["Weight", "Playtime", "LanguageEase", "ComMinPlaytime"]
+    categoric_cols = ["Family"]
+
+    naive_bayes_classifier(
+        df_train, df_test, 
+        num_feats=numeric_cols, 
+        cat_feats=categoric_cols, 
+        target_col="Rating",
+        print_metrics=True, 
+        make_plot=True, 
+        descriptors=descriptors, 
+        check_baseline=True
+    )
+
     

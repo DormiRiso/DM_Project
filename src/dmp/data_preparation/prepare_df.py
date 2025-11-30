@@ -78,7 +78,7 @@ def prepare_df(df, N_samples=None, descriptors=None, colonne=None, hists=False):
     """
 
     # Normalizza le colonne
-    columns_to_be_normalized = ["LanguageEase", "WeightedRating", "Playtime", "NumDesires", "AgeRec", "Weight", "YearPublished", "ComMinPlaytime"]
+    columns_to_be_normalized = ["LanguageEase", "WeightedRating", "Playtime", "NumDesires", "AgeRec", "Weight", "ComMinPlaytime"]
     df_prepared = min_max_scaling(df_prepared, columns_to_be_normalized)
 
     # Sampling delle rows
