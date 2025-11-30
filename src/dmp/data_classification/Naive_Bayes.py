@@ -54,9 +54,6 @@ def naive_bayes_classifier(train_df, test_df, num_feats=None, cat_feats=None, ta
 
     # 3. Addestramento (Modello)
     # Inizializza il modello Gaussian Naive Bayes (GNB) 
-
-[Image of Naive Bayes classification diagram with Bayes theorem formula]
-
     # GNB assume che le feature (ora tutte numeriche, grazie all'OHE e allo Scaling) seguano una distribuzione gaussiana.
     model = GaussianNB()
     # Addestra il modello utilizzando le feature scalate/codificate (X_train) e le etichette (y_train).
