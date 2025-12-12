@@ -26,5 +26,5 @@ def add_weighted_rating(df: pd.DataFrame, rating_col='Rating', votes_col='NumUse
     
     df[new_col] = (v / (v + m)) * R + (m / (v + m)) * C
 
-    df.drop(columns=[rating_col, votes_col], inplace=True, axis=1)
+    df.drop(columns=[votes_col], inplace=True, axis=1)
     return df
