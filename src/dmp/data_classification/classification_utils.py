@@ -1,9 +1,18 @@
-import os
+import pandas as pd
+import numpy as np 
 import matplotlib.pyplot as plt
+import seaborn as sns
+import os
+import re # Necessario per la sanificazione dei nomi
 
 from dmp.data_understanding.analysis_by_descriptors import make_safe_descriptor_name
 from sklearn.metrics import ConfusionMatrixDisplay, RocCurveDisplay
 import seaborn as sns
+from sklearn.metrics import (accuracy_score, precision_score, recall_score, f1_score)
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.dummy import DummyClassifier
+from sklearn.model_selection import cross_val_score, StratifiedKFold
 
 def generate_plots(model, X_train, y_train, X_test, y_test, feature_names, target_name, descriptors, model_tag="Model"):
     """
@@ -93,18 +102,6 @@ def generate_plots(model, X_train, y_train, X_test, y_test, feature_names, targe
     plt.close() # Chiude la figura per liberare memoria
     print(f"Dashboard salvata: {out_path}")
     
-import pandas as pd
-import numpy as np 
-import matplotlib.pyplot as plt
-import seaborn as sns
-import os
-import re # Necessario per la sanificazione dei nomi
-
-from sklearn.metrics import (accuracy_score, precision_score, recall_score, f1_score)
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.dummy import DummyClassifier
-from sklearn.model_selection import cross_val_score, StratifiedKFold
 
 # Assumiamo questa funzione helper per i nomi sicuri (come nel tuo codice)
 try:
