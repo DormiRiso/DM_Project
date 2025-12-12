@@ -1,3 +1,10 @@
+import os
+import matplotlib.pyplot as plt
+
+from dmp.data_understanding.analysis_by_descriptors import make_safe_descriptor_name
+from sklearn.metrics import ConfusionMatrixDisplay, RocCurveDisplay
+import seaborn as sns
+
 def generate_plots(model, X_train, y_train, X_test, y_test, feature_names, target_name, descriptors, model_tag="Model"):
     """
     Funzione di reportistica visuale che genera una Dashboard di performance in un'unica immagine.
