@@ -2,6 +2,7 @@ from .split_df import split_df
 from .KNN import knn
 from .Naive_Bayes import naive_bayes_classifier
 from .decision_tree import decision_tree_classifier
+from .regression import lin_regression, nonlin_regression, multiple_regression, multivariate_regression
 import os
 
 
@@ -34,10 +35,10 @@ def classificate_df(df, percentuale, save_dfs=False, descriptors = None):
 
 
     #Faccio il KNN per le colonne "NumDesires" e "YearPublished" (Funziona bene con Rating)
-    knn(df_train, df_test, num_feats = ["NumDesires", "YearPublished"], target_col="Rating", k=20, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
+    knn(df_train, df_test, num_feats = ["NumDesires", "YearPublished"], target_col="Rating", k=200, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
     
     #Faccio il KNN per le colonne "Weight" e "AgeRec"(funziona bene sia con Rating che con "-d roll action")
-    knn(df_train, df_test, num_feats =["Weight", "AgeRec"], target_col="Rating", k=50, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
+    knn(df_train, df_test, num_feats =["Weight", "AgeRec"], target_col="Rating", k=200, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
 
     # Algoritmo di Naive-Bayes per alcune colonne
     numeric_cols = ["Weight", "Playtime", "LanguageEase", "ComMinPlaytime"]
@@ -79,3 +80,19 @@ def classificate_df(df, percentuale, save_dfs=False, descriptors = None):
         check_baseline=True
     )
     
+    # 6. Regression:
+    print("\n4. REGRESSIONS")
+    
+    # Magari usare due colonne belle correlate prima di averle buttate via
+    lin_regression(df_train, df_test, independent_col="YearPublished", dependent_col="WeightedRating")
+    
+    # Questi sembrano interessanti da studiare:
+    nonlin_regression(df_train, df_test, independent_col="NumDesires", dependent_col="WeightedRating")
+    
+    # Colonna dipendente deve essere quella di prima ma possiamo giocare su quelle indip.
+    multiple_regression(df_train, df_test, independent_cols=["NumDesires", "AgeRec"], dependent_col="WeightedRating", method="Linear")
+    multiple_regression(df_train, df_test, independent_cols=["NumDesires", "AgeRec"], dependent_col="WeightedRating", method="KNN")
+    multiple_regression(df_train, df_test, independent_cols=["NumDesires", "AgeRec"], dependent_col="WeightedRating", method="DecisionTree")
+
+    # Non è richiesto dalla scheda quindi valutiamo
+    multivariate_regression(df_train, df_test, independent_cols=["NumDesires", "Weight"], dependent_cols=["WeightedRating", "YearPublished"])

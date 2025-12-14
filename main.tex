@@ -131,30 +131,30 @@ Un esempio di distribuzione prima e dopo questa pulizia è mostrato in figura \r
 Solo il $7.88\%$ dei dati è stato rimosso, ma la leggibilità della distribuzione è migliorata in modo significativo. 
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{/histograms/all_data/analisi_singola_yearpublished.png}
-	\centering
-	\caption{Distribuzione della colonna \textit{YearPublished} prima e dopo la rimozione degli \textit{outlier} (considerando solo i valori compresi tra i percentili $5\%$ e $95\%$). Il \textit{binning} è stato scelto utilizzando il criterio di \textit{Sturges}.}
-	\label{fig:histo_YearPublished}
+\includegraphics[width=0.9\linewidth]{/histograms/all_data/analisi_singola_yearpublished.png}
+\centering
+\caption{Distribuzione della colonna \textit{YearPublished} prima e dopo la rimozione degli \textit{outlier} (considerando solo i valori compresi tra i percentili $5\%$ e $95\%$). Il \textit{binning} è stato scelto utilizzando il criterio di \textit{Sturges}.}
+\label{fig:histo_YearPublished}
 \end{figure}
 
 Abbiamo svolto un’analisi analoga per tutte le colonne numeriche, creando un \textit{box plot} sovrapposto a un istogramma per i dati originali e ripetendo la procedura per i dati filtrati secondo il criterio descritto in precedenza (mantenendo solo i valori tra i percentili $5\%$ e $95\%$). 
 La figura \ref{fig:histo_box_not_cleaned} riporta tutti gli istogrammi generati utilizzando i dati grezzi, mentre la figura \ref{fig:histo_box_cleaned} mostra gli stessi istogrammi dopo la pulizia applicata con il metodo discusso.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{/histograms/all_data/Histogram_Matrix_all_data_unfiltered.png}
-	\centering
-	\caption{Distribuzioni delle variabili numeriche senza alcuna filtratura sul \textit{dataset} pulito. 
-	La visualizzazione è ottenuta tramite istogrammi sovrapposti a \textit{box plot}. 
-	I percentili corrispondono al $5, 25, 50, 75, 95\%$ dei dati originali. 
-	Il \textit{binning} è stato determinato utilizzando il criterio di \textit{Sturges}.}
-	\label{fig:histo_box_not_cleaned}
+\includegraphics[width=0.9\linewidth]{/histograms/all_data/Histogram_Matrix_all_data_unfiltered.png}
+\centering
+\caption{Distribuzioni delle variabili numeriche senza alcuna filtratura sul \textit{dataset} pulito. 
+La visualizzazione è ottenuta tramite istogrammi sovrapposti a \textit{box plot}. 
+I percentili corrispondono al $5, 25, 50, 75, 95\%$ dei dati originali. 
+Il \textit{binning} è stato determinato utilizzando il criterio di \textit{Sturges}.}
+\label{fig:histo_box_not_cleaned}
 \end{figure}
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{/histograms/all_data/Histogram_Matrix_all_data_filtered.png}
-	\centering
-	\caption{Distribuzioni delle variabili singole dopo la rimozione degli \textit{outlier} (considerando solo i valori compresi tra i percentili $5\%$ e $95\%$). La visualizzazione è ottenuta tramite istogrammi sovrapposti a \textit{box plot}. I percentili corrispondono al $5, 25, 50, 75, 95\%$ dei dati filtrati. Il \textit{binning} è stato determinato utilizzando il criterio di \textit{Sturges}.}
-	\label{fig:histo_box_cleaned}
+\includegraphics[width=0.9\linewidth]{/histograms/all_data/Histogram_Matrix_all_data_filtered.png}
+\centering
+\caption{Distribuzioni delle variabili singole dopo la rimozione degli \textit{outlier} (considerando solo i valori compresi tra i percentili $5\%$ e $95\%$). La visualizzazione è ottenuta tramite istogrammi sovrapposti a \textit{box plot}. I percentili corrispondono al $5, 25, 50, 75, 95\%$ dei dati filtrati. Il \textit{binning} è stato determinato utilizzando il criterio di \textit{Sturges}.}
+\label{fig:histo_box_cleaned}
 \end{figure}
 
 Si osserva che la maggior parte delle distribuzioni presenta una forte asimmetria verso valori bassi, con un picco concentrato in prossimità del minimo. 
@@ -182,10 +182,10 @@ Come prima analisi, abbiamo verificato quanti giochi appartengono a più di una 
 Questa informazione è riportata in figura \ref{fig:num_cats}, dove si osserva che la maggior parte dei giochi non è categorizzata oppure appartiene solo a una o due categorie.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{/category_figures/distribuzione_numero_categorie_per_gioco.png}
-	\centering
-	\caption{Numero di categorie a cui appartiene ogni gioco, in scala logaritmica. Ogni gioco è stato contato una sola volta, indipendentemente dal numero di categorie al quale apparteneva.}
-	\label{fig:num_cats}
+\includegraphics[width=0.9\linewidth]{/category_figures/distribuzione_numero_categorie_per_gioco.png}
+\centering
+\caption{Numero di categorie a cui appartiene ogni gioco, in scala logaritmica. Ogni gioco è stato contato una sola volta, indipendentemente dal numero di categorie al quale apparteneva.}
+\label{fig:num_cats}
 \end{figure}
 
 Abbiamo inoltre analizzato la distribuzione delle singole categorie, contando quante volte ciascuna compare nel \textit{dataset}. 
@@ -193,10 +193,10 @@ I risultati sono mostrati in figura \ref{fig:distr_cats}.
 Si nota immediatamente che i giochi di guerra sono i più comuni, seguiti da quelli di strategia e da quelli di famiglia.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{/category_figures/distribuzione_delle_categorie.png}
-	\centering
-	\caption{Distribuzione delle categorie di classificazione dei giochi.}
-	\label{fig:distr_cats}
+\includegraphics[width=0.9\linewidth]{/category_figures/distribuzione_delle_categorie.png}
+\centering
+\caption{Distribuzione delle categorie di classificazione dei giochi.}
+\label{fig:distr_cats}
 \end{figure}
 
 Successivamente, abbiamo studiato la distribuzione delle categorie prese a coppie. 
@@ -206,12 +206,12 @@ In questa figura, la diagonale rappresenta il numero totale di giochi appartenen
 La scala dei colori è stata impostata su base logaritmica, poiché i dati coprono diversi ordini di grandezza.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{/category_figures/category_couples_heatmap.png}
-	\centering
-	\caption{Occorrenze delle varie coppie di categorie per i giochi appartenenti a due categorie. 
-	La diagonale rappresenta il numero di occorrenze della singola categoria. 
-	La scala dei colori è logaritmica.}
-	\label{fig:heatmap_cats}
+\includegraphics[width=0.9\linewidth]{/category_figures/category_couples_heatmap.png}
+\centering
+\caption{Occorrenze delle varie coppie di categorie per i giochi appartenenti a due categorie. 
+La diagonale rappresenta il numero di occorrenze della singola categoria. 
+La scala dei colori è logaritmica.}
+\label{fig:heatmap_cats}
 \end{figure}
 
 La figura \ref{fig:heatmap_cats} mostra solo il numero assoluto di co-occorrenze per ciascuna coppia; tuttavia, le categorie più popolose singolarmente (come \textit{war}, \textit{strategy} e \textit{family}) tendono naturalmente ad avere anche più co-occorrenze. 
@@ -228,12 +228,12 @@ Per costruzione, l’equazione (\ref{eq:norm_cat}) impone che la diagonale valga
 La \textit{heatmap} normalizzata è mostrata in figura \ref{fig:heatmap_cats_norm}, dove la diagonale è stata eliminata (posta uguale a zero) per mettere in risalto i valori non banali.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{/category_figures/category_couples_heatmap_norm.png}
-	\centering
-	\caption{Co-occorrenze normalizzate delle varie coppie di categorie per i giochi appartenenti a due categorie, secondo l’equazione (\ref{eq:norm_cat}). 
-	La diagonale è stata posta uguale a zero per chiarezza. 
-	I valori fuori diagonale perdono significatività dopo la normalizzazione e sono stati quindi omessi.}
-	\label{fig:heatmap_cats_norm}
+\includegraphics[width=0.9\linewidth]{/category_figures/category_couples_heatmap_norm.png}
+\centering
+\caption{Co-occorrenze normalizzate delle varie coppie di categorie per i giochi appartenenti a due categorie, secondo l’equazione (\ref{eq:norm_cat}). 
+La diagonale è stata posta uguale a zero per chiarezza. 
+I valori fuori diagonale perdono significatività dopo la normalizzazione e sono stati quindi omessi.}
+\label{fig:heatmap_cats_norm}
 \end{figure}
 
 Dalla figura \ref{fig:heatmap_cats_norm} si osserva che la coppia \textit{strategy–family} rimane la più frequente, ma ora è evidente che ciò non è dovuto unicamente all’elevata numerosità delle due categorie. 
@@ -250,11 +250,11 @@ Nel complesso, le figure \ref{fig:num_cats}, \ref{fig:distr_cats}, \ref{fig:heat
 Infine, abbiamo studiato la distribuzione delle descrizioni dei giochi. Dopo aver convertito ogni colonna in una lista di stringhe, e assicurandoci che ogni parola comparisse una sola volta per lista, abbiamo creato un grafico a barre per visualizzare le occorrenze delle parole singole. Questo grafico si vede in figura \ref{fig:top_words}.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{/top_words/occorrenza_delle_parole_più_usate_nelle_descrizioni.png}
-	\centering
-	\caption{Grafico a barre delle occorrenze delle singole parole nella colonna \textit{Descriptions} del dataset.
+\includegraphics[width=0.9\linewidth]{/top_words/occorrenza_delle_parole_più_usate_nelle_descrizioni.png}
+\centering
+\caption{Grafico a barre delle occorrenze delle singole parole nella colonna \textit{Descriptions} del dataset.
 Ci siamo assicurarti di eliminare le occorrenze doppie delle parole.}
-	\label{fig:top_words}
+\label{fig:top_words}
 \end{figure}
 
 Non ci sorprende che le parole più comuni nelle descrizioni sono "game", "player", "win", "turn", e altre parole simili che si riferiscono ad un gioco in generale.
@@ -272,23 +272,23 @@ Queste colonne, assumendo pochi valori discreti, non sono adatte a essere rappre
 La figura \ref{fig:scatter_unfiltered} mostra tutte le coppie tra le variabili numeriche rimanenti, considerando ciascuna combinazione una sola volta.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{/scatterplots/all_data/Scatterplots_all_data_unfiltered}
-	\centering
-	\caption{\textit{Scatterplot} delle variabili numeriche di interesse. 
-	I dati non sono stati filtrati in alcun modo e ogni coppia compare una sola volta.}
-	\label{fig:scatter_unfiltered}
+\includegraphics[width=0.9\linewidth]{/scatterplots/all_data/Scatterplots_all_data_unfiltered}
+\centering
+\caption{\textit{Scatterplot} delle variabili numeriche di interesse. 
+I dati non sono stati filtrati in alcun modo e ogni coppia compare una sola volta.}
+\label{fig:scatter_unfiltered}
 \end{figure}
 
 Utilizzando lo stesso criterio di pulizia dei dati discusso nella sezione \ref{sec:histos} (basato sulla rimozione dei valori al di fuori dei percentili $5\%$ e $95\%$), abbiamo generato un secondo insieme di \textit{scatterplot} utilizzando i dati depurati dagli \textit{outlier}. 
 Questo consente di visualizzare meglio le zone più dense e centrali delle distribuzioni, come mostrato in figura \ref{fig:scatter_filtered}.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{/scatterplots/all_data/Scatterplots_all_data_filtered}
-	\centering
-	\caption{\textit{Scatterplot} delle variabili numeriche di interesse. 
-	I dati sono stati filtrati rimuovendo i valori al di fuori dei percentili più esterni ($5\%$ e $95\%$). 
-	Ogni coppia compare una sola volta.}
-	\label{fig:scatter_filtered}
+\includegraphics[width=0.9\linewidth]{/scatterplots/all_data/Scatterplots_all_data_filtered}
+\centering
+\caption{\textit{Scatterplot} delle variabili numeriche di interesse. 
+I dati sono stati filtrati rimuovendo i valori al di fuori dei percentili più esterni ($5\%$ e $95\%$). 
+Ogni coppia compare una sola volta.}
+\label{fig:scatter_filtered}
 \end{figure}
 
 La maggior parte delle coppie di variabili risulta distribuita in modo apparentemente scorrelato, con punti distribuiti uniformemente sul piano. 
@@ -303,21 +303,21 @@ Il criterio di selezione delle colonne numeriche è lo stesso adottato nella sez
 La \textit{heatmap} di correlazione è mostrata in figura \ref{fig:heatmap_corr}.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{/heatmaps/correlation_heatmap_unfiltered.png}
-	\centering
-	\caption{Matrice di correlazione tra le colonne numeriche analizzate. 
-	I dati non sono stati filtrati in alcun modo.}
-	\label{fig:heatmap_corr}
+\includegraphics[width=0.9\linewidth]{/heatmaps/correlation_heatmap_unfiltered.png}
+\centering
+\caption{Matrice di correlazione tra le colonne numeriche analizzate. 
+I dati non sono stati filtrati in alcun modo.}
+\label{fig:heatmap_corr}
 \end{figure}
 
 Come di consueto, abbiamo applicato il nostro criterio di filtraggio basato sulla tecnica descritta nelle sezioni precedenti, e il risultato della pulizia è riportato in figura \ref{fig:heatmap_corr_filt}.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{/heatmaps/correlation_heatmap_filtered.png}
-	\centering
-	\caption{Matrice di correlazione tra le colonne numeriche analizzate. 
-	I dati sono stati filtrati rimuovendo i valori al di fuori dei percentili più esterni ($5\%$ e $95\%$).}
-	\label{fig:heatmap_corr_filt}
+\includegraphics[width=0.9\linewidth]{/heatmaps/correlation_heatmap_filtered.png}
+\centering
+\caption{Matrice di correlazione tra le colonne numeriche analizzate. 
+I dati sono stati filtrati rimuovendo i valori al di fuori dei percentili più esterni ($5\%$ e $95\%$).}
+\label{fig:heatmap_corr_filt}
 \end{figure}
 
 Come anticipato, la correlazione tra \textit{ComWeight} e \textit{GameWeight} risulta massima nell’indice di Pearson. 
@@ -339,11 +339,11 @@ Per ridurre la dimensionalità e mettere meglio in evidenza le altre relazioni, 
 La nuova matrice di correlazione è riportata in figura \ref{fig:heatmap_corr_filt_dim}.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{/heatmaps/correlation_heatmap_filtered_diminished.png}
-	\centering
-	\caption{Matrice di correlazione tra le colonne numeriche analizzate, dopo la rimozione di una variabile per ciascuna coppia correlata 1:1. 
-	I dati sono stati filtrati rimuovendo i valori al di fuori dei percentili più esterni ($5\%$ e $95\%$).}
-	\label{fig:heatmap_corr_filt_dim}
+\includegraphics[width=0.9\linewidth]{/heatmaps/correlation_heatmap_filtered_diminished.png}
+\centering
+\caption{Matrice di correlazione tra le colonne numeriche analizzate, dopo la rimozione di una variabile per ciascuna coppia correlata 1:1. 
+I dati sono stati filtrati rimuovendo i valori al di fuori dei percentili più esterni ($5\%$ e $95\%$).}
+\label{fig:heatmap_corr_filt_dim}
 \end{figure}
 
 Dopo la pulizia del \textit{dataset}, emergono nuove correlazioni precedentemente nascoste dagli \textit{outlier}. 
@@ -399,13 +399,13 @@ Infine, la colonna \textit{LanguageEase} è stata trasformata applicando una fun
 Le distribuzioni delle colonne trasformate e aggregate sono mostrate in figura \ref{fig:histoboxmatrix_transformed}.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{/columns_transformed/all_data/histo_box_matrix_transformed_all_data.png}
-	\centering
-	\caption{Distribuzioni delle variabili numeriche trasformate e aggregate. 
-	La visualizzazione è ottenuta tramite istogrammi sovrapposti a \textit{box plot}. 
-	I percentili corrispondono al $5, 25, 50, 75, 95\%$ dei dati originali. 
-	Il \textit{binning} è stato determinato utilizzando il criterio di \textit{Sturges}.}
-	\label{fig:histoboxmatrix_transformed}
+\includegraphics[width=0.9\linewidth]{/columns_transformed/all_data/histo_box_matrix_transformed_all_data.png}
+\centering
+\caption{Distribuzioni delle variabili numeriche trasformate e aggregate. 
+La visualizzazione è ottenuta tramite istogrammi sovrapposti a \textit{box plot}. 
+I percentili corrispondono al $5, 25, 50, 75, 95\%$ dei dati originali. 
+Il \textit{binning} è stato determinato utilizzando il criterio di \textit{Sturges}.}
+\label{fig:histoboxmatrix_transformed}
 \end{figure}
 
 Come si può osservare, le distribuzioni risultano ora più centralizzate e leggibili, permettendo di analizzare con maggiore chiarezza l’andamento delle variabili, pur avendo ridotto la dimensionalità complessiva del \textit{dataset}.
@@ -417,12 +417,12 @@ Come prossimo passo, abbiamo deciso di implementare delle tecniche di \textit{sa
 
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{/sampling/all_data/AgeRec_histogram_comparison.png}
-	\centering
-	\caption{Distribuzione della colonna \textit{AgeRec} prima e dopo del \textit{sampling} randomico.
-	Sono stati presi \textit{2000} righe randomiche, con rimozione. 
-	Il \textit{binning} è stato determinato utilizzando il criterio di \textit{Sturges}.}
-	\label{fig:sampling_comparison_agerec}
+\includegraphics[width=0.9\linewidth]{/sampling/all_data/AgeRec_histogram_comparison.png}
+\centering
+\caption{Distribuzione della colonna \textit{AgeRec} prima e dopo del \textit{sampling} randomico.
+Sono stati presi \textit{2000} righe randomiche, con rimozione. 
+Il \textit{binning} è stato determinato utilizzando il criterio di \textit{Sturges}.}
+\label{fig:sampling_comparison_agerec}
 \end{figure}
 
 Come si vede in figura, i percentili dei dati sono rimasti per lo più inalterati, e la forma della distribuzione rimane simile. Questo ci dimostra che un \textit{sampling} randomico può essere un'ottimo metodo per ridurre la quantità di dati pur mantenedo le caratteristiche importanti della distribuzione, almeno per quanto riguarda $2000$ \textit{samples}. 
@@ -439,17 +439,17 @@ Come prima analisi abbiamo utilizzato un algoritmo di \textit{density-based clus
 Tutte le analisi sono state eseguite sul \textit{dataset} filtrato e sottoposto a \textit{sampling} a $2000$ righe. I valori \textit{NaN} sono stati rimossi.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/dbscan_numdesires_vs_weightedrating.png}
-	\centering
-	\caption{Density-based clustering di weighted rating vs numdesires}
-	\label{fig:db_numdes_weightedr}
+\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/dbscan_numdesires_vs_weightedrating.png}
+\centering
+\caption{Density-based clustering di weighted rating vs numdesires}
+\label{fig:db_numdes_weightedr}
 \end{figure}
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/dbscan_weightedrating_vs_agerec.png}
-	\centering
-	\caption{Density-based clustering di weighted rating vs agerec}
-	\label{fig:db_weightedr_agerec}
+\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/dbscan_weightedrating_vs_agerec.png}
+\centering
+\caption{Density-based clustering di weighted rating vs agerec}
+\label{fig:db_weightedr_agerec}
 \end{figure}
 
 Come si osserva, i \textit{clusters} individuati non riportano informazioni particolarmente significative, suggerendo che questa tecnica non sia la più adatta allo studio di queste variabili. 
@@ -462,17 +462,17 @@ Per esempio, in figura \ref{fig:db_weightedr_agerec} si nota un cluster che copr
 Abbiamo poi effettuato un’analisi analoga utilizzando l’algoritmo di \textit{k-means clustering}. Come riportato nelle figure \ref{fig:kmeans_numdes_weightedr} e \ref{fig:kmeans_weightedr_agerec}, abbiamo fissato $k=4$.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/k_means_numdesires_vs_weightedrating.png}
-	\centering
-	\caption{K-means clustering weighted rating vs numdesires, 4 \textit{clusters}}
-	\label{fig:kmeans_numdes_weightedr}
+\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/k_means_numdesires_vs_weightedrating.png}
+\centering
+\caption{K-means clustering weighted rating vs numdesires, 4 \textit{clusters}}
+\label{fig:kmeans_numdes_weightedr}
 \end{figure}
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/k_means_weightedrating_vs_agerec.png}
-	\centering
-	\caption{K-means clustering weighted rating vs agerec, 4 \textit{clusters}}
-	\label{fig:kmeans_weightedr_agerec}
+\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/k_means_weightedrating_vs_agerec.png}
+\centering
+\caption{K-means clustering weighted rating vs agerec, 4 \textit{clusters}}
+\label{fig:kmeans_weightedr_agerec}
 \end{figure}
 
 In questo caso i \textit{clusters} si separano in base alla fascia d’età (figura \ref{fig:kmeans_weightedr_agerec}) o principalmente in base al punteggio pesato (figura \ref{fig:kmeans_numdes_weightedr}). 
@@ -483,17 +483,17 @@ Inoltre, diversamente dagli algoritmi basati sulla densità, il metodo \textit{k
 È stato inoltre studiato l’andamento della \textit{Sum Squared Error (SSE)} al variare di $k$. I risultati sono mostrati in figura \ref{fig:sse_numdes_weightedr} e \ref{fig:sse_weightedr_agerec}, e sono il criterio utilizzato per fissare il valore ottimale di $k$ nelle figure precedenti.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/sse_vs_k_numdesires_vs_weightedrating.png}
-	\centering
-	\caption{SSE del K-means clustering weighted rating vs numdesires, al variare di \textit{k}}
-	\label{fig:sse_numdes_weightedr}
+\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/sse_vs_k_numdesires_vs_weightedrating.png}
+\centering
+\caption{SSE del K-means clustering weighted rating vs numdesires, al variare di \textit{k}}
+\label{fig:sse_numdes_weightedr}
 \end{figure}
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/sse_vs_k_weightedrating_vs_agerec.png}
-	\centering
-	\caption{SSE del K-means clustering weighted rating vs agerec, al variare di \textit{k}}
-	\label{fig:sse_weightedr_agerec}
+\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/sse_vs_k_weightedrating_vs_agerec.png}
+\centering
+\caption{SSE del K-means clustering weighted rating vs agerec, al variare di \textit{k}}
+\label{fig:sse_weightedr_agerec}
 \end{figure}
 
 Come atteso, la \textit{SSE} diminuisce all’aumentare del numero di centroidi, e le figure confermano questo andamento. 
@@ -505,17 +505,17 @@ Per evitare \textit{overfitting}, abbiamo scelto $k=4$, corrispondente al punto 
 Come ultima tecnica, abbiamo applicato l’\textit{hierarchical clustering} alle stesse variabili considerate finora. I risultati sono riportati nelle figure \ref{fig:hie_numdes_weightedr} e \ref{fig:hie_weightedr_agerec}.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/hierarchical_numdesires_vs_weightedrating.png}
-	\centering
-	\caption{Hierarchical clustering weighted rating vs numdesires}
-	\label{fig:hie_numdes_weightedr}
+\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/hierarchical_numdesires_vs_weightedrating.png}
+\centering
+\caption{Hierarchical clustering weighted rating vs numdesires}
+\label{fig:hie_numdes_weightedr}
 \end{figure}
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/hierarchical_weightedrating_vs_agerec.png}
-	\centering
-	\caption{Hierarchical clustering weighted rating vs agerec}
-	\label{fig:hie_weightedr_agerec}
+\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/hierarchical_weightedrating_vs_agerec.png}
+\centering
+\caption{Hierarchical clustering weighted rating vs agerec}
+\label{fig:hie_weightedr_agerec}
 \end{figure}
 
 I risultati ottenuti non sono molto soddisfacenti, tuttavia modificando leggermente i parametri è stato possibile ottenere una clusterizzazione più efficace:
@@ -532,17 +532,17 @@ Dall’immagine emergono cinque cluster ben distinti: in azzurro compaiono i gio
 Sono inoltre riportati i rispettivi \textit{dendrogram} in figure \ref{fig:ddg_numdes_weightedr} e \ref{fig:ddg_weightedr_agerec}.
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/dendrogram_numdesires_vs_weightedrating.png}
-	\centering
-	\caption{Dendrogram dell’hierarchical clustering weighted rating vs numdesires}
-	\label{fig:ddg_numdes_weightedr}
+\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/dendrogram_numdesires_vs_weightedrating.png}
+\centering
+\caption{Dendrogram dell’hierarchical clustering weighted rating vs numdesires}
+\label{fig:ddg_numdes_weightedr}
 \end{figure}
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/dendrogram_weightedrating_vs_agerec.png}
-	\centering
-	\caption{Dendrogram dell’hierarchical clustering weighted rating vs agerec}
-	\label{fig:ddg_weightedr_agerec}
+\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/dendrogram_weightedrating_vs_agerec.png}
+\centering
+\caption{Dendrogram dell’hierarchical clustering weighted rating vs agerec}
+\label{fig:ddg_weightedr_agerec}
 \end{figure}
 
 Osservando i diagrammi ad albero, si nota come la scelta di suddividere le due coppie di categorie in 4-5 cluster risulti appropriata: tracciando una linea orizzontale sull’albero è infatti possibile ottenere una suddivisione significativa dell’intero set di dati.
