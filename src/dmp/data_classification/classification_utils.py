@@ -10,9 +10,15 @@ from sklearn.metrics import ConfusionMatrixDisplay, RocCurveDisplay
 import seaborn as sns
 from sklearn.metrics import (accuracy_score, precision_score, recall_score, f1_score)
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.compose import ColumnTransformer
 from sklearn.dummy import DummyClassifier
 from sklearn.model_selection import cross_val_score, StratifiedKFold
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, roc_curve, auc
+from sklearn.preprocessing import label_binarize
+# Assicurati che anche plt e numpy siano presenti, se non lo sono già:
+import matplotlib.pyplot as plt
+import numpy as np
 
 def generate_plots(model, X_train, y_train, X_test, y_test, feature_names, target_name, descriptors, model_tag="Model"):
     """
@@ -320,3 +326,164 @@ def run_baseline_analysis(model, X, y, model_name):
     except Exception as e:
         print(f"⚠️ Errore baseline: {e}")
     print("-" * 50)
+    
+    
+import os
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, roc_curve, auc
+from sklearn.preprocessing import label_binarize
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import cross_val_score
+
+# --- FUNZIONE INTERNA PER GESTIRE I PERCORSI DI SALVATAGGIO ---
+def _get_save_path(model_tag, feature_names, descriptors, target_name, filename, base_dir="figures/classification"):
+    """
+    Costruisce il percorso di salvataggio organizzato per Modello -> Features.
+    Struttura: figures/classification / model_tag / NumDesires_Year / filename.png
+    """
+    
+    # 1. Costruiamo la stringa delle feature (es. "NumDesires_YearPublished")
+    # Nota: Non aggiungiamo più il model_tag qui, perché lo usiamo come cartella padre
+    feats_joined = "_".join(feature_names[:3])
+    suffix = "_etc" if len(feature_names) > 3 else ""
+    safe_feat_str = f"{feats_joined}{suffix}"
+    
+    # 2. Nome descrittore per il file (parte finale del nome file)
+    try:
+        from dmp.data_understanding.analysis_by_descriptors import make_safe_descriptor_name
+        desc_name = make_safe_descriptor_name(descriptors) if descriptors else str(target_name)
+    except ImportError:
+        desc_name = "_".join(descriptors) if isinstance(descriptors, list) else str(target_name)
+
+    # 3. COSTRUZIONE PATH (La modifica principale è qui)
+    # Creiamo una gerarchia: base_dir -> NOME_MODELLO -> NOME_FEATURES
+    # Esempio: figures/classification/KNN/NumDesires_YearPublished/
+    out_dir = os.path.join(base_dir, str(model_tag), safe_feat_str)
+    
+    # Crea tutte le cartelle necessarie
+    os.makedirs(out_dir, exist_ok=True)
+    
+    # 4. Nome file finale
+    final_name = f"{filename}_{desc_name}.png"
+    
+    return os.path.join(out_dir, final_name)
+
+# --- FUNZIONI DI PLOT MODIFICATE (SALVATAGGIO) ---
+
+def _plot_separated_roc(model, X_test, y_test, model_tag, feature_names, descriptors, target_name):
+    """
+    Genera e SALVA 3 plot separati per le curve ROC (One-vs-Rest).
+    """
+    try:
+        y_score = model.predict_proba(X_test)
+    except AttributeError:
+        print("⚠️ Il modello non supporta predict_proba. Impossibile salvare ROC.")
+        return
+
+    classes = model.classes_
+    n_classes = len(classes)
+    
+    # Binarizzazione e calcoli iniziali...
+    try:
+        y_score = model.predict_proba(X_test)
+    except AttributeError:
+        print("⚠️ Il modello non supporta predict_proba. Impossibile salvare ROC.")
+        return
+
+    classes = model.classes_
+    n_classes = len(classes)
+    y_test_bin = label_binarize(y_test, classes=classes)
+    if n_classes == 2 and y_test_bin.shape[1] == 1:
+        y_test_bin = np.hstack((1 - y_test_bin, y_test_bin))
+
+    print(f"   💾 Salvataggio Curve ROC per {model_tag}...")
+
+    for i in range(n_classes):
+        # ... (codice del plot invariato) ...
+        current_class = classes[i]
+        fpr, tpr, _ = roc_curve(y_test_bin[:, i], y_score[:, i])
+        roc_auc = auc(fpr, tpr)
+        
+        plt.figure(figsize=(7, 6))
+        plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (area = {roc_auc:.2f})')
+        plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title(f'ROC: {model_tag} | Class "{current_class}" (Target: {target_name})')
+        plt.legend(loc="lower right")
+        plt.grid(alpha=0.3)
+        
+        # --- CORREZIONE QUI SOTTO ---
+        safe_class = str(current_class).replace("-", "m") 
+        fname = f"{model_tag}_ROC_Class_{safe_class}"
+        
+        # Ora passiamo anche model_tag come primo argomento
+        out_path = _get_save_path(model_tag, feature_names, descriptors, target_name, fname)
+        # ----------------------------
+        
+        plt.savefig(out_path)
+        plt.close()
+def _plot_knn_k_search(X_train, y_train, model_tag, feature_names, descriptors, target_name, max_k=300, step_k=15):
+    """
+    Esegue Cross-Validation per trovare K ottimale e SALVA il grafico.
+    Adatta dinamicamente il range e lo step se i dati sono pochi.
+    """
+    
+    n_samples = len(X_train)
+    min_k = 1 
+    
+    # 1. Calcola il vero limite superiore per k (non può superare i campioni - 1)
+    #    Se n_samples è molto piccolo (es. 20), real_max_k sarà 19.
+    real_max_k = min(max_k, len(X_train) - 1)
+    k_range = range(1, real_max_k + 1, step_k)
+    
+    # ... (loop di cross validation e plot invariato) ...
+    k_scores = []
+    for k in k_range:
+        try:
+            knn_temp = KNeighborsClassifier(n_neighbors=k)
+            scores = cross_val_score(knn_temp, X_train, y_train, cv=3, scoring='accuracy')
+            k_scores.append(scores.mean())
+        except Exception:
+            k_scores.append(0)
+
+    plt.figure(figsize=(12, 6))
+    plt.plot(k_range, k_scores, marker='o', linestyle='-', color='purple')
+    plt.title(f'Accuratezza media (CV) al variare di K - {target_name}')
+    plt.xlabel('Valore di K')
+    plt.ylabel('Cross-Validated Accuracy')
+    ticks = list(k_range)
+    plt.xticks(ticks, rotation=45 if len(ticks) > 15 else 0)
+    plt.grid(True, alpha=0.3)
+    
+    # --- CORREZIONE QUI SOTTO ---
+    fname = f"{model_tag}_K_Search_Accuracy"
+    # Aggiunto model_tag
+    out_path = _get_save_path(model_tag, feature_names, descriptors, target_name, fname)
+    # ----------------------------
+    
+    plt.savefig(out_path)
+    plt.close()
+    
+def _plot_confusion_matrix(model, X_test, y_test, model_tag, feature_names, descriptors, target_name):
+    print(f"   💾 Salvataggio Confusion Matrix per {model_tag}...")
+    
+    plt.figure(figsize=(6, 5))
+    y_pred = model.predict(X_test)
+    cm = confusion_matrix(y_test, y_pred, labels=model.classes_)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=model.classes_)
+    disp.plot(cmap=plt.cm.Blues, values_format='d', ax=plt.gca())
+    plt.title(f"Confusion Matrix: {model_tag}")
+    
+    # --- CORREZIONE QUI SOTTO ---
+    fname = f"{model_tag}_Confusion_Matrix"
+    # Aggiunto model_tag
+    out_path = _get_save_path(model_tag, feature_names, descriptors, target_name, fname)
+    # ----------------------------
+    
+    plt.savefig(out_path)
+    plt.close()
