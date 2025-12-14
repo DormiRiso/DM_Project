@@ -1,7 +1,9 @@
 from .split_df import split_df
 from .KNN import knn
 from .Naive_Bayes import naive_bayes_classifier
+from .decision_tree import decision_tree_classifier
 import os
+
 
 def classificate_df(df, percentuale, save_dfs=False, descriptors = None):
     """
@@ -52,4 +54,28 @@ def classificate_df(df, percentuale, save_dfs=False, descriptors = None):
         check_baseline=True
     )
 
+    # 5. Decision Tree
+    print("\n3. DECISION TREE")
+    # Individual Decision Tree experiments
+    decision_tree_classifier(
+        df_train, df_test,
+        num_feats=["NumDesires", "YearPublished"],
+        target_col="Rating",
+        max_depth=5,
+        print_metrics=True,
+        make_plot=True,
+        descriptors=descriptors,
+        check_baseline=True
+    )
+    
+    decision_tree_classifier(
+        df_train, df_test,
+        num_feats=["Weight", "AgeRec"],
+        target_col="Rating",
+        max_depth=5,
+        print_metrics=True,
+        make_plot=True,
+        descriptors=descriptors,
+        check_baseline=True
+    )
     
