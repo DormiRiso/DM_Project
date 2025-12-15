@@ -6,7 +6,8 @@ from .classification_utils import (
     run_baseline_analysis,
     _plot_separated_roc,
     _plot_knn_k_search,
-    _plot_confusion_matrix
+    _plot_confusion_matrix,
+    _plot_separated_precision_recall
 )
 def naive_bayes_classifier(train_df, test_df, num_feats=None, cat_feats=None, target_col="Rating", print_metrics=False, make_plot=False, descriptors=None, check_baseline=False):
     """
@@ -73,6 +74,12 @@ Feature Categoriche: {cat_str}
 
             # B. 3 ROC Curves separate
             _plot_separated_roc(
+                model, X_test, y_test, model_tag, 
+                final_feature_names, descriptors, actual_target
+            )
+            
+            #C. 3 precision-recall curves
+            _plot_separated_precision_recall(
                 model, X_test, y_test, model_tag, 
                 final_feature_names, descriptors, actual_target
             )

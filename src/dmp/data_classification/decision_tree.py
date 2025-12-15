@@ -288,42 +288,45 @@ def generate_dt_plots(
     plt.close()
     print(f"✅ Confusion matrix saved: {cm_plot_path}")
     
-    # 3. ROC Curve (solo per classificazione binaria)
-    n_classes = len(np.unique(y_test))
-    if n_classes == 2:
-        plt.figure(figsize=(10, 8))
-        RocCurveDisplay.from_estimator(dt, X_test, y_test)
-        plt.plot([0, 1], [0, 1], 'r--', label='Random Classifier')
-        plt.title(f"ROC Curve - Decision Tree\n{desc_name}")
-        plt.legend()
-        roc_plot_path = out_dir / f"dt_roc_{desc_name}.png"
-        plt.savefig(roc_plot_path, dpi=150, bbox_inches='tight')
-        plt.close()
-        print(f"✅ ROC curve saved: {roc_plot_path}")
-    else:
-        print(f"⚠️  ROC curve skipped (multiclass with {n_classes} classes)")
+    # 3. ROC Curves (una per ogni output possibile)
+    try:
+        # Importazione locale per evitare errori se il file non è nel path
+        from dmp.data_classification.classification_utils import _plot_separated_roc
+        
+        # Chiamata alla funzione condivisa
+        # Nota: model_tag="decision_tree" creerà la cartella figures/classification/decision_tree/...
+        _plot_separated_roc(
+            model=dt,
+            X_test=X_test,
+            y_test=y_test,
+            model_tag="decision_tree", 
+            feature_names=feature_names,
+            descriptors=descriptors,
+            target_name=target_name
+        )
+    except ImportError:
+        print("⚠️ Impossibile importare _plot_separated_roc. Assicurati che classification_utils sia accessibile.")
+    except Exception as e:
+        print(f"⚠️ Errore durante la generazione delle ROC curves: {e}")
     
-    # 4. Precision-Recall Curve (solo per classificazione binaria)
-    if n_classes == 2:
-        plt.figure(figsize=(10, 8))
-        PrecisionRecallDisplay.from_estimator(dt, X_test, y_test)
-        plt.title(f"Precision-Recall Curve - Decision Tree\n{desc_name}")
-        pr_plot_path = out_dir / f"dt_precision_recall_{desc_name}.png"
-        plt.savefig(pr_plot_path, dpi=150, bbox_inches='tight')
-        plt.close()
-        print(f"✅ Precision-recall curve saved: {pr_plot_path}")
-    else:
-        # Per multiclass, mostra un messaggio invece di generare l'errore
-        plt.figure(figsize=(10, 8))
-        plt.text(0.5, 0.5, 
-                f"Precision-Recall Curve\nNot available for multiclass\n({n_classes} classes detected)",
-                ha='center', va='center', fontsize=12)
-        plt.title(f"Precision-Recall Curve - Decision Tree\n{desc_name}")
-        plt.axis('off')
-        pr_plot_path = out_dir / f"dt_precision_recall_{desc_name}.png"
-        plt.savefig(pr_plot_path, dpi=150, bbox_inches='tight')
-        plt.close()
-        print(f"⚠️  Precision-recall placeholder saved (multiclass with {n_classes} classes)")
+    # 4. Precision-Recall Curve
+    try:
+        # Importazione locale se necessario, o assicurati sia importata in alto
+        from dmp.data_classification.classification_utils import _plot_separated_precision_recall
+        
+        _plot_separated_precision_recall(
+            model=dt,
+            X_test=X_test,
+            y_test=y_test,
+            model_tag="decision_tree", 
+            feature_names=feature_names,
+            descriptors=descriptors,
+            target_name=target_name
+        )
+    except ImportError:
+        print("⚠️ Impossibile importare _plot_separated_precision_recall.")
+    except Exception as e:
+        print(f"⚠️ Errore generazione Precision-Recall curves: {e}")
     
     # 5. Feature Importance Bar Plot
     importances = dt.feature_importances_

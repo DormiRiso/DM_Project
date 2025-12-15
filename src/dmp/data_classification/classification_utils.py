@@ -6,7 +6,7 @@ import os
 import re # Necessario per la sanificazione dei nomi
 
 from dmp.data_understanding.analysis_by_descriptors import make_safe_descriptor_name
-from sklearn.metrics import ConfusionMatrixDisplay, RocCurveDisplay
+from sklearn.metrics import ConfusionMatrixDisplay, RocCurveDisplay, precision_recall_curve, average_precision_score
 import seaborn as sns
 from sklearn.metrics import (accuracy_score, precision_score, recall_score, f1_score)
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
@@ -338,38 +338,37 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score
 
 # --- FUNZIONE INTERNA PER GESTIRE I PERCORSI DI SALVATAGGIO ---
-def _get_save_path(model_tag, feature_names, descriptors, target_name, filename, base_dir="figures/classification"):
+def _get_save_path(model_tag, feature_names, descriptors, target_name, filename, base_dir="figures/classification", subfolder=None):
     """
-    Costruisce il percorso di salvataggio organizzato per Modello -> Features.
-    Struttura: figures/classification / model_tag / NumDesires_Year / filename.png
+    Costruisce il percorso di salvataggio.
+    Se 'subfolder' è specificato, crea una sottocartella (es. ROC_Curves).
     """
     
-    # 1. Costruiamo la stringa delle feature (es. "NumDesires_YearPublished")
-    # Nota: Non aggiungiamo più il model_tag qui, perché lo usiamo come cartella padre
+    # 1. Feature string
     feats_joined = "_".join(feature_names[:3])
     suffix = "_etc" if len(feature_names) > 3 else ""
     safe_feat_str = f"{feats_joined}{suffix}"
     
-    # 2. Nome descrittore per il file (parte finale del nome file)
+    # 2. Descriptor string
     try:
         from dmp.data_understanding.analysis_by_descriptors import make_safe_descriptor_name
         desc_name = make_safe_descriptor_name(descriptors) if descriptors else str(target_name)
     except ImportError:
         desc_name = "_".join(descriptors) if isinstance(descriptors, list) else str(target_name)
 
-    # 3. COSTRUZIONE PATH (La modifica principale è qui)
-    # Creiamo una gerarchia: base_dir -> NOME_MODELLO -> NOME_FEATURES
-    # Esempio: figures/classification/KNN/NumDesires_YearPublished/
+    # 3. COSTRUZIONE PATH con SOTTOCARTELLA
+    # Struttura: figures/classification / KNN / FeatureName / [Sottocartella Opzionale]
     out_dir = os.path.join(base_dir, str(model_tag), safe_feat_str)
     
-    # Crea tutte le cartelle necessarie
+    if subfolder:
+        out_dir = os.path.join(out_dir, subfolder)
+    
     os.makedirs(out_dir, exist_ok=True)
     
     # 4. Nome file finale
     final_name = f"{filename}_{desc_name}.png"
     
     return os.path.join(out_dir, final_name)
-
 # --- FUNZIONI DI PLOT MODIFICATE (SALVATAGGIO) ---
 
 def _plot_separated_roc(model, X_test, y_test, model_tag, feature_names, descriptors, target_name):
@@ -422,7 +421,7 @@ def _plot_separated_roc(model, X_test, y_test, model_tag, feature_names, descrip
         fname = f"{model_tag}_ROC_Class_{safe_class}"
         
         # Ora passiamo anche model_tag come primo argomento
-        out_path = _get_save_path(model_tag, feature_names, descriptors, target_name, fname)
+        out_path = _get_save_path(model_tag, feature_names, descriptors, target_name, fname, subfolder="ROC_Curves")
         # ----------------------------
         
         plt.savefig(out_path)
@@ -487,3 +486,60 @@ def _plot_confusion_matrix(model, X_test, y_test, model_tag, feature_names, desc
     
     plt.savefig(out_path)
     plt.close()
+    
+def _plot_separated_precision_recall(model, X_test, y_test, model_tag, feature_names, descriptors, target_name):
+    """
+    Genera e SALVA 3 plot separati per le curve Precision-Recall (One-vs-Rest).
+    """
+    try:
+        y_score = model.predict_proba(X_test)
+    except AttributeError:
+        print("⚠️ Il modello non supporta predict_proba. Impossibile salvare P-R Curve.")
+        return
+
+    classes = model.classes_
+    n_classes = len(classes)
+    
+    # Binarizzazione (One-vs-Rest)
+    # Trasforma y_test in una matrice binaria (es. [[0, 1, 0], [1, 0, 0], ...])
+    y_test_bin = label_binarize(y_test, classes=classes)
+    
+    # Fix per caso binario puro (se label_binarize restituisce una sola colonna)
+    if n_classes == 2 and y_test_bin.shape[1] == 1:
+        y_test_bin = np.hstack((1 - y_test_bin, y_test_bin))
+
+    print(f"   💾 Salvataggio Curve Precision-Recall per {model_tag}...")
+
+    for i in range(n_classes):
+        current_class = classes[i]
+        
+        # Calcolo Precision e Recall per la classe corrente vs Resto
+        precision, recall, _ = precision_recall_curve(y_test_bin[:, i], y_score[:, i])
+        
+        # Calcolo Average Precision (area sotto la curva PR)
+        avg_precision = average_precision_score(y_test_bin[:, i], y_score[:, i])
+        
+        plt.figure(figsize=(7, 6))
+        plt.plot(recall, precision, color='purple', lw=2, 
+                 label=f'AP = {avg_precision:.2f}')
+        
+        # Linea di base (frequenza della classe positiva nel test set)
+        baseline = y_test_bin[:, i].mean()
+        plt.plot([0, 1], [baseline, baseline], linestyle='--', color='gray', label=f'Baseline ({baseline:.2f})')
+
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('Recall')
+        plt.ylabel('Precision')
+        plt.title(f'P-R Curve: {model_tag} | Class "{current_class}" (Target: {target_name})')
+        plt.legend(loc="lower left")
+        plt.grid(alpha=0.3)
+        
+        # Salvataggio
+        safe_class = str(current_class).replace("-", "m") 
+        fname = f"{model_tag}_Precision_Recall_Class_{safe_class}"
+        
+        out_path = _get_save_path(model_tag, feature_names, descriptors, target_name, fname, subfolder="Precision_Recall_Curves")
+        
+        plt.savefig(out_path)
+        plt.close()

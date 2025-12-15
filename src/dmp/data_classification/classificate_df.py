@@ -39,11 +39,12 @@ def classificate_df(df, percentuale, save_dfs=False, descriptors = None):
     
     #Faccio il KNN per le colonne "Weight" e "AgeRec"(funziona bene sia con Rating che con "-d roll action")
     knn(df_train, df_test, num_feats =["Weight", "AgeRec"], target_col="Rating", k=200, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
+    
 
     # Algoritmo di Naive-Bayes per alcune colonne
-    numeric_cols = ["Weight", "Playtime", "LanguageEase", "ComMinPlaytime"]
-    categoric_cols = ["Family"]
-
+    numeric_cols = ["NumWeightVotes"]
+    categoric_cols = ["Family", "IsReimplementation", "Kickstarted"]
+    
     naive_bayes_classifier(
         df_train, df_test, 
         num_feats=numeric_cols, 
@@ -96,3 +97,4 @@ def classificate_df(df, percentuale, save_dfs=False, descriptors = None):
 
     # Non è richiesto dalla scheda quindi valutiamo
     multivariate_regression(df_train, df_test, independent_cols=["NumDesires", "Weight"], dependent_cols=["WeightedRating", "YearPublished"])
+

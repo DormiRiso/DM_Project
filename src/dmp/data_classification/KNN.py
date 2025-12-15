@@ -14,7 +14,8 @@ from .classification_utils import (
     run_baseline_analysis,
     _plot_separated_roc,
     _plot_knn_k_search,
-    _plot_confusion_matrix
+    _plot_confusion_matrix,
+    _plot_separated_precision_recall
 )
 
 
@@ -93,7 +94,13 @@ Feature Categoriche: {cat_str}
                 final_feature_names, descriptors, actual_target
             )
             
-            # C. EXTRA: Plot Accuratezza vs K
+            #C. 3 Accuracy-Recall plots
+            _plot_separated_precision_recall(
+                model, X_test, y_test, model_tag, 
+                final_feature_names, descriptors, actual_target
+            )
+            
+            # D.Plot Accuratezza vs K
             _plot_knn_k_search(
                 X_train, y_train, "KNN", 
                 final_feature_names, descriptors, actual_target, 
