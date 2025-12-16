@@ -22,7 +22,6 @@ def pca(data, columns, newcolumntitle):
 
 
     data[newcolumntitle] = X_pca
-    # Pass the columns list directly to remove_columns (don't stringify it)
-    data = remove_columns(data, columns)
+    #data = remove_columns(data, columns) # In realtà non le voglio buttare via mi servono per regressions
 
     return data

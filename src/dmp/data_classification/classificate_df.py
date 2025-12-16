@@ -85,8 +85,11 @@ def classificate_df(df, percentuale, save_dfs=False, descriptors = None):
     print("\n4. REGRESSIONS")
     
     # Magari usare due colonne belle correlate prima di averle buttate via
-    lin_regression(df_train, df_test, independent_col="YearPublished", dependent_col="WeightedRating")
-    
+    lin_regression(df_train, df_test, independent_col="ComWeight", dependent_col="GameWeight")
+    lin_regression(df_train, df_test, independent_col="ComAgeRec", dependent_col="MfgAgeRec")   
+    lin_regression(df_train, df_test, independent_col="NumWish", dependent_col="NumWant")
+    lin_regression(df_train, df_test, independent_col="ComMaxPlaytime", dependent_col="MfgPlaytime")
+
     # Questi sembrano interessanti da studiare:
     nonlin_regression(df_train, df_test, independent_col="NumDesires", dependent_col="WeightedRating")
     
