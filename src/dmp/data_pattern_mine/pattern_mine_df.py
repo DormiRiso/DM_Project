@@ -59,8 +59,6 @@ def pattern_mine_df(df, run_columns=True, run_descriptors=True):
     if run_descriptors and 'Description' in working_df.columns:
         print("\n" + "="*30 + "\nANALISI: DESCRITTORI (Description)\n" + "="*30)
         # Qui 'columns' può essere None o [] perché use_descriptors=True 
-        # forzerà la funzione a leggere solo la colonna 'Description'
-        #working_df = working_df.sample(n=10000) # Prendi solo 10.000 righe a caso
         make_apriori_for_itemsets(
             working_df, 
             columns=[], 
