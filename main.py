@@ -28,6 +28,7 @@ from dmp.data_preparation import prepare_df
 from dmp.data_clustering import cluster_df
 from dmp.config import VERBOSE, set_verbose
 from dmp.data_classification import classificate_df
+from dmp.data_pattern_mine import pattern_mine_df
 
 # 🎨 Colori ANSI per una stampa più leggibile
 class Colors:
@@ -112,14 +113,14 @@ def cluster_data(input_file: Path, verbose: bool, sse: bool):
     """Esegue la clusterizzazione di alcune colonne selezionate sul dataframe già pulite e filtrato"""
 
     print(f"{Colors.BLUE}📊 Caricamento dataset pulito e preparato da:{Colors.RESET} {input_file}")
-    filtered_df = pd.read_csv(input_file, converters={"Ranks": literal_eval}) #Leggi direttamente la colonna "Ranks" come python list e non stringa
+    prepared_df = pd.read_csv(input_file, converters={"Ranks": literal_eval}) #Leggi direttamente la colonna "Ranks" come python list e non stringa
 
     if verbose:
         print(f"{Colors.CYAN}🔍 Avvio della clusterizzazione dei dati {Colors.RESET}")
-        cluster_df(filtered_df, sse)
+        cluster_df(prepared_df, sse)
     else:
         with yaspin(text="🔍 Avvio della clusterizzazione dei dati ", color="cyan") as spinner:
-            cluster_df(filtered_df, sse)
+            cluster_df(prepared_df, sse)
             spinner.ok("✅")
     print(f"{Colors.GREEN}📈 Clusterizzazione completata!{Colors.RESET}\n")  
 
@@ -135,6 +136,19 @@ def classificate_data(input_file: Path, percentage, descriptors = None, verbose 
             classificate_df(prepared_df, percentage, save_dfs = True, descriptors = descriptors)
             spinner.ok("✅")
     print(f"{Colors.GREEN}📈 classificazione completata!{Colors.RESET}\n")  
+
+def patter_mine_data(input_file: Path, verbose = False):
+    print(f"{Colors.BLUE}📊 Caricamento dataset pulito e preparato da:{Colors.RESET} {input_file}")
+    prepared_df = pd.read_csv(input_file, converters={"Ranks": literal_eval}) #Leggi direttamente la colonna "Ranks" come python list e non stringa
+
+    if verbose:
+        print(f"{Colors.CYAN}🔍 Avvio della classificazione dei dati {Colors.RESET}")
+        pattern_mine_df(prepared_df)
+    else:
+        with yaspin(text="🔍 Avvio della classificazione dei dati ", color="cyan") as spinner:
+            pattern_mine_df(prepared_df)
+            spinner.ok("✅")
+    print(f"{Colors.GREEN}📈 classificazione completata!{Colors.RESET}\n") 
 
 
 def hypno_toad():
@@ -225,6 +239,11 @@ def main():
     help="Esegue il processo di classificazione del df preparato"
     )
     parser.add_argument(
+    "-pat", "--pattern_mine",
+    action="store_true",
+    help="Esegue il processo di pattern mining del df preparato"
+    )
+    parser.add_argument(
         "-hand_warmer", "--hand_warmer",
         action="store_true",
         help="Esegue ogni funzione del programma di analisi dati (ATTENZIONE) e ti scalda le mani ;)"
@@ -280,6 +299,9 @@ def main():
     if args.classification:
         percentage_for_split = 0.7
         classificate_data(prepared_output_file, percentage_for_split, descriptors = args.descriptors)
+
+    if args.pattern_mine:
+        patter_mine_data(prepared_output_file)
 
     print(f"{Colors.BOLD}🏁 Operazione completata!{Colors.RESET} ✅")
 
