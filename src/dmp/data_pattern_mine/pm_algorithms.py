@@ -231,7 +231,7 @@ def find_association_rules(df, columns, supp, conf, zmin, zmax, target_char='r',
             print(" > Top 5 Regole (per Lift):")
             temp_df = res_df.head(5).copy()
             for i, row in temp_df.iterrows():
-                print(f"   {row['antecedent']} => {row['consequent']} [L: {row['lift']}]")
+                print(f"   {row['antecedent']} => {row['consequent']} [Lift: {row['lift']}]")
         print("-" * 40)
 
     if output_file and not res_df.empty:

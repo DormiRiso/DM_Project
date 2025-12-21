@@ -46,7 +46,7 @@ def prepare_df(df, N_samples=None, descriptors=None, colonne=None, hists=False):
         df = filter_df_by_descriptors(df, descriptors, column="Description")
 
     print(f"\n{Colors.BOLD}{Colors.BLUE}🚀 Inizio processo di Data Preparation...{Colors.RESET}")
-
+    
     # 🗑️ Rimozione colonne inutili tramite PCA, rimpiazzandole con colonne nuove (2->1)
     section("Rimozione colonne che sono strettamente correlate con altre", "🧺")
     df = pca(df, columns=["ComWeight", "GameWeight"], newcolumntitle='Weight')

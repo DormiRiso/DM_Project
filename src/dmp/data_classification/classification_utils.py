@@ -1,24 +1,29 @@
+import os
+import re
+import numpy as np
 import pandas as pd
-import numpy as np 
 import matplotlib.pyplot as plt
 import seaborn as sns
-import os
-import re # Necessario per la sanificazione dei nomi
+from scipy.stats import norm
 
-from dmp.data_understanding.analysis_by_descriptors import make_safe_descriptor_name
-from sklearn.metrics import ConfusionMatrixDisplay, RocCurveDisplay, precision_recall_curve, average_precision_score
-import seaborn as sns
-from sklearn.metrics import (accuracy_score, precision_score, recall_score, f1_score)
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.neighbors import KNeighborsClassifier
+# Scikit-Learn: Preprocessing e Composizione
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, label_binarize
 from sklearn.compose import ColumnTransformer
+
+# Scikit-Learn: Modelli e Validazione
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.dummy import DummyClassifier
 from sklearn.model_selection import cross_val_score, StratifiedKFold
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, roc_curve, auc
-from sklearn.preprocessing import label_binarize
-# Assicurati che anche plt e numpy siano presenti, se non lo sono già:
-import matplotlib.pyplot as plt
-import numpy as np
+
+# Scikit-Learn: Metriche e Visualizzazione Performance
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score,
+    average_precision_score, confusion_matrix, ConfusionMatrixDisplay,
+    roc_curve, auc, RocCurveDisplay, precision_recall_curve
+)
+
+# Import locali/personalizzati
+from dmp.data_understanding.analysis_by_descriptors import make_safe_descriptor_name
 
 def generate_plots(model, X_train, y_train, X_test, y_test, feature_names, target_name, descriptors, model_tag="Model"):
     """
@@ -280,62 +285,58 @@ def make_metrics(y_true, y_pred, model_name, target_name):
     print("-" * 40)
 
 def run_baseline_analysis(model, X, y, model_name):
-    """
-    Esegue cross-validation confrontando il Modello Reale con due baseline statistiche:
-    1. Dummy Classifier (sceglie la classe più frequente).
-    2. Random Permutation (modello allenato su etichette casuali).
-    """
-    print(f"\n--- 📊 ANALISI BASELINE ({model_name}) ---")
-    # Usa Stratified K-Fold per mantenere la proporzione delle classi in ogni fold
-    cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
+    print(f"\n--- 📊 ANALISI STATISTICA BASELINE ({model_name}) ---")
     
-    try:
-        # 1. Modello Reale (Performance media sui dati corretti)
-        real_scores = cross_val_score(model, X, y, cv=cv, scoring='accuracy')
-        r_mean, r_std = real_scores.mean(), real_scores.std()
+    cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
+    n = len(y)  # Numero totale di campioni
+    z_alpha_2 = norm.ppf(1 - 0.05/2) # Valore critico Z per alpha=0.05 (circa 1.96)
+
+    def calculate_significance(acc1, acc2, n1, n2):
+        """Calcola l'intervallo di confidenza per la differenza tra due proporzioni."""
+        d_hat = acc1 - acc2
+        # Calcolo della varianza della differenza (come da tua formula)
+        # Nota: usiamo la radice quadrata per ottenere la deviazione standard (sigma_d)
+        var_d = (acc1 * (1 - acc1) / n1) + (acc2 * (1 - acc2) / n2)
+        sigma_d = np.sqrt(var_d)
         
-        # 2. Baseline Dummy (Modello che sceglie sempre la classe più frequente)
+        margin_error = z_alpha_2 * sigma_d
+        
+        return d_hat, margin_error
+
+    try:
+        # 1. Performance Modello Reale
+        real_scores = cross_val_score(model, X, y, cv=cv, scoring='accuracy')
+        r_mean = real_scores.mean()
+        
+        # 2. Baseline Dummy (Most Frequent)
         dummy = DummyClassifier(strategy="most_frequent")
         dummy_scores = cross_val_score(dummy, X, y, cv=cv, scoring='accuracy')
-        d_mean, d_std = dummy_scores.mean(), dummy_scores.std()
+        d_mean = dummy_scores.mean()
         
-        # 3. Random Permutation (Test di robustezza/significatività)
+        # 3. Random Permutation
         y_rnd = np.random.permutation(y)
-        # Alleniamo il modello reale su etichette casuali
         rnd_scores = cross_val_score(model, X, y_rnd, cv=cv, scoring='accuracy')
-        rnd_mean, rnd_std = rnd_scores.mean(), rnd_scores.std()
+        rnd_mean = rnd_scores.mean()
 
-        # Stampa dei risultati comparativi
-        print(f"{'Modello':<25} | {'Acc Media':<10} | {'Std Dev':<15}")
-        print("-" * 60)
-        print(f"1. {model_name:<22} | {r_mean:.4f}      | ± {r_std:.4f}")
-        print(f"2. Baseline (Most Freq)   | {d_mean:.4f}      | ± {d_std:.4f}")
-        print(f"3. Random Permutation     | {rnd_mean:.4f}      | ± {rnd_std:.4f}")
-        
-        # Analisi della significatività (Confronto degli intervalli di confidenza approssimativi)
-        lower_bound = r_mean - (2*r_std)
-        upper_bound = d_mean + (2*d_std)
+        print(f"{'Confronto':<25} | {'Diff (d̂)':<10} | {'Intervallo di Confidenza (95%)':<30}")
+        print("-" * 80)
 
-        if lower_bound > upper_bound:
-            print("\n✅ RISULTATO ROBUSTO: L'intervallo di confidenza del modello supera la baseline (2 std_dev).")
-        elif r_mean > d_mean:
-            print("\n⚠️ RISULTATO INCERTO: Media migliore, ma gli intervalli si sovrappongono (2 std_dev).")
-        else:
-            print("\n❌ FALLIMENTO: Il modello non batte la baseline(2 std_dev).")
+        comparisons = [
+            ("Reale vs Dummy", r_mean, d_mean),
+            ("Reale vs Random", r_mean, rnd_mean)
+        ]
+
+        for label, acc1, acc2 in comparisons:
+            d_hat, margin_error = calculate_significance(acc1, acc2, n, n)
+            status = "✅ SIGNIFICATIVO" if d_hat - margin_error > 0 else "❌ NON SIGNIFICATIVO"
             
+            print(f"{label:<25} | {d_hat:.4f}  +/- {margin_error:.4f} -> {status}")
+
     except Exception as e:
-        print(f"⚠️ Errore baseline: {e}")
-    print("-" * 50)
+        print(f"⚠️ Errore durante l'analisi: {e}")
+    print("-" * 80)    
     
-    
-import os
-import matplotlib.pyplot as plt
-import numpy as np
-import seaborn as sns
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, roc_curve, auc
-from sklearn.preprocessing import label_binarize
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import cross_val_score
+
 
 # --- FUNZIONE INTERNA PER GESTIRE I PERCORSI DI SALVATAGGIO ---
 def _get_save_path(model_tag, feature_names, descriptors, target_name, filename, base_dir="figures/classification", subfolder=None):
