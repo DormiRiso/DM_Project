@@ -33,7 +33,7 @@ def lin_regression(
                              E.g., `"WeightedRating"`.
     """
 
-    base_dir = f"figures/classification/regression/linear/{dependent_col}_vs_{independent_col}"
+    base_dir = f"figures/classification/regression/linear"
 
     # Non considerare le colonne con uno o più NaN
     all_cols = [independent_col] + [dependent_col]
@@ -47,95 +47,50 @@ def lin_regression(
     x_test = df_test[independent_col].values.reshape(-1, 1)
     y_test = df_test[dependent_col].values
 
-    print("\n\n--- INIZIO: LINEAR REGRESSION ---")
+    fig, axes = plt.subplots(1, 3, figsize=(20, 6))
 
-    reg = LinearRegression()
-    reg.fit(x_train, y_train)
+    models = [
+        ("Linear Regression", LinearRegression()),
+        ("Ridge", Ridge()),
+        ("Lasso", Lasso())
+    ]
 
-    y_pred = reg.predict(x_test)
-    stats_text = (f"Pendenza: {reg.coef_}\n"
-                f"Intercetta: {reg.intercept_} \n"
-                f"$R^2$: {r2_score(y_test, y_pred):.3f}\n"
-                f"MSE: {mean_squared_error(y_test, y_pred):.3f}\n"
-                f"MAE: {mean_absolute_error(y_test, y_pred):.3f}")
+    for i, (name, model) in enumerate(models):
+        print(f"\n--- INIZIO: {name.upper()} ---")
+        
+        # Training
+        model.fit(x_train, y_train)
+        y_pred = model.predict(x_test)
+        
+        # Metrics
+        stats_text = (f"Pendenza: {model.coef_[0]:.2f}\n"
+                    f"Intercetta: {model.intercept_:.2f} \n"
+                    f"$R^2$: {r2_score(y_test, y_pred):.2f}\n"
+                    f"MSE: {mean_squared_error(y_test, y_pred):.2f}\n"
+                    f"MAE: {mean_absolute_error(y_test, y_pred):.2f}")
 
-    out_path = os.path.join(base_dir, f"linear_{dependent_col}_vs_{independent_col}.png")
-    os.makedirs(os.path.dirname(out_path), exist_ok=True) # Crea le directory se non esistono
+        # Plotting on specific axis
+        ax = axes[i]
+        sns.scatterplot(data=df_test, x=independent_col, y=dependent_col, ax=ax)
+        ax.plot(x_test, model.coef_[0]*x_test + model.intercept_, c="red")
+        
+        ax.text(0.05, 0.95, stats_text, 
+                transform=ax.transAxes, 
+                fontsize=9, 
+                verticalalignment='top', 
+                bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.5))
+        
+        ax.set_title(name)
 
-    sns.scatterplot(data=df_test, x=independent_col, y=dependent_col)
-    plt.plot(x_test, reg.coef_[0]*x_test+reg.intercept_, c="red")
-    plt.text(0.05, 0.95, stats_text, 
-            transform=plt.gca().transAxes, 
-            fontsize=10, 
-            verticalalignment='top', 
-            bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.5))
-
-    plt.suptitle(f"Linear Regression, {dependent_col} vs {independent_col}", fontsize=16)
-    plt.tight_layout() # Ottimizza lo spazio tra i subplots
-    plt.savefig(out_path) 
-    plt.close() # Chiude la figura per liberare memoria
-    print(f"\nFigura salvata: {out_path}")
-
-    # RIDGE
-    method = "Ridge"
-    print("\n\n--- INIZIO: LINEAR REGRESSION CON RIDGE---")
-    reg = Ridge()
-    reg.fit(x_train, y_train)
-
-    y_pred = reg.predict(x_test)
-    stats_text = (f"Pendenza: {reg.coef_}\n"
-                f"Intercetta: {reg.intercept_} \n"
-                f"$R^2$: {r2_score(y_test, y_pred):.3f}\n"
-                f"MSE: {mean_squared_error(y_test, y_pred):.3f}\n"
-                f"MAE: {mean_absolute_error(y_test, y_pred):.3f}")
-
-
-    out_path = os.path.join(base_dir, f"ridge_{dependent_col}_vs_{independent_col}.png")
-    os.makedirs(os.path.dirname(out_path), exist_ok=True) # Crea le directory se non esistono
-
-
-    sns.scatterplot(data=df_test, x=independent_col, y=dependent_col)
-    plt.plot(x_train, reg.coef_[0]*x_train+reg.intercept_, c="red")
-    plt.text(0.05, 0.95, stats_text, 
-            transform=plt.gca().transAxes, 
-            fontsize=10, 
-            verticalalignment='top', 
-            bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.5))
-
-    plt.suptitle(f"Linear Ridge Regression, {dependent_col} vs {independent_col}", fontsize=16)
-    plt.tight_layout() # Ottimizza lo spazio tra i subplots
-    plt.savefig(out_path) 
-    plt.close() # Chiude la figura per liberare memoria
-    print(f"\nFigura salvata: {out_path}")
-
-    # LASSO
-    print("\n\n--- INIZIO: LINEAR REGRESSION CON LASSO---")
-    reg = Lasso()
-    reg.fit(x_train, y_train)
+    # Titolo principale e salvataggio
+    plt.suptitle(f"{dependent_col}_vs_{independent_col}", fontsize=16)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95]) # Spazio per il suptitle
     
-    y_pred = reg.predict(x_test)
-    stats_text = (f"Pendenza: {reg.coef_}\n"
-                f"Intercetta: {reg.intercept_} \n"
-                f"$R^2$: {r2_score(y_test, y_pred):.3f}\n"
-                f"MSE: {mean_squared_error(y_test, y_pred):.3f}\n"
-                f"MAE: {mean_absolute_error(y_test, y_pred):.3f}")
-
-
-    out_path = os.path.join(base_dir, f"lasso_{dependent_col}_vs_{independent_col}.png")
-    os.makedirs(os.path.dirname(out_path), exist_ok=True) # Crea le directory se non esistono
-
-    sns.scatterplot(data=df_test, x=independent_col, y=dependent_col)
-    plt.plot(x_train, reg.coef_[0]*x_train+reg.intercept_, c="red")
-    plt.text(0.05, 0.95, stats_text, 
-            transform=plt.gca().transAxes, 
-            fontsize=10, 
-            verticalalignment='top', 
-            bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.5))
-
-    plt.suptitle(f"Linear Lasso Regression, {dependent_col} vs {independent_col}", fontsize=16)
-    plt.tight_layout() # Ottimizza lo spazio tra i subplots
+    out_path = os.path.join(base_dir, f"{dependent_col}_vs_{independent_col}.png")
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    
     plt.savefig(out_path) 
-    plt.close() # Chiude la figura per liberare memoria
+    plt.close() 
     print(f"\nFigura salvata: {out_path}")
 
 def nonlin_regression(
@@ -181,9 +136,9 @@ def nonlin_regression(
     reg.fit(x_train, y_train)
 
     y_pred = reg.predict(x_test)
-    stats_text = (f"$R^2$: {r2_score(y_test, y_pred):.3f}\n"
-                f"MSE: {mean_squared_error(y_test, y_pred):.3f}\n"
-                f"MAE: {mean_absolute_error(y_test, y_pred):.3f}")
+    stats_text = (f"$R^2$: {r2_score(y_test, y_pred):.2f}\n"
+                f"MSE: {mean_squared_error(y_test, y_pred):.2f}\n"
+                f"MAE: {mean_absolute_error(y_test, y_pred):.2f}")
 
     out_path = os.path.join(base_dir, f"{dependent_col}_vs_{independent_col}_{method}.png")
     os.makedirs(os.path.dirname(out_path), exist_ok=True) # Crea le directory se non esistono
@@ -229,9 +184,9 @@ def nonlin_regression(
     reg.fit(x_train, y_train)
 
     y_pred = reg.predict(x_test)
-    stats_text = (f"$R^2$: {r2_score(y_test, y_pred):.3f}\n"
-                f"MSE: {mean_squared_error(y_test, y_pred):.3f}\n"
-                f"MAE: {mean_absolute_error(y_test, y_pred):.3f}")
+    stats_text = (f"$R^2$: {r2_score(y_test, y_pred):.2f}\n"
+                f"MSE: {mean_squared_error(y_test, y_pred):.2f}\n"
+                f"MAE: {mean_absolute_error(y_test, y_pred):.2f}")
 
 
     out_path = os.path.join(base_dir, f"{dependent_col}_vs_{independent_col}_{method}.png")
@@ -252,13 +207,65 @@ def nonlin_regression(
     plt.close() # Chiude la figura per liberare memoria
     print(f"\nFigura salvata: {out_path}")
 
+def hyperparameter_tuning(df_train, df_test, independent_cols, dependent_col):
+    
+    base_dir = "figures/classification/regression/multiple"
+
+    if len(independent_cols) != 2:
+        print("Errore: questa funzione richiede esattamente 2 colonne indipendenti.")
+        return
+
+    # Pulizia Dati
+    all_cols = independent_cols + [dependent_col]
+    df_train = df_train.dropna(subset=all_cols)
+    df_test = df_test.dropna(subset=all_cols)
+
+    X_train = df_train[independent_cols].values
+    y_train = df_train[dependent_col].values.ravel()
+    X_test = df_test[independent_cols].values
+    y_test = df_test[dependent_col].values.ravel()
+
+    alphas = np.logspace(-3, 4, 20)
+    ks = range(1, 99)
+    depths = range(1, 31)
+
+    fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+    
+    # 1. Ridge Alpha
+    ridge_scores = [r2_score(y_test, Ridge(alpha=a).fit(X_train, y_train).predict(X_test)) for a in alphas]
+    axes[0, 0].plot(alphas, ridge_scores, marker='o'); axes[0, 0].set_xscale('log')
+    axes[0, 0].set_title("Ridge: R² vs Alpha"); axes[0, 0].set_xlabel("Alpha")
+
+    # 2. Lasso Alpha
+    lasso_scores = [r2_score(y_test, Lasso(alpha=a).fit(X_train, y_train).predict(X_test)) for a in alphas]
+    axes[0, 1].plot(alphas, lasso_scores, marker='o', color='orange'); axes[0, 1].set_xscale('log')
+    axes[0, 1].set_title("Lasso: R² vs Alpha"); axes[0, 1].set_xlabel("Alpha")
+
+    # 3. KNN K
+    knn_scores = [r2_score(y_test, KNeighborsRegressor(n_neighbors=k).fit(X_train, y_train).predict(X_test)) for k in ks]
+    axes[1, 0].plot(ks, knn_scores, marker='o', color='green')
+    axes[1, 0].set_title("KNN: R² vs N Neighbors"); axes[1, 0].set_xlabel("K")
+
+    # 4. Decision Tree Depth
+    dt_scores = [r2_score(y_test, DecisionTreeRegressor(max_depth=d).fit(X_train, y_train).predict(X_test)) for d in depths]
+    axes[1, 1].plot(depths, dt_scores, marker='o', color='red')
+    axes[1, 1].set_title("Tree: R² vs Max Depth"); axes[1, 1].set_xlabel("Depth")
+
+    # Salvataggio
+    out_path = os.path.join(base_dir, f"hyperparameter_tuning_{dependent_col}_vs_{independent_cols[0]}_{independent_cols[1]}.png")
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    
+    plt.tight_layout(rect=[0, 0.03, 1, 0.97])
+    plt.savefig(out_path) 
+    plt.close()
+    print(f"\nFigura salvata: {out_path}")
 
 def multiple_regression(
     df_train: pd.DataFrame,
     df_test: pd.DataFrame,
-    independent_cols: list, # Deve contenere esattamente 2 nomi di colonne
+    independent_cols: list, # Esattamente 2 righe 
     dependent_col: str,
-    method = "Linear"
+    params: dict = None
 ):
     """
     Esegue una regressione lineare multipla con due variabili indipendenti e genera
@@ -269,86 +276,87 @@ def multiple_regression(
         df_test (pd.DataFrame): DataFrame di test originale.
         independent_cols (list): Lista di esattamente due nomi di colonne indipendenti (features).
         dependent_col (str): Nome della colonna dipendente (target).
-        method (str): Metodo da utilizzare per la regressione (default: 'linear')
+        params: Dizionario dei parametri per le funzioni (ridge, lasso, knn, tree)
     """
+    if params is None: params = {}
+
+    # Extract params with defaults
+    a_ridge = params.get('alpha_ridge', 1.0)
+    a_lasso = params.get('alpha_lasso', 1.0)
+    k_val = params.get('n_neighbors', 5)
+    d_val = params.get('max_depth', None)
 
     base_dir = "figures/classification/regression/multiple"
 
-    # Controllo per garantire che ci siano esattamente due variabili indipendenti per il plot bivariato
     if len(independent_cols) != 2:
-        print("Errore: questa funzione richiede esattamente 2 colonne indipendenti per il plotting.")
+        print("Errore: questa funzione richiede esattamente 2 colonne indipendenti.")
         return
 
+    # Pulizia Dati
     all_cols = independent_cols + [dependent_col]
-
-    # Pulizia Dati: Rimuove le righe con NaN nei set di train e test
     df_train = df_train.dropna(subset=all_cols)
     df_test = df_test.dropna(subset=all_cols)
 
     X_train = df_train[independent_cols].values
     y_train = df_train[dependent_col].values.ravel()
-
     X_test = df_test[independent_cols].values
     y_test = df_test[dependent_col].values.ravel()
 
-    print(f"\n\n--- INIZIO: {method} MULTIPLE VARIABLE REGRESSION ---")
-    print(f"Target: {dependent_col} vs Features: {independent_cols[0]} e {independent_cols[1]}")
+    # Definizione dei 5 modelli
+    models = [
+        ("Linear", LinearRegression(), "Param: None"),
+        ("Ridge", Ridge(alpha=a_ridge), f"Alpha: {a_ridge}"),
+        ("Lasso", Lasso(alpha=a_lasso), f"Alpha: {a_lasso}"),
+        ("KNN", KNeighborsRegressor(n_neighbors=k_val), f"n: {k_val}"),
+        ("DecisionTree", DecisionTreeRegressor(max_depth=d_val), f"Max Depth: {d_val}")
+    ]
 
-    # Addestramento del modello di regressione lineare
+    # Inizializza la figura 5x2
+    fig, axes = plt.subplots(5, 2, figsize=(15, 25))
+    plt.suptitle(f"Multiple Regression Comparison: {dependent_col} vs {independent_cols}", fontsize=20)
 
-    if method == "Linear":
-        reg = LinearRegression()
-    elif method == "KNN":
-        reg = KNeighborsRegressor()
-    elif method == "DecisionTree":
-        reg = DecisionTreeRegressor()
-    else:
-        print("Metodi accettati: 'Linear', 'KNN', 'DecisionTree'")
-
-    reg.fit(X_train, y_train)
-
-    # Previsione sui dati di TEST
-    y_pred = reg.predict(X_test)
-    
-    y_pred = reg.predict(X_test)
-    stats_text = (f"$R^2$: {r2_score(y_test, y_pred):.3f}\n"
-                f"MSE: {mean_squared_error(y_test, y_pred):.3f}\n"
-                f"MAE: {mean_absolute_error(y_test, y_pred):.3f}")
-    # --- Creazione dei due subplots ---
-    fig, axes = plt.subplots(1, 2, figsize=(15, 6))
-    
-    # Titolo generale per l'intera figura
-    plt.suptitle(f"Regressione Multipla (Dati Test): {dependent_col} vs {independent_cols[0]} e {independent_cols[1]}", fontsize=16)
-
-    # Plot 1: Feature 1 vs Target
-    sns.scatterplot(ax=axes[0], data=df_test, x=independent_cols[0], y=dependent_col, label="True Test", alpha=0.6)
-    # Per il plot delle previsioni, usiamo la Feature 1 (indice 0) come X e la y_pred come Y
-    sns.scatterplot(ax=axes[0], x=X_test[:, 0], y=y_pred.ravel(), label="Predicted Test", marker="X", color='red')
-    plt.text(0.05, 0.95, stats_text, 
-            transform=plt.gca().transAxes, 
-            fontsize=10, 
-            verticalalignment='top', 
-            bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.5))
+    for row_idx, (name, model, param_info) in enumerate(models):
+        print(f"Training {name}...")
         
-    axes[0].set_title(f"{dependent_col} vs {independent_cols[0]}")
-    axes[0].legend()
+        # Addestramento e Predizione
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        
+        # Metriche
+        stats_text = (f"{param_info}\n"
+                      f"$R^2$: {r2_score(y_test, y_pred):.2f}\n"
+                      f"MSE: {mean_squared_error(y_test, y_pred):.2f}\n"
+                      f"MAE: {mean_absolute_error(y_test, y_pred):.2f}")
 
-    # Plot 2: Feature 2 vs Target
-    sns.scatterplot(ax=axes[1], data=df_test, x=independent_cols[1], y=dependent_col, label="True Test", alpha=0.6)
-    # Per il plot delle previsioni, usiamo la Feature 2 (indice 1) come X e la y_pred come Y
-    sns.scatterplot(ax=axes[1], x=X_test[:, 1], y=y_pred.ravel(), label="Predicted Test", marker="X", color='red')
-    axes[1].set_title(f"{dependent_col} vs {independent_cols[1]}")
-    axes[1].legend()
+        # Plot per ogni variabile indipendente (Colonna 0 e Colonna 1)
+        for col_idx in range(2):
+            ax = axes[row_idx, col_idx]
+            
+            # Scatter dati reali
+            sns.scatterplot(ax=ax, data=df_test, x=independent_cols[col_idx], y=dependent_col, 
+                            label="True Test", alpha=0.4)
+            
+            # Scatter dati predetti
+            sns.scatterplot(ax=ax, x=X_test[:, col_idx], y=y_pred, 
+                            label="Predicted Test", marker="X", color='red', alpha=0.6)
+            
+            # Aggiunta box statistiche solo nella prima colonna per chiarezza
+            if col_idx == 0:
+                ax.text(0.05, 0.95, f"MODEL: {name}\n{stats_text}", 
+                        transform=ax.transAxes, fontsize=10, verticalalignment='top', 
+                        bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.7))
+            
+            ax.set_title(f"{name}: {dependent_col} vs {independent_cols[col_idx]}")
+            ax.legend()
 
-    # Salvataggio della figura
-    out_path = os.path.join(base_dir, f"{method}_{dependent_col}_vs_{independent_cols[0]}_e_{independent_cols[1]}_subplots.png")
+    # Salvataggio
+    out_path = os.path.join(base_dir, f"comparison_5x2_{dependent_col}_vs_{independent_cols[0]}_{independent_cols[1]}.png")
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     
-    plt.tight_layout(rect=[0, 0.03, 1, 0.95]) # Ottimizza lo spazio tenendo conto del suptitle
+    plt.tight_layout(rect=[0, 0.03, 1, 0.97])
     plt.savefig(out_path) 
     plt.close()
     print(f"\nFigura salvata: {out_path}")
-
 
 def multivariate_regression(
     df_train: pd.DataFrame,
@@ -404,9 +412,9 @@ def multivariate_regression(
     y_pred = reg.predict(X_test)
     
     # --- Valutazione (Nota: le metriche R2/MSE sono calcolate sulla media delle due output) ---
-    stats_text = (f"Mean $R^2$: {r2_score(y_test, y_pred):.3f}\n"
-                f"Mean MSE: {mean_squared_error(y_test, y_pred):.3f}\n"
-                f"Mean MAE: {mean_absolute_error(y_test, y_pred):.3f}")
+    stats_text = (f"Mean $R^2$: {r2_score(y_test, y_pred):.2f}\n"
+                f"Mean MSE: {mean_squared_error(y_test, y_pred):.2f}\n"
+                f"Mean MAE: {mean_absolute_error(y_test, y_pred):.2f}")
 
     # --- Creazione e Salvataggio dei Subplots ---
     fig, axes = plt.subplots(2, 2, figsize=(15, 6), sharex=True)
@@ -466,9 +474,9 @@ def multivariate_regression(
     y_pred = reg.predict(X_test)
     
     # --- Valutazione (Nota: le metriche R2/MSE sono calcolate sulla media delle due output) ---
-    print('R2: %.3f' % r2_score(y_test, y_pred))
-    print('MSE: %.3f' % mean_squared_error(y_test, y_pred))
-    print('MAE: %.3f' % mean_absolute_error(y_test, y_pred))
+    print('R2: %.2f' % r2_score(y_test, y_pred))
+    print('MSE: %.2f' % mean_squared_error(y_test, y_pred))
+    print('MAE: %.2f' % mean_absolute_error(y_test, y_pred))
 
     # --- Creazione e Salvataggio dei Subplots ---
     fig, axes = plt.subplots(2, 2, figsize=(15, 6), sharex=True)
