@@ -1,4 +1,4 @@
-\documentclass[12pt,twocolumn]{article}
+\documentclass[10pt,twocolumn]{article}
 
 
 \usepackage[utf8]{inputenc}
@@ -13,7 +13,7 @@
 
 \graphicspath{ {./figures/} }
 
-\geometry{a4paper, top=2cm, bottom=2cm, left=2cm, right=2cm}
+\geometry{a4paper, top=1.5cm, bottom=1.5cm, left=1cm, right=1cm}
 \setlength{\absleftindent}{3cm}
 \setlength{\absrightindent}{3cm}
 
@@ -547,6 +547,39 @@ Sono inoltre riportati i rispettivi \textit{dendrogram} in figure \ref{fig:ddg_n
 
 Osservando i diagrammi ad albero, si nota come la scelta di suddividere le due coppie di categorie in 4-5 cluster risulti appropriata: tracciando una linea orizzontale sull’albero è infatti possibile ottenere una suddivisione significativa dell’intero set di dati.
 
+
+\section{Classificazione}
+
+Come prossimo passo abbiamo utilizzato diverse tecniche di classificazione con lo scopo di prevedere il possibile \textit{rating} di un gioco a partire dai suoi attributi. Abbiamo esplorato tecniche \textit{lazy} tipo \textit{kNN classification}, e tecniche \textit{eager} tipo \textit{naive Bayes} e \textit{decision trees}. L'analisi si è concentrata principalmente sulla classificazione della colonna \textit{rating} in base alle coppie di attributi \textit{AgeRec} con \textit{Weight} e \textit{NumDesires} con \textit{YearPublished}.
+
+\subsection{KNN}
+
+
+
+
+\subsection{Naive Bayes}
+
+
+
+12
+\subsection{Decision Trees}
+12
+
+\section{Regressione}
+
+Come ulteriore strumento di predizione abbiamo studiato la dipendenza tra le colonne utilizzando tecniche di regressione. Non ci siamo limitati alla banale regressione lineare, svolgendo analisi anche tramite tecniche non lineari che utilizzano termini di regolarizzazione, algoritmi \textit{lazy} tipo \textit{kNN} e \textit{eager learners} tipo \textit{decision trees}. Inoltre, abbiamo studiato la dipendenza di una colonna rispetto a due colonne indipendenti, utilizzando le stesse tecniche di prima. 
+ 
+\subsection{Una variabile indipendente}
+12
+
+\subsection{Due variabili indipendenti}
+12
+
+\section{Pattern Mining}
+
+Come ultima analisi abbiamo applicato due algoritmi di \textit{pattern mining} al dataset per trovare correlazioni e per trovare correlazioni e identificare strutture ricorrenti che caratterizzano il \textit{dataset].
+\subsection{FP Growth}
+12
 \section{Conclusioni}
 
 In questo progetto abbiamo svolto un’analisi completa del \textit{dataset} proveniente da BoardGameGeek, affrontando in modo sistematico tutte le fasi del processo di preparazione ed esplorazione dei dati. A partire da una prima comprensione delle variabili, abbiamo identificato criticità strutturali e incoerenze semantiche, applicando una pulizia approfondita che ha permesso di rimuovere valori impossibili, gestire correttamente i dati mancanti e uniformare gli attributi secondo il loro dominio.

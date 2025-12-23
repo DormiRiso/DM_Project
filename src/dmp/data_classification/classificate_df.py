@@ -2,7 +2,7 @@ from .split_df import split_df
 from .KNN import knn
 from .Naive_Bayes import naive_bayes_classifier
 from .decision_tree import decision_tree_classifier
-from .regression import lin_regression, nonlin_regression, multiple_regression, multivariate_regression
+from .regression import lin_regression, nonlin_regression, multiple_regression, multivariate_regression, hyperparameter_tuning
 import os
 
 
@@ -94,9 +94,9 @@ def classificate_df(df, percentuale, save_dfs=False, descriptors = None):
     nonlin_regression(df_train, df_test, independent_col="NumDesires", dependent_col="WeightedRating")
     
     # Colonna dipendente deve essere quella di prima ma possiamo giocare su quelle indip.
-    multiple_regression(df_train, df_test, independent_cols=["NumDesires", "AgeRec"], dependent_col="WeightedRating", method="Linear")
-    multiple_regression(df_train, df_test, independent_cols=["NumDesires", "AgeRec"], dependent_col="WeightedRating", method="KNN")
-    multiple_regression(df_train, df_test, independent_cols=["NumDesires", "AgeRec"], dependent_col="WeightedRating", method="DecisionTree")
+    hyperparameter_tuning(df_train, df_test, independent_cols=["NumDesires", "AgeRec"], dependent_col="WeightedRating")
+    best_params = {'alpha_ridge': 54.0, 'alpha_lasso' : 2e-3, 'n_neighbors' : 15, 'max_depth' : 6}
+    multiple_regression(df_train, df_test, independent_cols=["NumDesires", "AgeRec"], dependent_col="WeightedRating", params=best_params)
 
     # Non è richiesto dalla scheda quindi valutiamo
     multivariate_regression(df_train, df_test, independent_cols=["NumDesires", "Weight"], dependent_cols=["WeightedRating", "YearPublished"])
