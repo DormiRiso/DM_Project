@@ -1,86 +1,102 @@
 from sklearn.cluster import DBSCAN
+from sklearn.neighbors import NearestNeighbors
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 from dmp.config import VERBOSE
 
-def dbscan(x_column, y_column, eps=0.3, min_samples=5, **kwargs):
-    """Applica l'algoritmo DBSCAN ai dati forniti e produce uno scatter plot dei cluster,
-    con box informativo contenente eps, N_min e altre statistiche."""
 
-    # Pulizia dei dati: ignoro punti con NaN
-    x_data, y_data = [], []
+def dbscan(x_column, y_column, eps=0.3, min_samples=5, show_knee=True, **kwargs):
+    """
+    Esegue DBSCAN e produce un doppio grafico: 
+    1. Analisi della K-distance per la scelta di eps.
+    2. Scatter plot dei cluster risultanti.
+    """
+
+    # --- 1. Preparazione e Pulizia Dati (CORRETTA) ---
+    x_data = []
+    y_data = []
+    
+    # Iteriamo sulle coppie per garantire che le lunghezze rimangano uguali
     for x, y in zip(x_column, y_column):
+        # Se uno dei due è NaN, saltiamo la coppia
         if np.isnan(x) or np.isnan(y):
             continue
         x_data.append(float(x))
         y_data.append(float(y))
 
-    if not x_data or not y_data:
-        raise ValueError("Le colonne fornite sono vuote o contengono solo valori validi NaN.")
+    # Controllo di sicurezza se dopo la pulizia non rimangono dati
+    if not x_data:
+        raise ValueError("Dopo la rimozione dei NaN non sono rimasti dati sufficienti.")
 
-    # Creo un array (N, 2) per DBSCAN
     X = np.column_stack((x_data, y_data))
 
-    # Applico DBSCAN
+    # --- 2. Calcolo K-Distance (per il plot diagnostico) ---
+    neighbors = NearestNeighbors(n_neighbors=min_samples)
+    neighbors_fit = neighbors.fit(X)
+    distances, _ = neighbors_fit.kneighbors(X)
+    k_distances = np.sort(distances[:, min_samples-1], axis=0)
+
+    # --- 3. Esecuzione DBSCAN ---
     db = DBSCAN(eps=eps, min_samples=min_samples)
     db.fit(X)
     labels = db.labels_
 
-    # Numero di cluster trovati (escludendo il rumore, che ha label = -1)
     n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
     n_noise = np.sum(labels == -1)
-    n_points = len(labels)
 
-    # Plot dei risultati
-    fig, ax = plt.subplots(figsize=(8, 6))
+    # --- 4. Plotting (Layout a due colonne) ---
+    fig, (ax_knee, ax_scatter) = plt.subplots(1, 2, figsize=(15, 6))
+    
+    # A. SOTTOPLOT: K-Distance Plot
+    ax_knee.plot(k_distances, color='royalblue', linewidth=2)
+    ax_knee.axhline(y=eps, color='r', linestyle='--', label=f'Eps scelto ({eps})')
+    ax_knee.set_title("Analisi per scelta Epsilon (K-dist)")
+    ax_knee.set_xlabel("Punti ordinati")
+    ax_knee.set_ylabel(f"Distanza dal {min_samples}° vicino")
+    ax_knee.legend()
+    ax_knee.grid(True)
+
+    # B. SOTTOPLOT: Scatter Plot
     palette = sns.color_palette("husl", max(n_clusters, 1))
-
-    # Colori per cluster (i punti rumorosi saranno in nero)
-    for label in set(labels):
+    # Ottimizzazione: plotta solo le label uniche trovate
+    unique_labels = set(labels)
+    
+    for label in unique_labels:
         if label == -1:
             color = 'k'
             label_name = 'Rumore'
+            alpha = 0.3 # Rendiamo il rumore meno invasivo visivamente
         else:
             color = palette[label % len(palette)]
             label_name = f'Cluster {label}'
-        ax.scatter(
-            X[labels == label, 0],
-            X[labels == label, 1],
-            s=50, c=[color], label=label_name, alpha=0.6, edgecolors='none'
-        )
+            alpha = 0.6
+            
+        mask = (labels == label)
+        ax_scatter.scatter(X[mask, 0], X[mask, 1], s=40, c=[color], 
+                           label=label_name, alpha=alpha, edgecolors='none')
 
-    # Titoli e assi
-    ax.set_title(kwargs.get("title", f"DBSCAN Clustering (eps={eps}, N_min={min_samples})"))
-    ax.set_xlabel(kwargs.get("x_label", "X"))
-    ax.set_ylabel(kwargs.get("y_label", "Y"))
-    ax.grid(True)
+    ax_scatter.set_title(kwargs.get("title", "Risultato DBSCAN"))
+    ax_scatter.set_xlabel(kwargs.get("x_label", "X"))
+    ax_scatter.set_ylabel(kwargs.get("y_label", "Y"))
+    ax_scatter.grid(True, alpha=0.3)
 
     # --- BOX INFORMATIVO ---
     info_text = (
-        f"Parametri:\n"
-        f"  • eps = {eps}\n"
-        f"  • N_min = {min_samples}\n\n"
-        f"Risultati:\n"
-        f"  • Cluster trovati = {n_clusters}\n"
-        f"  • Punti totali = {n_points}\n"
-        f"  • Rumore = {n_noise}"
+        f"Parametri:\n  • eps = {eps}\n  • N_min = {min_samples}\n\n"
+        f"Risultati:\n  • Cluster = {n_clusters}\n  • Rumore = {n_noise}\n"
+        f"  • Punti totali = {len(X)}"
     )
+    # Posiziona il box informativo leggermente fuori dal plot
+    ax_scatter.text(1.05, 0.5, info_text, transform=ax_scatter.transAxes,
+                    fontsize=10, va='center', bbox=dict(boxstyle="round", facecolor="whitesmoke"))
 
-    ax.text(
-        1.02, 0.5, info_text,
-        transform=ax.transAxes,
-        fontsize=10,
-        verticalalignment='center',
-        bbox=dict(boxstyle="round,pad=0.5", facecolor="whitesmoke", edgecolor="gray")
-    )
-
-    # Legenda spostata di lato per non sovrapporsi al box
-    ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1), borderaxespad=0)
+    # Legenda esterna
+    ax_scatter.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
+    
     plt.tight_layout()
 
     if VERBOSE:
-        print(f"[INFO] DBSCAN ha trovato {n_clusters} cluster "
-              f"({n_noise} punti di rumore su {n_points} totali). eps={eps}, N_min={min_samples}")
+        print(f"[INFO] DBSCAN completato: {n_clusters} cluster trovati su {len(X)} punti.")
 
     return fig, labels
