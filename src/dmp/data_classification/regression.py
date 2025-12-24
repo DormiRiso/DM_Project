@@ -10,15 +10,71 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.tree import plot_tree
 from sklearn.neighbors import KNeighborsRegressor
 
-def lin_regression(
+
+def hyperparameter_tuning_single(df_train, df_test, independent_col, dependent_col):
+    
+    base_dir = f"figures/classification/regression/single"
+
+    # Pulizia Dati
+    all_cols = [independent_col] + [dependent_col]
+
+    df_train = df_train.dropna(subset=all_cols)
+    df_test = df_test.dropna(subset=all_cols)
+
+    x_train = df_train[independent_col].values.reshape(-1, 1)
+    y_train = df_train[dependent_col].values
+
+    x_test = df_test[independent_col].values.reshape(-1, 1)
+    y_test = df_test[dependent_col].values
+
+    alphas = np.logspace(-3, 4, 20)
+    ks = range(1, 99)
+    depths = range(1, 31)
+
+    fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+    
+    # 1. Ridge Alpha
+    ridge_scores = [r2_score(y_test, Ridge(alpha=a).fit(x_train, y_train).predict(x_test)) for a in alphas]
+    axes[0, 0].plot(alphas, ridge_scores, marker='o'); axes[0, 0].set_xscale('log')
+    axes[0, 0].set_title("Ridge: R² vs Alpha"); axes[0, 0].set_xlabel("Alpha")
+
+    # 2. Lasso Alpha
+    lasso_scores = [r2_score(y_test, Lasso(alpha=a).fit(x_train, y_train).predict(x_test)) for a in alphas]
+    axes[0, 1].plot(alphas, lasso_scores, marker='o', color='orange'); axes[0, 1].set_xscale('log')
+    axes[0, 1].set_title("Lasso: R² vs Alpha"); axes[0, 1].set_xlabel("Alpha")
+
+    # 3. KNN K
+    knn_scores = [r2_score(y_test, KNeighborsRegressor(n_neighbors=k).fit(x_train, y_train).predict(x_test)) for k in ks]
+    axes[1, 0].plot(ks, knn_scores, marker='o', color='green')
+    axes[1, 0].set_title("KNN: R² vs N Neighbors"); axes[1, 0].set_xlabel("K")
+
+    # 4. Decision Tree Depth
+    dt_scores = [r2_score(y_test, DecisionTreeRegressor(max_depth=d).fit(x_train, y_train).predict(x_test)) for d in depths]
+    axes[1, 1].plot(depths, dt_scores, marker='o', color='red')
+    axes[1, 1].set_title("Tree: R² vs Max Depth"); axes[1, 1].set_xlabel("Depth")
+
+    # Salvataggio
+    out_path = os.path.join(base_dir, f"hyperparameter_tuning_{dependent_col}_vs_{independent_col}.png")
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    
+    plt.suptitle(f"{dependent_col} vs {independent_col} hyperparameters", fontsize=16)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.97])
+    plt.savefig(out_path) 
+    plt.close()
+    print(f"\nFigura salvata: {out_path}")
+
+
+
+def single_regression(
     df_train,
     df_test,
     independent_col,
-    dependent_col
+    dependent_col,
+    params = None
 ):
     """
-    Esegue e visualizza i risultati di tre algoritmi di regressione lineare:
-    Banale regressione lineare, e regressione lineare con regolarizzazione Ridge e Lasso.
+    Esegue e visualizza i risultati di cinque algoritmi di regressione:
+    Banale regressione lineare, e regressione lineare con regolarizzazione Ridge e Lasso, knn e decision trees.
 
     Il codice pulisce prima i dati rimuovendo le righe con NaN nelle colonne specificate,
     addestra i modelli, stampa le metriche di valutazione (R2, MSE, MAE) e salva i grafici
@@ -31,9 +87,17 @@ def lin_regression(
                                 E.g., `"NumDesires"`.
         dependent_col (str): Nome della colonna dipendente (target).
                              E.g., `"WeightedRating"`.
-    """
+        params: Dizionario dei parametri per le funzioni (ridge, lasso, knn, tree)
 
-    base_dir = f"figures/classification/regression/linear"
+    """
+    if params is None: params = {}
+
+    # Extract params with defaults
+    a_ridge = params.get('alpha_ridge', 80)
+    a_lasso = params.get('alpha_lasso', 2e-3)
+    k_val = params.get('n_neighbors', 20)
+    d_val = params.get('max_depth', 6)
+    base_dir = f"figures/classification/regression/single"
 
     # Non considerare le colonne con uno o più NaN
     all_cols = [independent_col] + [dependent_col]
@@ -47,32 +111,38 @@ def lin_regression(
     x_test = df_test[independent_col].values.reshape(-1, 1)
     y_test = df_test[dependent_col].values
 
-    fig, axes = plt.subplots(1, 3, figsize=(20, 6))
-
+    # Definizione dei 5 modelli
     models = [
-        ("Linear Regression", LinearRegression()),
-        ("Ridge", Ridge()),
-        ("Lasso", Lasso())
+        ("Linear", LinearRegression(), "Param: None"),
+        ("Ridge", Ridge(alpha=a_ridge), f"Alpha: {a_ridge}"),
+        ("Lasso", Lasso(alpha=a_lasso), f"Alpha: {a_lasso}"),
+        ("KNN", KNeighborsRegressor(n_neighbors=k_val), f"n: {k_val}"),
+        ("DecisionTree", DecisionTreeRegressor(max_depth=d_val), f"Max Depth: {d_val}")
     ]
+    # Inizializza la figura 5x1
+    fig, axes = plt.subplots(5, 1, figsize=(15, 25))
+    plt.suptitle(f"Regression Comparison: {dependent_col} vs {independent_col}", fontsize=20)
 
-    for i, (name, model) in enumerate(models):
-        print(f"\n--- INIZIO: {name.upper()} ---")
+    for i, (name, model, param_info) in enumerate(models):
+        print(f"Training {name}...")
         
-        # Training
+        # Addestramento e Predizione
         model.fit(x_train, y_train)
         y_pred = model.predict(x_test)
         
-        # Metrics
-        stats_text = (f"Pendenza: {model.coef_[0]:.2f}\n"
-                    f"Intercetta: {model.intercept_:.2f} \n"
-                    f"$R^2$: {r2_score(y_test, y_pred):.2f}\n"
-                    f"MSE: {mean_squared_error(y_test, y_pred):.2f}\n"
-                    f"MAE: {mean_absolute_error(y_test, y_pred):.2f}")
+        # Metriche
+        stats_text = (f"{param_info}\n"
+                      f"$R^2$: {r2_score(y_test, y_pred):.2f}\n"
+                      f"MSE: {mean_squared_error(y_test, y_pred):.2f}\n"
+                      f"MAE: {mean_absolute_error(y_test, y_pred):.2f}")
+        
 
         # Plotting on specific axis
         ax = axes[i]
-        sns.scatterplot(data=df_test, x=independent_col, y=dependent_col, ax=ax)
-        ax.plot(x_test, model.coef_[0]*x_test + model.intercept_, c="red")
+        sns.scatterplot(ax=ax, data=df_test, x=independent_col, y=dependent_col, 
+                            label="True Test", alpha=0.4)
+        sns.scatterplot(ax=ax, x=x_test[:,0], y=y_pred, 
+                            label="Predicted Test", marker="x", color='red', alpha=0.6)
         
         ax.text(0.05, 0.95, stats_text, 
                 transform=ax.transAxes, 
@@ -83,7 +153,7 @@ def lin_regression(
         ax.set_title(name)
 
     # Titolo principale e salvataggio
-    plt.suptitle(f"{dependent_col}_vs_{independent_col}", fontsize=16)
+    plt.suptitle(f"{dependent_col} vs {independent_col}", fontsize=16)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95]) # Spazio per il suptitle
     
     out_path = os.path.join(base_dir, f"{dependent_col}_vs_{independent_col}.png")
@@ -93,121 +163,7 @@ def lin_regression(
     plt.close() 
     print(f"\nFigura salvata: {out_path}")
 
-def nonlin_regression(
-    df_train,
-    df_test,
-    independent_col,
-    dependent_col
-):
-    """
-    Esegue e visualizza i risultati di due algoritmi di regressione non-lineare:
-    Decision Tree Regressor e K-Nearest Neighbors Regressor (KNN).
-
-    Il codice pulisce prima i dati rimuovendo le righe con NaN nelle colonne specificate,
-    addestra i modelli, stampa le metriche di valutazione (R2, MSE, MAE) e salva i grafici
-    dei risultati e, per il Decision Tree, una visualizzazione dell'albero.
-
-    Args:
-        df_train_raw (pd.DataFrame): DataFrame di training originale contenente NaN.
-        df_test_raw (pd.DataFrame): DataFrame di test originale contenente NaN.
-        independent_col (str): Nome della colonna indipendente (features).
-                                E.g., `"NumDesires"`.
-        dependent_col (str): Nome della colonna dipendente (target).
-                             E.g., `"WeightedRating"`.
-    """
-
-    base_dir = "figures/classification/regression/nonlinear"
-
-    # Non considerare le colonne con uno o più NaN
-    all_cols = [independent_col] + [dependent_col]
-
-    df_train = df_train.dropna(subset=all_cols)
-    df_test = df_test.dropna(subset=all_cols)
-
-    x_train = df_train[independent_col].values.reshape(-1, 1)
-    y_train = df_train[dependent_col].values
-
-    x_test = df_test[independent_col].values.reshape(-1, 1)
-    y_test = df_test[dependent_col].values
-
-    print("\n\n--- INIZIO: DECISION TREE REGRESSION ---")
-    method = "DecisionTree"
-    reg = DecisionTreeRegressor(max_depth = None)
-    reg.fit(x_train, y_train)
-
-    y_pred = reg.predict(x_test)
-    stats_text = (f"$R^2$: {r2_score(y_test, y_pred):.2f}\n"
-                f"MSE: {mean_squared_error(y_test, y_pred):.2f}\n"
-                f"MAE: {mean_absolute_error(y_test, y_pred):.2f}")
-
-    out_path = os.path.join(base_dir, f"{dependent_col}_vs_{independent_col}_{method}.png")
-    os.makedirs(os.path.dirname(out_path), exist_ok=True) # Crea le directory se non esistono
-
-    sns.scatterplot(data=df_test, x=independent_col, y=dependent_col, label="True")
-    sns.scatterplot(data=df_test, x=independent_col, y=reg.predict(x_test).ravel(), label="Predicted", marker="X", color='red')
-    plt.text(0.05, 0.95, stats_text, 
-            transform=plt.gca().transAxes, 
-            fontsize=10, 
-            verticalalignment='top', 
-            bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.5))
-    
-    plt.legend()
-    plt.suptitle(f"{method} Regression, {dependent_col} vs {independent_col}", fontsize=16)
-    plt.tight_layout() # Ottimizza lo spazio tra i subplots
-    plt.savefig(out_path) 
-    plt.close() # Chiude la figura per liberare memoria
-    print(f"\nFigura salvata: {out_path}")
-
-    plt.figure(figsize=(20, 10))
-
-    plot_tree(
-        reg,
-        filled=True,
-        rounded=True,
-        fontsize=10,
-        precision=2,
-        max_depth = 3
-    )
-
-    out_path = os.path.join(base_dir, f"{dependent_col}_vs_{independent_col}_{method}_Tree.png")
-    os.makedirs(os.path.dirname(out_path), exist_ok=True) # Crea le directory se non esistono
-    plt.suptitle(f"{method} Regression, {dependent_col} vs {independent_col} tree", fontsize=16)
-    plt.tight_layout() # Ottimizza lo spazio tra i subplots
-    plt.savefig(out_path) 
-    plt.close() # Chiude la figura per liberare memoria
-    print(f"\nFigura salvata: {out_path}")
-
-    # KNN
-    method = "KNN"
-    print("\n\n--- INIZIO: KNN REGRESSION ---")
-    reg = KNeighborsRegressor()
-    reg.fit(x_train, y_train)
-
-    y_pred = reg.predict(x_test)
-    stats_text = (f"$R^2$: {r2_score(y_test, y_pred):.2f}\n"
-                f"MSE: {mean_squared_error(y_test, y_pred):.2f}\n"
-                f"MAE: {mean_absolute_error(y_test, y_pred):.2f}")
-
-
-    out_path = os.path.join(base_dir, f"{dependent_col}_vs_{independent_col}_{method}.png")
-    os.makedirs(os.path.dirname(out_path), exist_ok=True) # Crea le directory se non esistono
-
-    sns.scatterplot(data=df_test, x=independent_col, y=dependent_col, label="True")
-    sns.scatterplot(data=df_test, x=independent_col, y=reg.predict(x_test).ravel(), label="Predicted", marker="X", color="red")
-    plt.text(0.05, 0.95, stats_text, 
-            transform=plt.gca().transAxes, 
-            fontsize=10, 
-            verticalalignment='top', 
-            bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.5))
-    
-    plt.legend()
-    plt.suptitle(f"{method} Regression, {dependent_col} vs {independent_col}", fontsize=16)
-    plt.tight_layout() # Ottimizza lo spazio tra i subplots
-    plt.savefig(out_path) 
-    plt.close() # Chiude la figura per liberare memoria
-    print(f"\nFigura salvata: {out_path}")
-
-def hyperparameter_tuning(df_train, df_test, independent_cols, dependent_col):
+def hyperparameter_tuning_multiple(df_train, df_test, independent_cols, dependent_col):
     
     base_dir = "figures/classification/regression/multiple"
 
@@ -254,7 +210,8 @@ def hyperparameter_tuning(df_train, df_test, independent_cols, dependent_col):
     # Salvataggio
     out_path = os.path.join(base_dir, f"hyperparameter_tuning_{dependent_col}_vs_{independent_cols[0]}_{independent_cols[1]}.png")
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
-    
+
+    plt.suptitle(f"{dependent_col} vs {independent_cols[0]} and {independent_cols[1]} hyperparameters", fontsize=16)
     plt.tight_layout(rect=[0, 0.03, 1, 0.97])
     plt.savefig(out_path) 
     plt.close()
@@ -268,7 +225,7 @@ def multiple_regression(
     params: dict = None
 ):
     """
-    Esegue una regressione lineare multipla con due variabili indipendenti e genera
+    Esegue una regressione multipla con due variabili indipendenti e genera
     due subplots per visualizzare l'adattamento del modello rispetto a ciascuna feature.
 
     Args:
@@ -353,6 +310,7 @@ def multiple_regression(
     out_path = os.path.join(base_dir, f"comparison_5x2_{dependent_col}_vs_{independent_cols[0]}_{independent_cols[1]}.png")
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     
+    plt.suptitle(f"{dependent_col} vs {independent_cols[0]} and {independent_cols[1]}", fontsize=16)
     plt.tight_layout(rect=[0, 0.03, 1, 0.97])
     plt.savefig(out_path) 
     plt.close()

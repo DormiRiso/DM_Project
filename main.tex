@@ -552,6 +552,7 @@ Osservando i diagrammi ad albero, si nota come la scelta di suddividere le due c
 
 Come prossimo passo abbiamo utilizzato diverse tecniche di classificazione con lo scopo di prevedere il possibile \textit{rating} di un gioco a partire dai suoi attributi. Abbiamo esplorato tecniche \textit{lazy} tipo \textit{kNN classification}, e tecniche \textit{eager} tipo \textit{naive Bayes} e \textit{decision trees}. L'analisi si è concentrata principalmente sulla classificazione della colonna \textit{rating} in base alle coppie di attributi \textit{AgeRec} con \textit{Weight} e \textit{NumDesires} con \textit{YearPublished}.
 
+Per tutti gli algoritmi di classificazione abbiamo iniziato splittando il \textit{dataset} in due, mettendo da parte il $30\%$ da usare come \textit{dataset} di test mentre l'altro $70\%$ è stato usato per fare \textit{training} dei modelli. Il taglio è stato eseguito randomicamente per evitare effetti di \textit{bias} e per assicurarci che entrambi parti rappresentassero l'interità dei dati. 
 \subsection{KNN}
 
 
@@ -569,15 +570,40 @@ Come prossimo passo abbiamo utilizzato diverse tecniche di classificazione con l
 
 Come ulteriore strumento di predizione abbiamo studiato la dipendenza tra le colonne utilizzando tecniche di regressione. Non ci siamo limitati alla banale regressione lineare, svolgendo analisi anche tramite tecniche non lineari che utilizzano termini di regolarizzazione, algoritmi \textit{lazy} tipo \textit{kNN} e \textit{eager learners} tipo \textit{decision trees}. Inoltre, abbiamo studiato la dipendenza di una colonna rispetto a due colonne indipendenti, utilizzando le stesse tecniche di prima. 
  
+Cpme nella sezione precedente, il \textit{dataset} è stato diviso in due parti, dove il  $70\%$ delle righe (scelte randomicamente) sono state usate come set di \textit{training} e l'altro $30\%$ di \textit{test}. 
 \subsection{Una variabile indipendente}
-12
+
+
 
 \subsection{Due variabili indipendenti}
-12
+
+Nel caso di due variabili indipendenti abbiamo utilizzato come variabile indipendente la colonna \textit{WeightedRating} con la speranza di poter predirre, tramite tecniche di regressione, l'eventuale successo di un gioco con determinate carateristiche. Abbiamo provato tutte le coppie tra le seguenti colonne: \textit{Weight}, \textit{Playtime}, \textit{AgeRec}, \textit{NumDesires}, \textit{LanguageEase}, trovando che i risultati migliori si trovavano per la coppia \textit{NumDesires} e \textit{Weight}. 
+
+Abbiamo utilizzato 5 tecniche diverse, eseguendo un fit lineare, un fit lineare con regolarizzazione (utilizzando sia \textit{lasso} che \textit{ridge}), \textit{knn} e \textit{decision trees}. Per fissare i parametri di questi algoritmi abbiamo eseguito le regressioni sul \textit{dataset} di \textit{training} per un valore del parametro, e calcolato il $R^2$ dei risultati sul \textit{dataset} di \textit{test}. Poi, si è fatto variare il valore del parametro, eseguendo uno \textit{sweep} per ogni algoritmo. Abbiamo scelto il miglior valore di ciascun parametro in base al punto di "gomito" della curva ottenuta. Queste curve sono riportate in figura \ref{fig:regression_parameter_sweep}.
+
+\begin{figure}[h]
+\includegraphics[width=0.9\linewidth]{../figures/classification/regression/multiple/hyperparameter_tuning_WeightedRating_vs_Weight_NumDesires.png}
+\centering
+\caption{$R^2$ al variare dei parametri dei diversi modelli di regressione, per \textit{WeightedRating} vs  \textit{NumDesires} e \textit{Weight} }
+\label{fig:regression_parameter_sweep}
+\end{figure}
+
+Da queste curve si sono impostati i valori dei parametri, e abbiamo eseguito il programma di regressione, ottenendo i risultati riportati in figura \ref{fig:regression_WR_R_NumD}
+
+\begin{figure}[h]
+\includegraphics[width=0.9\linewidth]{../figures/classification/regression/multiple/comparison_5x2_WeightedRating_vs_Weight_NumDesires.png}
+\centering
+\caption{Regressione di \textit{WeightedRating} vs \textit{NumDesires} e \textit{Weight}, i punti rossi rappresentano la regressione sui valori di \textit{test} mentre i punti blu rappresentano i valori di \textit{test} del \textit{dataset}}
+\label{fig:regression_WR_R_NumD}
+\end{figure}
+
+Guadrdando il $R^2$ come metrica, il miglior risultato ottenuto è tramite l'algoritmo di \textit{decision trees} che spiega $44\%$ della varianza. Questo ci suggerisce che questa coppia di variabili indipendenti non basta per spiegare la varianza del \textit{WeightedRating}, ma già possono essere utilizzate come buoni indicatori per l'eventuale valutazione di un gioco. 
+
+
 
 \section{Pattern Mining}
 
-Come ultima analisi abbiamo applicato due algoritmi di \textit{pattern mining} al dataset per trovare correlazioni e per trovare correlazioni e identificare strutture ricorrenti che caratterizzano il \textit{dataset].
+Come ultima analisi abbiamo applicato due algoritmi di \textit{pattern mining} al dataset per trovare correlazioni e per trovare correlazioni e identificare strutture ricorrenti che caratterizzano il \textit{dataset}.
 \subsection{FP Growth}
 12
 \section{Conclusioni}
