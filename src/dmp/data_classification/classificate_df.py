@@ -35,10 +35,11 @@ def classificate_df(df, percentuale, save_dfs=False, descriptors = None):
 
 
     #Faccio il KNN per le colonne "NumDesires" e "YearPublished" (Funziona bene con Rating)
-    knn(df_train, df_test, num_feats = ["NumDesires", "YearPublished"], target_col="Rating", k=20, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
+    knn(df_train, df_test, num_feats = ["NumDesires", "YearPublished"], target_col="Rating", k=40, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
     
-    #Faccio il KNN per le colonne "Weight" e "AgeRec"(funziona bene sia con Rating che con "-d roll action")
+    #Faccio il KNN per le colonne "Weight" e "AgeRec"(Sia con "Rating" che con "roll-action")
     knn(df_train, df_test, num_feats =["Weight", "AgeRec"], target_col="Rating", k=30, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
+    knn(df_train, df_test, num_feats =["Weight", "AgeRec"], target_col="Rating", k=30, print_metrics=True, make_plot=True, descriptors=["roll", "action"], check_baseline=True)
     
 
     # Algoritmo di Naive-Bayes per alcune colonne
@@ -80,7 +81,7 @@ def classificate_df(df, percentuale, save_dfs=False, descriptors = None):
         descriptors=descriptors,
         check_baseline=True
     )
-    
+
     # 6. Regression:
     print("\n4. REGRESSIONS")
     

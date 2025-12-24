@@ -346,9 +346,12 @@ def _get_save_path(model_tag, feature_names, descriptors, target_name, filename,
     """
     
     # 1. Feature string
-    feats_joined = "_".join(feature_names[:3])
-    suffix = "_etc" if len(feature_names) > 3 else ""
-    safe_feat_str = f"{feats_joined}{suffix}"
+    if model_tag == "NB":
+        safe_feat_str = ""
+    else:
+        feats_joined = "_".join(feature_names[:3])
+        suffix = "_etc" if len(feature_names) > 3 else ""
+        safe_feat_str = f"{feats_joined}{suffix}"
     
     # 2. Descriptor string
     try:
@@ -370,11 +373,10 @@ def _get_save_path(model_tag, feature_names, descriptors, target_name, filename,
     final_name = f"{filename}_{desc_name}.png"
     
     return os.path.join(out_dir, final_name)
-# --- FUNZIONI DI PLOT MODIFICATE (SALVATAGGIO) ---
 
 def _plot_separated_roc(model, X_test, y_test, model_tag, feature_names, descriptors, target_name):
     """
-    Genera e SALVA 3 plot separati per le curve ROC (One-vs-Rest).
+    Genera e SALVA un unico plot contenente le curve ROC per tutte le classi (One-vs-Rest).
     """
     try:
         y_score = model.predict_proba(X_test)
@@ -385,49 +387,53 @@ def _plot_separated_roc(model, X_test, y_test, model_tag, feature_names, descrip
     classes = model.classes_
     n_classes = len(classes)
     
-    # Binarizzazione e calcoli iniziali...
-    try:
-        y_score = model.predict_proba(X_test)
-    except AttributeError:
-        print("⚠️ Il modello non supporta predict_proba. Impossibile salvare ROC.")
-        return
-
-    classes = model.classes_
-    n_classes = len(classes)
+    # Binarizzazione (One-vs-Rest)
     y_test_bin = label_binarize(y_test, classes=classes)
+    
+    # Fix per caso binario puro (se label_binarize restituisce una sola colonna)
     if n_classes == 2 and y_test_bin.shape[1] == 1:
         y_test_bin = np.hstack((1 - y_test_bin, y_test_bin))
 
-    print(f"   💾 Salvataggio Curve ROC per {model_tag}...")
+    print(f"   💾 Salvataggio Curve ROC Combinate per {model_tag}...")
+
+    # Creazione della figura UNICA prima del ciclo
+    plt.figure(figsize=(10, 8))
+    
+    # Generazione colori diversi per ogni classe
+    colors = plt.cm.get_cmap('tab10', n_classes)
 
     for i in range(n_classes):
-        # ... (codice del plot invariato) ...
         current_class = classes[i]
+        
+        # Calcolo FPR, TPR e AUC per la classe corrente
         fpr, tpr, _ = roc_curve(y_test_bin[:, i], y_score[:, i])
         roc_auc = auc(fpr, tpr)
         
-        plt.figure(figsize=(7, 6))
-        plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (area = {roc_auc:.2f})')
-        plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-        plt.xlim([0.0, 1.0])
-        plt.ylim([0.0, 1.05])
-        plt.xlabel('False Positive Rate')
-        plt.ylabel('True Positive Rate')
-        plt.title(f'ROC: {model_tag} | Class "{current_class}" (Target: {target_name})')
-        plt.legend(loc="lower right")
-        plt.grid(alpha=0.3)
-        
-        # --- CORREZIONE QUI SOTTO ---
-        safe_class = str(current_class).replace("-", "m") 
-        fname = f"{model_tag}_ROC_Class_{safe_class}"
-        
-        # Ora passiamo anche model_tag come primo argomento
-        out_path = _get_save_path(model_tag, feature_names, descriptors, target_name, fname, subfolder="ROC_Curves")
-        # ----------------------------
-        
-        plt.savefig(out_path)
-        plt.close()
-def _plot_knn_k_search(X_train, y_train, model_tag, feature_names, descriptors, target_name, max_k=300, step_k=15):
+        # Aggiunta della curva al plot
+        plt.plot(fpr, tpr, lw=2, color=colors(i),
+                 label=f'Class "{current_class}" (AUC = {roc_auc:.2f})')
+
+    # Linea diagonale (random classifier)
+    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--', label='Random Guess')
+
+    # Configurazione finale del plot unico
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title(f'Multi-class ROC Curve: {model_tag}\n(Target: {target_name})')
+    plt.legend(loc="lower right", fontsize='small')
+    plt.grid(alpha=0.3)
+    
+    # Costruzione nome file e salvataggio
+    fname = f"{model_tag}_Combined_ROC"
+    
+    out_path = _get_save_path(model_tag, feature_names, descriptors, target_name, fname)
+    
+    plt.savefig(out_path)
+    plt.close()
+
+def _plot_knn_k_search(X_train, y_train, model_tag, feature_names, descriptors, target_name, max_k=300, step_k=15, cv=10):
     """
     Esegue Cross-Validation per trovare K ottimale e SALVA il grafico.
     Adatta dinamicamente il range e lo step se i dati sono pochi.
@@ -446,16 +452,16 @@ def _plot_knn_k_search(X_train, y_train, model_tag, feature_names, descriptors, 
     for k in k_range:
         try:
             knn_temp = KNeighborsClassifier(n_neighbors=k)
-            scores = cross_val_score(knn_temp, X_train, y_train, cv=3, scoring='accuracy')
+            scores = cross_val_score(knn_temp, X_train, y_train, cv=cv, scoring='accuracy')
             k_scores.append(scores.mean())
         except Exception:
             k_scores.append(0)
 
     plt.figure(figsize=(12, 6))
     plt.plot(k_range, k_scores, marker='o', linestyle='-', color='purple')
-    plt.title(f'Accuratezza media (CV) al variare di K - {target_name}')
+    plt.title(f'Accuratezza media (CV) al variare di K (target : {target_name})')
     plt.xlabel('Valore di K')
-    plt.ylabel('Cross-Validated Accuracy')
+    plt.ylabel(f'Cross-Validated Accuracy [cv={cv}]')
     ticks = list(k_range)
     plt.xticks(ticks, rotation=45 if len(ticks) > 15 else 0)
     plt.grid(True, alpha=0.3)
@@ -472,25 +478,52 @@ def _plot_knn_k_search(X_train, y_train, model_tag, feature_names, descriptors, 
 def _plot_confusion_matrix(model, X_test, y_test, model_tag, feature_names, descriptors, target_name):
     print(f"   💾 Salvataggio Confusion Matrix per {model_tag}...")
     
-    plt.figure(figsize=(6, 5))
     y_pred = model.predict(X_test)
+    
+    # --- 1. Calcolo delle Metriche ---
+    acc = accuracy_score(y_test, y_pred)
+    # 'weighted': calcola la media pesata in base al numero di istanze per classe (utile se sbilanciato)
+    prec = precision_score(y_test, y_pred, average='weighted', zero_division=0)
+    rec = recall_score(y_test, y_pred, average='weighted', zero_division=0)
+    
+    # --- 2. Creazione Plot ---
+    # Aumento leggermente l'altezza (figsize) per far spazio al testo sotto
+    plt.figure(figsize=(6, 6))
+    ax = plt.gca()
+    
     cm = confusion_matrix(y_test, y_pred, labels=model.classes_)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=model.classes_)
-    disp.plot(cmap=plt.cm.Blues, values_format='d', ax=plt.gca())
-    plt.title(f"Confusion Matrix: {model_tag}")
     
-    # --- CORREZIONE QUI SOTTO ---
+    # Plot della matrice
+    disp.plot(cmap=plt.cm.Blues, values_format='d', ax=ax, colorbar=False)
+    
+    plt.title(f"Confusion Matrix: {model_tag}\n(Target: {target_name})")
+    
+    # --- 3. Aggiunta statistiche come footer ---
+    stats_text = (
+        f"Accuracy: {acc:.2%}\n"
+        f"Precision: {prec:.2%}\n"
+        f"Recall: {rec:.2%}"
+    )
+    
+    # figtext scrive coordinate relative alla figura intera (0,0 basso-sx, 1,1 alto-dx)
+    # y=0.02 posiziona il testo in fondo
+    plt.figtext(0.5, 0.02, stats_text, horizontalalignment='center', fontsize=10,
+                bbox=dict(boxstyle="round,pad=0.5", facecolor="whitesmoke", edgecolor="gray", alpha=0.8))
+    
+    # Aggiusta i margini per non tagliare il testo in basso
+    plt.subplots_adjust(bottom=0.2)
+    
+    # --- 4. Salvataggio ---
     fname = f"{model_tag}_Confusion_Matrix"
-    # Aggiunto model_tag
     out_path = _get_save_path(model_tag, feature_names, descriptors, target_name, fname)
-    # ----------------------------
     
     plt.savefig(out_path)
     plt.close()
     
 def _plot_separated_precision_recall(model, X_test, y_test, model_tag, feature_names, descriptors, target_name):
     """
-    Genera e SALVA 3 plot separati per le curve Precision-Recall (One-vs-Rest).
+    Genera e SALVA un unico plot contenente le curve Precision-Recall per tutte le classi (One-vs-Rest).
     """
     try:
         y_score = model.predict_proba(X_test)
@@ -502,45 +535,46 @@ def _plot_separated_precision_recall(model, X_test, y_test, model_tag, feature_n
     n_classes = len(classes)
     
     # Binarizzazione (One-vs-Rest)
-    # Trasforma y_test in una matrice binaria (es. [[0, 1, 0], [1, 0, 0], ...])
     y_test_bin = label_binarize(y_test, classes=classes)
     
-    # Fix per caso binario puro (se label_binarize restituisce una sola colonna)
+    # Fix per caso binario puro
     if n_classes == 2 and y_test_bin.shape[1] == 1:
         y_test_bin = np.hstack((1 - y_test_bin, y_test_bin))
 
-    print(f"   💾 Salvataggio Curve Precision-Recall per {model_tag}...")
+    print(f"   💾 Salvataggio Curva Precision-Recall Combinata per {model_tag}...")
+
+    # Creazione della figura UNICA prima del ciclo
+    plt.figure(figsize=(10, 8))
+    
+    # Generazione colori diversi per ogni classe
+    colors = plt.cm.get_cmap('tab10', n_classes)
 
     for i in range(n_classes):
         current_class = classes[i]
         
-        # Calcolo Precision e Recall per la classe corrente vs Resto
+        # Calcolo curve
         precision, recall, _ = precision_recall_curve(y_test_bin[:, i], y_score[:, i])
-        
-        # Calcolo Average Precision (area sotto la curva PR)
         avg_precision = average_precision_score(y_test_bin[:, i], y_score[:, i])
         
-        plt.figure(figsize=(7, 6))
-        plt.plot(recall, precision, color='purple', lw=2, 
-                 label=f'AP = {avg_precision:.2f}')
-        
-        # Linea di base (frequenza della classe positiva nel test set)
-        baseline = y_test_bin[:, i].mean()
-        plt.plot([0, 1], [baseline, baseline], linestyle='--', color='gray', label=f'Baseline ({baseline:.2f})')
+        # Aggiunta della curva al plot comune
+        plt.plot(recall, precision, lw=2, color=colors(i),
+                 label=f'Class "{current_class}" (AP = {avg_precision:.2f})')
 
-        plt.xlim([0.0, 1.0])
-        plt.ylim([0.0, 1.05])
-        plt.xlabel('Recall')
-        plt.ylabel('Precision')
-        plt.title(f'P-R Curve: {model_tag} | Class "{current_class}" (Target: {target_name})')
-        plt.legend(loc="lower left")
-        plt.grid(alpha=0.3)
-        
-        # Salvataggio
-        safe_class = str(current_class).replace("-", "m") 
-        fname = f"{model_tag}_Precision_Recall_Class_{safe_class}"
-        
-        out_path = _get_save_path(model_tag, feature_names, descriptors, target_name, fname, subfolder="Precision_Recall_Curves")
-        
-        plt.savefig(out_path)
-        plt.close()
+    # Configurazione finale del plot unico
+    plt.plot([0, 1], [0.5, 0.5], 'k--', lw=1, alpha=0.3, label='Baseline (0.5)') # Opzionale: linea generica
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.title(f'Multi-class Precision-Recall Curve: {model_tag}\n(Target: {target_name})')
+    plt.legend(loc="lower left", fontsize='small')
+    plt.grid(alpha=0.3)
+    
+    # Costruzione nome file e salvataggio
+    fname = f"{model_tag}_Combined_Precision_Recall"
+    
+    # Assicurati che _get_save_path sia accessibile o importata
+    out_path = _get_save_path(model_tag, feature_names, descriptors, target_name, fname)
+    
+    plt.savefig(out_path)
+    plt.close()
