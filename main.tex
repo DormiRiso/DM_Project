@@ -13,7 +13,7 @@
 
 \graphicspath{ {./figures/} }
 
-\geometry{a4paper, top=1.5cm, bottom=1.5cm, left=1cm, right=1cm}
+\geometry{a4paper, top=2.5cm, bottom=2.5cm, left=2cm, right=2cm}
 \setlength{\absleftindent}{3cm}
 \setlength{\absrightindent}{3cm}
 
@@ -547,24 +547,95 @@ Sono inoltre riportati i rispettivi \textit{dendrogram} in figure \ref{fig:ddg_n
 
 Osservando i diagrammi ad albero, si nota come la scelta di suddividere le due coppie di categorie in 4-5 cluster risulti appropriata: tracciando una linea orizzontale sull’albero è infatti possibile ottenere una suddivisione significativa dell’intero set di dati.
 
-
 \section{Classificazione}
+\label{sec:classification}
 
-Come prossimo passo abbiamo utilizzato diverse tecniche di classificazione con lo scopo di prevedere il possibile \textit{rating} di un gioco a partire dai suoi attributi. Abbiamo esplorato tecniche \textit{lazy} tipo \textit{kNN classification}, e tecniche \textit{eager} tipo \textit{naive Bayes} e \textit{decision trees}. L'analisi si è concentrata principalmente sulla classificazione della colonna \textit{rating} in base alle coppie di attributi \textit{AgeRec} con \textit{Weight} e \textit{NumDesires} con \textit{YearPublished}.
+Come passo successivo abbiamo utilizzato diverse tecniche di classificazione con lo scopo di prevedere il possibile \textit{rating} di un gioco a partire dai suoi attributi. Abbiamo esplorato sia tecniche \textit{lazy}, come la classificazione \textit{KNN}, sia tecniche \textit{eager}, come \textit{Naive Bayes} e \textit{Decision Trees}. L’analisi si è concentrata principalmente sulla classificazione della colonna \textit{Rating} utilizzando come \textit{feature} le coppie \textit{AgeRec}-\textit{Weight} e \textit{NumDesires}-\textit{YearPublished}.
 
-Per tutti gli algoritmi di classificazione abbiamo iniziato splittando il \textit{dataset} in due, mettendo da parte il $30\%$ da usare come \textit{dataset} di test mentre l'altro $70\%$ è stato usato per fare \textit{training} dei modelli. Il taglio è stato eseguito randomicamente per evitare effetti di \textit{bias} e per assicurarci che entrambi parti rappresentassero l'interità dei dati. 
-\subsection{KNN}
+Per tutti gli algoritmi di classificazione, il \textit{dataset} è stato suddiviso in due parti: il $70\%$ dei dati è stato utilizzato per il \textit{training} dei modelli, mentre il restante $30\%$ è stato riservato come \textit{dataset} di test. La suddivisione è stata effettuata in modo randomico, al fine di ridurre possibili effetti di \textit{bias} e garantire che entrambe le parti rappresentassero adeguatamente l’interezza dei dati.
 
+\subsection{Classificazione KNN}
 
+Abbiamo iniziato utilizzando il metodo di classificazione basato sui primi \textit{k} vicini, ovvero la classificazione \textit{KNN}, per stimare il \textit{Rating} utilizzando \textit{NumDesires} e \textit{YearPublished} come \textit{feature}.
 
+Prima di applicare l’algoritmo, abbiamo rimosso tutte le righe contenenti valori \textit{NaN} ed effettuato una standardizzazione basata sullo \textit{Z-score}, che porta le \textit{feature} ad avere media nulla e deviazione standard unitaria. Questa operazione è necessaria in quanto l’algoritmo si basa sulla distanza euclidea, e quindi è necessario che le variabili siano confrontabili sulla stessa scala. In questo modo, colonne come \textit{YearPublished} e \textit{NumDesires} contribuiscono in maniera bilanciata alla metrica Euclideaanza, evitando che una \textit{feature} domini rispetto alle altre.
+
+\subsubsection{Selezione del parametro \textit{k}}
+
+Per individuare il valore ottimale di \textit{k}, abbiamo calcolato l’accuratezza del modello al variare di questo parametro utilizzando una \textit{10-fold cross validation} e mediando i risultati ottenuti. L’accuratezza è stata calcolata come il rapporto tra il numero di predizioni corrette (veri positivi e veri negativi per ciascuna classe) e il numero totale di osservazioni.
+
+Questa procedura consente di ottenere una stima più robusta delle prestazioni del modello, riducendo la dipendenza dalla particolare suddivisione tra \textit{training} e \textit{test set}.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{../figures/classification/KNN/NumDesires_YearPublished/KNN_K_Search_Accuracy_Rating.png}
+	\centering
+	\caption{Accuratezza in funzione di \textit{k}, calcolata tramite \textit{10-fold cross-validation}, con \textit{k} variabile tra $1$ e $96$ in passi di $5$. Si osserva che $k=26$ massimizza l’accuratezza del modello.}
+	\label{fig:k_sel_class_ND_YP}
+\end{figure}
+
+Come mostrato in figura \ref{fig:k_sel_class_ND_YP}, il valore $k=26$ corrisponde alla massima accuratezza media. Di conseguenza, questo valore è stato utilizzato nelle analisi successive.
+
+\subsubsection{Analisi del modello}
+
+Dopo aver preparato i dati e selezionato il valore ottimale del parametro, abbiamo eseguito l’algoritmo di classificazione \textit{KNN} con $k=26$. Come prima analisi delle prestazioni, abbiamo esaminato la matrice di confusione ottenuta applicando il modello ai dati di \textit{test}, riportata in figura \ref{fig:confusion_matrix_ND_YP}.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{../figures/classification/KNN/NumDesires_YearPublished/KNN_Confusion_Matrix_Rating.png}
+	\centering
+	\caption{Matrice di confusione per il target \textit{Rating}, utilizzando \textit{NumDesires} e \textit{YearPublished} come \textit{feature}.}
+	\label{fig:confusion_matrix_ND_YP}
+\end{figure}
+
+Dalla matrice di confusione si osserva che accuratezza, precisione e richiamo si trovano intorno al $59\%$. A titolo di confronto, un classificatore che selezionasse casualmente una delle tre classi di \textit{Rating} otterrebbe un’accuratezza attesa di circa il $33\%$. Il modello risulta quindi significativamente migliore di una scelta casuale. Tuttavia, ci suggerisce che non riesca a spiegare completamente la variabilità del \textit{Rating} tramite queste sole \textit{feature}. 
+
+Si nota inoltre che la classe $-1$ viene confusa meno frequentemente con la classe $1$ rispetto alla classe $0$, indicando che giochi con valutazioni estremamente positive o negative risultano più facilmente distinguibili rispetto a quelli con valutazione intermedia, che non ci sorprende come risultato.
+
+Per valutare la separabilità delle classi, abbiamo costruito le \textit{ROC curve} per ciascuna classe del target, considerando le altre due come classe negativa. A partire da queste curve abbiamo calcolato l’\textit{AUC (Area Under Curve)} come metrica di valutazione. La \textit{ROC curve} rappresenta il compromesso tra il tasso di veri positivi e quello di falsi positivi al variare della soglia di classificazione.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{../figures/classification/KNN/NumDesires_YearPublished/KNN_Combined_ROC_Rating.png}
+	\centering
+	\caption{\textit{ROC curve} per il target \textit{Rating} utilizzando \textit{NumDesires} e \textit{YearPublished}. La linea tratteggiata rappresenta un classificatore casuale privo di potere discriminante.}
+	\label{fig:ROC_ND_YP}
+\end{figure}
+
+Come mostrato in figura \ref{fig:ROC_ND_YP}, la classe $-1$ risulta la più facilmente distinguibile ($AUC = 0.82$), mentre la classe $0$ è la più difficile da separare ($AUC = 0.65$). Questo è coerente con l’interpretazione del \textit{Rating} medio come classe di transizione tra valutazioni positive e negative.
+
+Tuttavia, la \textit{ROC curve} non fornisce informazioni sulla distribuzione delle classi. Per completare l’analisi del modello abbiamo quindi considerato anche le \textit{precision-recall curves}, costruite ordinando le predizioni sul \textit{dataset} di test e valutando precisione e richiamo al variare della soglia di classificazione. 
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{../figures/classification/KNN/NumDesires_YearPublished/KNN_Combined_Precision_Recall_Rating.png}
+	\centering
+	\caption{\textit{Precision-recall curve} per il target \textit{Rating} utilizzando \textit{NumDesires} e \textit{YearPublished}.}
+	\label{fig:P_R_ND_YP}
+\end{figure}
+
+I risultati, riportati in figura \ref{fig:P_R_ND_YP}, mostrano che la classe $1$, pur presentando una buona \textit{AUC} nella \textit{ROC curve}, perde rapidamente precisione all’aumentare del richiamo. Questo comportamento è dovuto al fatto che si tratta della classe meno popolata: per individuare un numero maggiore di giochi con \textit{Rating} alto è necessario accettare una precisione inferiore rispetto alle altre classi.
 
 \subsection{Naive Bayes}
 
+Come algoritmo successivo abbiamo utilizzato il \textit{Naive Bayes}, con l’obiettivo di classificare il \textit{Rating} di un gioco a partire da un insieme di \textit{feature}. Poiché il \textit{Naive Bayes} è particolarmente adatto anche alla gestione di \textit{feature} categoriche, abbiamo incluso la variabile \textit{Family} come attributo aggiuntivo, insieme a \textit{NumDesires} e \textit{YearPublished}. 
+
+Come nel caso precedente, abbiamo iniziato rimuovendo dal \textit{dataset} tutte le righe contenenti valori \textit{NaN} e standardizzando le variabili numeriche per portarle ad avere media nulla e deviazione standard unitaria. Questo implica che l’analisi è stata condotta esclusivamente sui giochi appartenenti ad almeno una famiglia: i giochi non appartenenti a nessuna famiglia sono trattati come \textit{NaN} e quindi rimossi. Perciò, l’analisi è stata effettuata su circa il $30\%$ del \textit{dataset} iniziale, limitandosi ai soli giochi associati ad una famiglia.
+
+Abbiamo utilizzato il modello \textit{MixedNB} del pacchetto \textit{mixed-naive-bayes}, estensione di \textit{scikit-learn}, che tratta le \textit{feature} numeriche come variabili gaussiane e utilizza una \textit{likelihood} multibernoulliana per le \textit{feature} categoriche. A ciascuna categoria è stata assegnata una chiave numerica tramite \textit{ordinal encoding}. Come per la classificazione \textit{KNN}, abbiamo analizzato le prestazioni del modello tramite matrice di confusione, \textit{ROC curves} e curve di precisione-richiamo. Tutti i risultati sono riportati in figura \ref{fig:dashboard_NB}.
+
+\begin{figure}[h]
+	\includegraphics[width=0.9\linewidth]{../figures/classification/NB/NB_Full_Summary_Report_Rating.png}
+	\centering
+	\caption{Matrice di confusione, \textit{ROC curves} e curve di precisione-richiamo per il target \textit{Rating}, utilizzando \textit{NumDesires} e \textit{YearPublished} come \textit{feature} numeriche e \textit{Family} come \textit{feature} categorica.}
+	\label{fig:dashboard_NB}
+\end{figure}
+
+Analogamente al caso del \textit{KNN}, accuratezza, precisione e richiamo indicano che il modello classifica correttamente i dati con una frequenza significativamente maggiore rispetto a un classificatore casuale. Anche in questo caso, la classe più difficile da classificare risulta essere la classe $0$, in quanto intermedia tra le altre due. Tutte le metriche risultano complessivamente migliori rispetto a quelle ottenute con il \textit{KNN}, suggerendo che l’inclusione della variabile \textit{Family} abbia fornito informazione aggiuntiva utile alla classificazione.
+
+Tuttavia, l’introduzione di questa \textit{feature} comporta una restrizione del \textit{dataset} analizzato, introducendo un \textit{bias} a priori: il modello viene infatti addestrato e valutato esclusivamente sui giochi appartenenti a una famiglia, e non sull’interezza del \textit{dataset} originale.
+
+Infine, è importante ricordare che il \textit{Naive Bayes} assume l’indipendenza condizionata tra le \textit{feature}. Sebbene le variabili considerate non presentino forti correlazioni, non possono essere considerate completamente indipendenti. Nonostante questa limitazione, la tecnica del \textit{Naive Bayes} si è dimostrata robusta e particolarmente utile, permettendo di integrare efficacemente \textit{feature} numeriche e categoriche all’interno del processo di classificazione.
 
 
-12
 \subsection{Decision Trees}
-12
+12345678
 
 \section{Regressione}
 
@@ -572,12 +643,12 @@ Come ulteriore strumento di predizione abbiamo studiato la dipendenza tra le col
  
 Cpme nella sezione precedente, il \textit{dataset} è stato diviso in due parti, dove il  $70\%$ delle righe (scelte randomicamente) sono state usate come set di \textit{training} e l'altro $30\%$ di \textit{test}. 
 \subsection{Una variabile indipendente}
-
+12345678
 
 
 \subsection{Due variabili indipendenti}
 
-Nel caso di due variabili indipendenti abbiamo utilizzato come variabile indipendente la colonna \textit{WeightedRating} con la speranza di poter predirre, tramite tecniche di regressione, l'eventuale successo di un gioco con determinate carateristiche. Abbiamo provato tutte le coppie tra le seguenti colonne: \textit{Weight}, \textit{Playtime}, \textit{AgeRec}, \textit{NumDesires}, \textit{LanguageEase}, trovando che i risultati migliori si trovavano per la coppia \textit{NumDesires} e \textit{Weight}. 
+Nel caso di due variabili indipendenti abbiamo utilizzato come variabile indipendente la colonna \textit{WeightedRating} con la speranza di poter predirre, tramite tecniche di regressione, l'eventuale successo di un gioco con determinate caratteristiche. Abbiamo provato tutte le coppie tra le seguenti colonne: \textit{Weight}, \textit{Playtime}, \textit{AgeRec}, \textit{NumDesires}, \textit{LanguageEase}, trovando che i risultati migliori si trovavano per la coppia \textit{NumDesires} e \textit{Weight}. 
 
 Abbiamo utilizzato 5 tecniche diverse, eseguendo un fit lineare, un fit lineare con regolarizzazione (utilizzando sia \textit{lasso} che \textit{ridge}), \textit{knn} e \textit{decision trees}. Per fissare i parametri di questi algoritmi abbiamo eseguito le regressioni sul \textit{dataset} di \textit{training} per un valore del parametro, e calcolato il $R^2$ dei risultati sul \textit{dataset} di \textit{test}. Poi, si è fatto variare il valore del parametro, eseguendo uno \textit{sweep} per ogni algoritmo. Abbiamo scelto il miglior valore di ciascun parametro in base al punto di "gomito" della curva ottenuta. Queste curve sono riportate in figura \ref{fig:regression_parameter_sweep}.
 
@@ -605,7 +676,7 @@ Guadrdando il $R^2$ come metrica, il miglior risultato ottenuto è tramite l'alg
 
 Come ultima analisi abbiamo applicato due algoritmi di \textit{pattern mining} al dataset per trovare correlazioni e per trovare correlazioni e identificare strutture ricorrenti che caratterizzano il \textit{dataset}.
 \subsection{FP Growth}
-12
+12345678
 \section{Conclusioni}
 
 In questo progetto abbiamo svolto un’analisi completa del \textit{dataset} proveniente da BoardGameGeek, affrontando in modo sistematico tutte le fasi del processo di preparazione ed esplorazione dei dati. A partire da una prima comprensione delle variabili, abbiamo identificato criticità strutturali e incoerenze semantiche, applicando una pulizia approfondita che ha permesso di rimuovere valori impossibili, gestire correttamente i dati mancanti e uniformare gli attributi secondo il loro dominio.

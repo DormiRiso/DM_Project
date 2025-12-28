@@ -84,7 +84,7 @@ Feature Categoriche: {cat_str}
 
             # A. Confusion Matrix
             _plot_confusion_matrix(
-                model, X_test, y_test, model_tag, 
+                model, predictions, y_test, model_tag, 
                 final_feature_names, descriptors, actual_target
             )
             

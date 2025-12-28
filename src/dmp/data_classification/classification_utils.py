@@ -7,7 +7,7 @@ import seaborn as sns
 from scipy.stats import norm
 
 # Scikit-Learn: Preprocessing e Composizione
-from sklearn.preprocessing import StandardScaler, OneHotEncoder, label_binarize
+from sklearn.preprocessing import StandardScaler, OrdinalEncoder, label_binarize
 from sklearn.compose import ColumnTransformer
 
 # Scikit-Learn: Modelli e Validazione
@@ -245,7 +245,7 @@ def clean_and_process_data(train_df, test_df, numeric_cols, categorical_cols, ta
         transformers.append(('num', StandardScaler(), numeric_cols)) # Scaling delle numeriche
     if categorical_cols:
         # OneHotEncoder per categoriche (handle_unknown='ignore' previene crash su nuove categorie nel test)
-        transformers.append(('cat', OneHotEncoder(handle_unknown='ignore', sparse_output=False), categorical_cols))
+        transformers.append(('cat', OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1), categorical_cols))
 
     preprocessor = ColumnTransformer(transformers=transformers, verbose_feature_names_out=False)
     
@@ -374,6 +374,48 @@ def _get_save_path(model_tag, feature_names, descriptors, target_name, filename,
     
     return os.path.join(out_dir, final_name)
 
+def _plot_knn_k_search(X_train, y_train, model_tag, feature_names, descriptors, target_name, max_k=300, step_k=15, cv=10):
+    """
+    Esegue Cross-Validation per trovare K ottimale e SALVA il grafico.
+    Adatta dinamicamente il range e lo step se i dati sono pochi.
+    """
+    
+    n_samples = len(X_train)
+    min_k = 1 
+    
+    # 1. Calcola il vero limite superiore per k (non può superare i campioni - 1)
+    #    Se n_samples è molto piccolo (es. 20), real_max_k sarà 19.
+    real_max_k = min(max_k, len(X_train) - 1)
+    k_range = range(1, real_max_k + 1, step_k)
+    
+    # ... (loop di cross validation e plot invariato) ...
+    k_scores = []
+    for k in k_range:
+        try:
+            knn_temp = KNeighborsClassifier(n_neighbors=k)
+            scores = cross_val_score(knn_temp, X_train, y_train, cv=cv, scoring='accuracy')
+            k_scores.append(scores.mean())
+        except Exception:
+            k_scores.append(0)
+
+    plt.figure(figsize=(12, 6))
+    plt.plot(k_range, k_scores, marker='o', linestyle='-', color='purple')
+    plt.title(f'Accuratezza media (CV) al variare di K (target : {target_name})')
+    plt.xlabel('Valore di K')
+    plt.ylabel(f'Cross-Validated Accuracy [cv={cv}]')
+    ticks = list(k_range)
+    plt.xticks(ticks, rotation=45 if len(ticks) > 15 else 0)
+    plt.grid(True, alpha=0.3)
+    
+    # --- CORREZIONE QUI SOTTO ---
+    fname = f"{model_tag}_K_Search_Accuracy"
+    # Aggiunto model_tag
+    out_path = _get_save_path(model_tag, feature_names, descriptors, target_name, fname)
+    # ----------------------------
+    
+    plt.savefig(out_path)
+    plt.close()
+   
 def _plot_separated_roc(model, X_test, y_test, model_tag, feature_names, descriptors, target_name):
     """
     Genera e SALVA un unico plot contenente le curve ROC per tutte le classi (One-vs-Rest).
@@ -432,53 +474,11 @@ def _plot_separated_roc(model, X_test, y_test, model_tag, feature_names, descrip
     
     plt.savefig(out_path)
     plt.close()
-
-def _plot_knn_k_search(X_train, y_train, model_tag, feature_names, descriptors, target_name, max_k=300, step_k=15, cv=10):
-    """
-    Esegue Cross-Validation per trovare K ottimale e SALVA il grafico.
-    Adatta dinamicamente il range e lo step se i dati sono pochi.
-    """
-    
-    n_samples = len(X_train)
-    min_k = 1 
-    
-    # 1. Calcola il vero limite superiore per k (non può superare i campioni - 1)
-    #    Se n_samples è molto piccolo (es. 20), real_max_k sarà 19.
-    real_max_k = min(max_k, len(X_train) - 1)
-    k_range = range(1, real_max_k + 1, step_k)
-    
-    # ... (loop di cross validation e plot invariato) ...
-    k_scores = []
-    for k in k_range:
-        try:
-            knn_temp = KNeighborsClassifier(n_neighbors=k)
-            scores = cross_val_score(knn_temp, X_train, y_train, cv=cv, scoring='accuracy')
-            k_scores.append(scores.mean())
-        except Exception:
-            k_scores.append(0)
-
-    plt.figure(figsize=(12, 6))
-    plt.plot(k_range, k_scores, marker='o', linestyle='-', color='purple')
-    plt.title(f'Accuratezza media (CV) al variare di K (target : {target_name})')
-    plt.xlabel('Valore di K')
-    plt.ylabel(f'Cross-Validated Accuracy [cv={cv}]')
-    ticks = list(k_range)
-    plt.xticks(ticks, rotation=45 if len(ticks) > 15 else 0)
-    plt.grid(True, alpha=0.3)
-    
-    # --- CORREZIONE QUI SOTTO ---
-    fname = f"{model_tag}_K_Search_Accuracy"
-    # Aggiunto model_tag
-    out_path = _get_save_path(model_tag, feature_names, descriptors, target_name, fname)
-    # ----------------------------
-    
-    plt.savefig(out_path)
-    plt.close()
-    
-def _plot_confusion_matrix(model, X_test, y_test, model_tag, feature_names, descriptors, target_name):
+ 
+def _plot_confusion_matrix(model, predictions, y_test, model_tag, feature_names, descriptors, target_name):
     print(f"   💾 Salvataggio Confusion Matrix per {model_tag}...")
     
-    y_pred = model.predict(X_test)
+    y_pred = predictions
     
     # --- 1. Calcolo delle Metriche ---
     acc = accuracy_score(y_test, y_pred)
@@ -556,12 +556,18 @@ def _plot_separated_precision_recall(model, X_test, y_test, model_tag, feature_n
         precision, recall, _ = precision_recall_curve(y_test_bin[:, i], y_score[:, i])
         avg_precision = average_precision_score(y_test_bin[:, i], y_score[:, i])
         
+        # Calculate prevalence (baseline)
+        prevalence = np.sum(y_test_bin[:, i]) / len(y_test_bin)
+
         # Aggiunta della curva al plot comune
         plt.plot(recall, precision, lw=2, color=colors(i),
                  label=f'Class "{current_class}" (AP = {avg_precision:.2f})')
 
+        # Baseline che dipende dalla % dei positivi
+        plt.axhline(y=prevalence, color=colors(i), linestyle='--', alpha=0.5, 
+            label=f'Baseline "{current_class}" ({prevalence:.2f})')
+    
     # Configurazione finale del plot unico
-    plt.plot([0, 1], [0.5, 0.5], 'k--', lw=1, alpha=0.3, label='Baseline (0.5)') # Opzionale: linea generica
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
     plt.xlabel('Recall')
@@ -576,5 +582,68 @@ def _plot_separated_precision_recall(model, X_test, y_test, model_tag, feature_n
     # Assicurati che _get_save_path sia accessibile o importata
     out_path = _get_save_path(model_tag, feature_names, descriptors, target_name, fname)
     
+    plt.savefig(out_path)
+    plt.close()
+
+def _plot_nb_summary_subplot(model, predictions, X_test, y_test, model_tag, feature_names, descriptors, target_name):
+    """
+    Creates a 1x3 subplot containing the Confusion Matrix, ROC Curves, and Precision-Recall Curves.
+    """
+    try:
+        y_score = model.predict_proba(X_test)
+        y_pred = model.predict(X_test)
+    except AttributeError:
+        print(f"⚠️ Model {model_tag} does not support probability estimates.")
+        return
+
+    classes = model.classes_
+    n_classes = len(classes)
+    y_test_bin = label_binarize(y_test, classes=classes)
+    if n_classes == 2 and y_test_bin.shape[1] == 1:
+        y_test_bin = np.hstack((1 - y_test_bin, y_test_bin))
+
+    # Create figure with 1 row and 3 columns
+    fig, axes = plt.subplots(1, 3, figsize=(20, 6))
+    colors = plt.cm.get_cmap('tab10', n_classes)
+
+    # --- 1. Confusion Matrix (Left) ---
+    cm = confusion_matrix(y_test, predictions, labels=classes)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
+    disp.plot(cmap=plt.cm.Blues, values_format='d', ax=axes[0], colorbar=False)
+    axes[0].set_title(f"Confusion Matrix\nAccuracy: {accuracy_score(y_test, y_pred):.2%}")
+
+    # --- 2. ROC Curves (Center) ---
+    for i in range(n_classes):
+        fpr, tpr, _ = roc_curve(y_test_bin[:, i], y_score[:, i])
+        roc_auc = auc(fpr, tpr)
+        axes[1].plot(fpr, tpr, lw=2, color=colors(i), label=f'Class {classes[i]} ({roc_auc:.2f})')
+    
+    axes[1].plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    axes[1].set_title(f"Multi-class ROC (Target: {target_name})")
+    axes[1].set_xlabel('False Positive Rate')
+    axes[1].set_ylabel('True Positive Rate')
+    axes[1].legend(loc="lower right", fontsize='x-small')
+    axes[1].grid(alpha=0.3)
+
+    # --- 3. Precision-Recall Curves (Right) ---
+    for i in range(n_classes):
+        precision, recall, _ = precision_recall_curve(y_test_bin[:, i], y_score[:, i])
+        ap = average_precision_score(y_test_bin[:, i], y_score[:, i])
+        prevalence = np.sum(y_test_bin[:, i]) / len(y_test_bin)
+        
+        axes[2].plot(recall, precision, lw=2, color=colors(i), label=f'Class {classes[i]} (AP={ap:.2f})')
+        axes[2].axhline(y=prevalence, color=colors(i), linestyle='--', alpha=0.4)
+
+    axes[2].set_title("Precision-Recall Curve")
+    axes[2].set_xlabel('Recall')
+    axes[2].set_ylabel('Precision')
+    axes[2].legend(loc="lower left", fontsize='x-small')
+    axes[2].grid(alpha=0.3)
+
+    plt.tight_layout()
+    
+    # Save using your custom path function
+    fname = f"{model_tag}_Full_Summary_Report"
+    out_path = _get_save_path(model_tag, feature_names, descriptors, target_name, fname)
     plt.savefig(out_path)
     plt.close()
