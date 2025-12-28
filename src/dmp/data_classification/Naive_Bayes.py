@@ -1,4 +1,7 @@
-from sklearn.naive_bayes import GaussianNB
+import numpy as np
+
+from mixed_naive_bayes import MixedNB
+from sklearn.preprocessing import LabelEncoder
 from .classification_utils import (
     prepare_target_column, 
     clean_and_process_data, 
@@ -7,7 +10,8 @@ from .classification_utils import (
     _plot_separated_roc,
     _plot_knn_k_search,
     _plot_confusion_matrix,
-    _plot_separated_precision_recall
+    _plot_separated_precision_recall,
+    _plot_nb_summary_subplot
 )
 def naive_bayes_classifier(train_df, test_df, num_feats=None, cat_feats=None, target_col="Rating", print_metrics=False, make_plot=False, descriptors=None, check_baseline=False):
     """
@@ -43,18 +47,29 @@ Feature Categoriche: {cat_str}
     if len(df_test_clean) == 0:
         print("⚠️ Nessun dato di test valido dopo la pulizia.")
         return df_test_clean
+    
+
+    le = LabelEncoder()
+    # Trasforma y_train (es: [-1, 0, 1] -> [0, 1, 2]) serve per mixedNB
+    y_train_encoded = le.fit_transform(y_train)
+    y_train_encoded = np.array(y_train_encoded, dtype=np.int64)
+    start_idx = len(num_feats) if num_feats else 0
+    cat_indices = [int(i) for i in range(start_idx, len(final_feature_names))]
+
+    if not cat_indices:
+            cat_indices = None
 
     # 4. ADDESTRAMENTO
-    model = GaussianNB()
-    model.fit(X_train, y_train)
-    
+    model = MixedNB(categorical_features=cat_indices)
+    model.fit(X_train, y_train_encoded)
+    model.classes_ = le.classes_
     # 5. PREDIZIONE
-    predictions = model.predict(X_test)
+    predictions = le.inverse_transform(model.predict(X_test))
     df_test_clean['prediction'] = predictions
 
     # 6. BASELINE & METRICHE & PLOT CUSTOM
     if check_baseline:
-        run_baseline_analysis(model, X_train, y_train, "Naive Bayes")
+        run_baseline_analysis(model, X_train, y_train_encoded, "Naive Bayes")
 
     if actual_target in df_test_clean.columns:
         y_test = df_test_clean[actual_target]
@@ -68,7 +83,7 @@ Feature Categoriche: {cat_str}
 
             # A. Confusion Matrix
             _plot_confusion_matrix(
-                model, X_test, y_test, model_tag, 
+                model, predictions, y_test, model_tag, 
                 final_feature_names, descriptors, actual_target
             )
 
@@ -84,5 +99,6 @@ Feature Categoriche: {cat_str}
                 final_feature_names, descriptors, actual_target
             )
             
-
+            _plot_nb_summary_subplot(model, predictions, X_test, y_test, model_tag, 
+                final_feature_names, descriptors, actual_target)
     return df_test_clean
