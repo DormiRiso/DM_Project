@@ -5,9 +5,12 @@ import seaborn as sns
 import os
 from pathlib import Path
 
+from .classification_utils import _plot_summary_subplot
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.metrics import (
     accuracy_score,
+    precision_score,
+    recall_score,
     f1_score,
     classification_report,
     confusion_matrix,
@@ -62,8 +65,8 @@ def decision_tree_classifier(
     cat_feats=None,
     target_col="Rating",
     max_depth=None,
-    min_samples_split=2,
-    min_samples_leaf=1,
+    min_samples_split=80,
+    min_samples_leaf=100,
     criterion='gini',
     print_metrics=True,
     make_plot=True,
@@ -222,7 +225,7 @@ def decision_tree_classifier(
     # Generate plots (only if we have test data)
     if make_plot and y_test is not None and len(y_test) > 0:
         generate_dt_plots(
-            dt, X_train, y_train, X_test, y_test,
+            dt, X_train, y_train, X_test, y_test, y_test_pred,
             feature_names, actual_target, descriptors,
             max_depth, min_samples_split, min_samples_leaf, criterion
         )
@@ -241,7 +244,7 @@ def decision_tree_classifier(
 
 
 def generate_dt_plots(
-    dt, X_train, y_train, X_test, y_test,
+    dt, X_train, y_train, X_test, y_test, y_pred,
     feature_names, target_name, descriptors,
     max_depth, min_samples_split, min_samples_leaf, criterion
 ):
@@ -274,15 +277,42 @@ def generate_dt_plots(
     plt.savefig(tree_plot_path, dpi=150, bbox_inches='tight')
     plt.close()
     print(f"✅ Tree plot saved: {tree_plot_path}")
-    
+
     # 2. Confusion Matrix
-    plt.figure(figsize=(10, 8))
-    ConfusionMatrixDisplay.from_estimator(
-        dt, X_test, y_test,
-        cmap='Blues',
-        display_labels=sorted(np.unique(y_test).astype(str))
+    plt.figure(figsize=(6, 6))
+    ax = plt.gca()
+    unique_labels = sorted(np.unique(y_test))
+
+    
+    cm = confusion_matrix(y_test, y_pred, labels=unique_labels)
+    disp = ConfusionMatrixDisplay(
+        confusion_matrix=cm, 
+        display_labels=[str(l) for l in unique_labels]
+    )    
+
+    # Plot della matrice
+    disp.plot(cmap='Blues', values_format='d', ax=ax, colorbar=False)
+    plt.title(f"Confusion Matrix: Decision Tree\n(Target: {desc_name})")
+
+    acc = accuracy_score(y_test, y_pred)
+    # 'weighted': calcola la media pesata in base al numero di istanze per classe (utile se sbilanciato)
+    prec = precision_score(y_test, y_pred, average='weighted', zero_division=0)
+    rec = recall_score(y_test, y_pred, average='weighted', zero_division=0)
+
+    stats_text = (
+        f"Accuracy: {acc:.2%}\n"
+        f"Precision: {prec:.2%}\n"
+        f"Recall: {rec:.2%}"
     )
-    plt.title(f"Confusion Matrix - Decision Tree\n{desc_name}")
+    
+    # figtext scrive coordinate relative alla figura intera (0,0 basso-sx, 1,1 alto-dx)
+    # y=0.02 posiziona il testo in fondo
+    plt.figtext(0.5, 0.02, stats_text, horizontalalignment='center', fontsize=10,
+                bbox=dict(boxstyle="round,pad=0.5", facecolor="whitesmoke", edgecolor="gray", alpha=0.8))
+    
+    # Aggiusta i margini per non tagliare il testo in basso
+    plt.subplots_adjust(bottom=0.2)
+
     cm_plot_path = out_dir / f"dt_confusion_{desc_name}.png"
     plt.savefig(cm_plot_path, dpi=150, bbox_inches='tight')
     plt.close()
@@ -350,6 +380,15 @@ def generate_dt_plots(
         feature_names, target_name, desc_name, out_dir
     )
     
+    _plot_summary_subplot(model=dt,
+            predictions=y_pred,
+            X_test=X_test,
+            y_test=y_test,
+            model_tag="decision_tree", 
+            feature_names=feature_names,
+            descriptors=descriptors,
+            target_name=target_name)
+        
     # 7. Hyperparameter Tuning (opzionale - commenta se troppo lento)
     print("🔄 Performing hyperparameter tuning...")
     try:
@@ -455,8 +494,8 @@ def perform_hyperparameter_tuning(X_train, y_train, X_test, y_test, feature_name
     
     param_dist = {
         'max_depth': [None] + list(range(2, 20)),
-        'min_samples_split': [2, 5, 10, 20, 30, 50],
-        'min_samples_leaf': [1, 2, 5, 10, 20, 30],
+        'min_samples_split': [2,5,10,25,30,50,75,80,100],
+        'min_samples_leaf': [2,5,10,25,30,50,75,80,100],
         'criterion': ['gini', 'entropy']
     }
     
@@ -465,7 +504,7 @@ def perform_hyperparameter_tuning(X_train, y_train, X_test, y_test, feature_name
     random_search = RandomizedSearchCV(
         dt,
         param_distributions=param_dist,
-        n_iter=50,
+        n_iter=500,
         cv=5,
         scoring='accuracy',
         random_state=42,
