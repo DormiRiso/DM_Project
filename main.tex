@@ -17,7 +17,7 @@
 \setlength{\absleftindent}{3cm}
 \setlength{\absrightindent}{3cm}
 
-\title{Data Mining: Fundamentals prima consegna}
+\title{A Data Mining Study of the BoardGameGeek Dataset}
 \author{Leonardo Amabile, Michelangelo Leoni, Jacopo Omodei}
 \date{\today}
 
@@ -28,10 +28,9 @@
 \maketitle % need full-width title
 \begin{onecolabstract}
 
+In questo progetto abbiamo pulito, analizzato e trasformato il \textit{dataset} di BoardGameGeek, correggendo valori errati, riducendo la dimensionalità tramite tecniche di aggregazione e ottenendo un insieme di dati più coerente e interpretabile. Abbiamo studiato distribuzioni, correlazioni e categorie, e applicato diverse tecniche di \textit{clustering}, che non hanno evidenziato gruppi nettamente distinti ma suggeriscono uno spettro continuo di caratteristiche nei giochi da tavolo.
 
-In questo progetto abbiamo pulito, analizzato e trasformato il \textit{dataset} di BoardGameGeek, correggendo valori errati, riducendo la dimensionalità tramite tecniche di aggregazione e creando un insieme di dati più coerente e interpretabile. Abbiamo studiato distribuzioni, correlazioni e categorie, e applicato varie tecniche di \textit{clustering}, che non hanno evidenziato gruppi distinti ma suggeriscono uno spettro continuo di caratteristiche nei giochi da tavolo. Il \textit{dataset} finale risulta adatto ad ulteriori analisi di classificazione e regressione.
-
-
+Sul \textit{dataset} finale abbiamo quindi applicato tecniche di \textit{classificazione}, utilizzando modelli \textit{KNN}, \textit{Naive Bayes} e \textit{Decision Trees}, e tecniche di \textit{regressione} sia con una che con due variabili indipendenti, confrontando modelli lineari, regolarizzati e non lineari. Infine, abbiamo esplorato relazioni frequenti tra attributi tramite tecniche di \textit{pattern mining}, utilizzando l’algoritmo \textit{FP-Growth}. Nel complesso, il lavoro fornisce una visione articolata e completa delle dinamiche interne al \textit{dataset}.
 
 
 \end{onecolabstract}
@@ -549,6 +548,7 @@ Come passo successivo abbiamo utilizzato diverse tecniche di classificazione con
 Per tutti gli algoritmi di classificazione, il \textit{dataset} è stato suddiviso in due parti: il $70\%$ dei dati è stato utilizzato per il \textit{training} dei modelli, mentre il restante $30\%$ è stato riservato come \textit{dataset} di test. La suddivisione è stata effettuata in modo randomico, al fine di ridurre possibili effetti di \textit{bias} e garantire che entrambe le parti rappresentassero adeguatamente l’interezza dei dati.
 
 \subsection{Classificazione KNN}
+\label{sec:class_knn}
 
 Abbiamo iniziato utilizzando il metodo di classificazione basato sui primi \textit{k} vicini, ovvero la classificazione \textit{KNN}, per stimare il \textit{Rating} utilizzando \textit{NumDesires} e \textit{YearPublished} come \textit{feature}.
 
@@ -582,7 +582,7 @@ Dopo aver preparato i dati e selezionato il valore ottimale del parametro, abbia
 
 Dalla matrice di confusione si osserva che accuratezza, precisione e richiamo si trovano intorno al $59\%$. 
 
-Per determinare se questo valore di accuracy è statisticamente significativo, è stata effettuata un'analisi su una 10-fold-Cross-Validation. Il modello proposto è stato confrontato con altri due di riferimento: un \textit{Dummy classifier} che risponde sempre con la classe più frequente (per verificare le capacità del modello di superare gli sbilanciamenti nella classe \textit{target}) e un modello addestrato su \textit{target} permutati casualmente, per comprendere se effettivamente il modello supera la semplice selezione casuale. Assumendo che le stime delle accuratezze seguano una distribuzione Normale (approssimazione valida per grandi campioni) con media pari all'accuratezza osservata $p$ e varianza derivata dalla distribuzione binomiale $\sigma_{p}^{2} = \frac{p (1-p)}{n}$, è possibile definire l'intervallo di confidenza al 95 \% per la differenza $d$ tra le performance dei due modelli come segue:
+Per determinare se questo valore di accuracy è statisticamente significativo, è stata effettuata un'analisi su una 10-fold-Cross-Validation. Il modello proposto è stato confrontato con altri due di riferimento: un \textit{Dummy classifier} che risponde sempre con la classe più frequente (per verificare le capacità del modello di superare gli sbilanciamenti nella classe \textit{target}) e un modello addestrato su \textit{target} permutati casualmente, per comprendere se effettivamente il modello supera la semplice selezione casuale. Assumendo che le stime delle accuratezze seguano una distribuzione Normale (approssimazione valida per grandi campioni) con media pari all'accuratezza osservata $p$ e varianza derivata dalla distribuzione binomiale $\sigma_{p}^{2} = \frac{p (1-p)}{n}$, è possibile definire l'intervallo di confidenza al 95\% per la differenza $d$ tra le performance dei due modelli come segue:
 
 \[
 d \in \left[ \hat{d} - Z_{\alpha/2}\sigma_{d} \,;\, \hat{d} + Z_{\alpha/2}\sigma_{d} \right]
@@ -592,18 +592,23 @@ dove $\hat{d}$ rappresenta la differenza osservata tra le medie e $\sigma_d$ l'e
 
 Nel KNN proposto sulle feature si osservano i seguenti risultati:
 
-\begin{center}
-\begin{tabular}{|l|c|}
-\hline
-\textbf{Modelli} & $d$ \textbf{ @ 95\% CL} \\
-\hline
-Reale vs Dummy & $0.141 \pm 0.012$ \\
-Reale vs Random & $0.185 \pm 0.015$ \\
-\hline
-\end{tabular}
-\end{center}
 
-Siccome entrambi gli intervalli sono sempre positivi possiamo dire che il nostro modello è più accurato con un livello di confidenza al 95 \% rispetto agli altri due.
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|}
+	\hline
+	\textbf{Modelli} & $d$ \textbf{ @ 95\% CL} \\
+	\hline
+	Reale vs Dummy & $0.141 \pm 0.012$ \\
+	Reale vs Random & $0.185 \pm 0.015$ \\
+	\hline
+\end{tabular}
+\caption{Risultati del test statistico di confronto tra l'accuratezza del modello reale e i baseline \textit{dummy} e \textit{random} per la classificazione del \textit{target} \textit{results} con algoritmo basato sul \textit{KNN}.}
+\label{tab:real_dummy_random_table_KNN}
+\end{table}
+
+
+Siccome entrambi gli intervalli sono sempre positivi possiamo dire che il nostro modello è più accurato con un livello di confidenza al 95\% rispetto agli altri due.
 
 Si nota inoltre che la classe $-1$ viene confusa meno frequentemente con la classe $1$ rispetto alla classe $0$, indicando che giochi con valutazioni estremamente positive o negative risultano più facilmente distinguibili rispetto a quelli con valutazione intermedia, che non ci sorprende come risultato.
 
@@ -665,33 +670,52 @@ Per il valore di \textit{k} è stata seguita la stessa procedura di prima, arriv
 
 Dalle figure \ref{fig:confusion_matrix_W_AR_roll_action}, \ref{fig:ROC_W_AR_roll_action} e \ref{fig:P_R_W_AR_roll_action} è evidente come il modello non riesca a classificare i giochi che sono sia "roll" che "action", probabilmente perchè esistono pochi punti con questa doppia caratteristica. Il modello comunque mostra dei risultati soddisfacenti nel differenziare le due classi, soprattutto se lo confrontiamo con i due modelli \textit{random} e \textit{dummy}:
 
-\begin{center}
+\begin{table}[h]
+\centering
 \begin{tabular}{|l|c|}
-\hline
-\textbf{Modelli} & $d$ \textbf{ @ 95\% CL} \\
-\hline
-Reale vs Dummy & $0.059  \pm 0.020$ \\
-Reale vs Random & $0.074  \pm 0.019$ \\
-\hline
+	\hline
+	\textbf{Modelli} & $d$ \textbf{ @ 95\% CL} \\
+	\hline
+	Reale vs Dummy & $0.059  \pm 0.020$ \\
+	Reale vs Random & $0.074  \pm 0.019$ \\
+	\hline
 \end{tabular}
-\end{center}
+\caption{Risultati del test statistico di confronto tra l'accuratezza del modello reale e i baseline \textit{dummy} e \textit{random} per la classificazione del \textit{target} "action-roll" con algoritmo basato sul \textit{KNN}.}
+\label{tab:real_dummy_random_table_KNN_RA}
+\end{table}
 
 \subsection{Naive Bayes}
 
-Come algoritmo successivo abbiamo utilizzato il \textit{Naive Bayes}, con l’obiettivo di classificare il \textit{Rating} di un gioco a partire da un insieme di \textit{feature}. Poiché il \textit{Naive Bayes} è particolarmente adatto anche alla gestione di \textit{feature} categoriche, abbiamo incluso la variabile \textit{Family} come attributo aggiuntivo, insieme a \textit{NumDesires} e \textit{YearPublished}. 
+Come algoritmo successivo abbiamo utilizzato il \textit{Naive Bayes}, con l’obiettivo di classificare il \textit{Rating} di un gioco a partire da un insieme di \textit{feature}. Poiché il \textit{Naive Bayes} è particolarmente adatto alla gestione di \textit{feature} categoriche, abbiamo incluso la variabile \textit{Family} come attributo aggiuntivo, insieme a \textit{NumDesires} e \textit{YearPublished}. 
 
-Come nel caso precedente, abbiamo iniziato rimuovendo dal \textit{dataset} tutte le righe contenenti valori \textit{NaN} e standardizzando le variabili numeriche per portarle ad avere media nulla e deviazione standard unitaria. Questo implica che l’analisi è stata condotta esclusivamente sui giochi appartenenti ad almeno una famiglia: i giochi non appartenenti a nessuna famiglia sono trattati come \textit{NaN} e quindi rimossi. Perciò, l’analisi è stata effettuata su circa il $30\%$ del \textit{dataset} iniziale, limitandosi ai soli giochi associati ad una famiglia.
+Come nel caso precedente, abbiamo iniziato rimuovendo dal \textit{dataset} tutte le righe contenenti valori \textit{NaN} e standardizzando le variabili numeriche per portarle ad avere media nulla e deviazione standard unitaria. Questo implica che l’analisi è stata condotta esclusivamente sui giochi appartenenti ad almeno una famiglia: i giochi non associati ad alcuna famiglia sono stati trattati come \textit{NaN} e quindi rimossi. Di conseguenza, l’analisi è stata effettuata su circa il $30\%$ del \textit{dataset} iniziale, limitandosi ai soli giochi associati ad una famiglia.
 
-Abbiamo utilizzato il modello \textit{MixedNB} del pacchetto \textit{mixed-naive-bayes}, estensione di \textit{scikit-learn}, che tratta le \textit{feature} numeriche come variabili gaussiane e utilizza una \textit{likelihood} multibernoulliana per le \textit{feature} categoriche. A ciascuna categoria è stata assegnata una chiave numerica tramite \textit{ordinal encoding}. Come per la classificazione \textit{KNN}, abbiamo analizzato le prestazioni del modello tramite matrice di confusione, \textit{ROC curves} e curve di precisione-richiamo. Tutti i risultati sono riportati in figura \ref{fig:dashboard_NB}.
+Abbiamo utilizzato il modello \textit{MixedNB} del pacchetto \textit{mixed-naive-bayes}, estensione di \textit{scikit-learn}, che tratta le \textit{feature} numeriche come variabili gaussiane e utilizza una \textit{likelihood} multibernoulliana per le \textit{feature} categoriche. A ciascuna categoria è stata assegnata una chiave numerica tramite \textit{ordinal encoding}. Come per la classificazione \textit{KNN}, abbiamo analizzato le prestazioni del modello tramite matrice di confusione, \textit{ROC curves} e curve di precisione--richiamo. Tutti i risultati sono riportati in figura \ref{fig:dashboard_NB}.
 
 \begin{figure}[h!]
 	\includegraphics[width=0.9\linewidth]{../figures/classification/NB/NB_Full_Summary_Report_Rating.png}
 	\centering
-	\caption{Matrice di confusione, \textit{ROC curves} e curve di precisione-richiamo per il target \textit{Rating}, utilizzando \textit{NumDesires} e \textit{YearPublished} come \textit{feature} numeriche e \textit{Family} come \textit{feature} categorica.}
+	\caption{Matrice di confusione, \textit{ROC curves} e curve di precisione--richiamo per il target \textit{Rating}, utilizzando \textit{NumDesires} e \textit{YearPublished} come \textit{feature} numeriche e \textit{Family} come \textit{feature} categorica.}
 	\label{fig:dashboard_NB}
 \end{figure}
 
-Analogamente al caso del \textit{KNN}, accuratezza, precisione e richiamo indicano che il modello classifica correttamente i dati con una frequenza significativamente maggiore rispetto a un classificatore casuale. Anche in questo caso, la classe più difficile da classificare risulta essere la classe $0$, in quanto intermedia tra le altre due. Tutte le metriche risultano complessivamente migliori rispetto a quelle ottenute con il \textit{KNN}, suggerendo che l’inclusione della variabile \textit{Family} abbia fornito informazione aggiuntiva utile alla classificazione.
+Analogamente al caso del \textit{KNN}, accuratezza, precisione e richiamo indicano che il modello classifica correttamente i dati con una frequenza significativamente maggiore rispetto a un classificatore casuale. Paragonando, come nella sezione precedente, l'accuratezza con un modello \textit{dummy} e randomico, si ottengono i seguenti valori:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|}
+    \hline
+    \textbf{Modelli} & $d$ \textbf{ @ 95\% CL} \\
+    \hline
+    Reale vs Dummy & $0.229 \pm 0.020$ \\
+    Reale vs Random & $0.274 \pm 0.020$ \\
+    \hline
+\end{tabular}
+\caption{Risultati del test statistico di confronto tra l’accuratezza del modello reale e i baseline \textit{dummy} e \textit{random} per la classificazione tramite un modello \textit{naive Bayes}.}
+\label{tab:real_dummy_random_table_NB}
+\end{table}
+
+Anche in questo caso, il classificatore risulta significativo e la classe più difficile da classificare risulta essere la classe $0$, in quanto intermedia tra le altre due. Tutte le metriche risultano complessivamente migliori rispetto a quelle ottenute con il \textit{KNN}, suggerendo che l’inclusione della variabile \textit{Family} abbia fornito informazione aggiuntiva utile alla classificazione.
 
 Tuttavia, l’introduzione di questa \textit{feature} comporta una restrizione del \textit{dataset} analizzato, introducendo un \textit{bias} a priori: il modello viene infatti addestrato e valutato esclusivamente sui giochi appartenenti a una famiglia, e non sull’interezza del \textit{dataset} originale.
 
@@ -700,90 +724,168 @@ Infine, è importante ricordare che il \textit{Naive Bayes} assume l’indipende
 
 \subsection{Decision Trees}
 
-Come ultima tecnica di classificazione abbiamo utilizzato i \textit{decision trees} per determinare il \textit{rating} di giochi. Come nelle sezioni precedenti, abbiamo diviso il \textit{dataset} in due parti (\textit{training} e \textit{test}), rimosso i \textit{NaN}, e standardizzato le colonne numeriche. Come nelle sezioni precedenti, si useranno le colonne \textit{NumDesires} e \textit{YearPublished} come \textit{feature} per classificare i giochi in base al \textit{target} di \textit{rating}.
+Come ultima tecnica di classificazione abbiamo utilizzato i \textit{decision trees} per determinare il \textit{Rating} dei giochi. Come nelle sezioni precedenti, abbiamo suddiviso il \textit{dataset} in \textit{training set} e \textit{test set}, rimosso i \textit{NaN} e standardizzato le variabili numeriche. Anche in questo caso, sono state utilizzate le colonne \textit{NumDesires} e \textit{YearPublished} come \textit{feature} per la classificazione del \textit{rating}.
 
 \subsubsection{Selezione dei parametri}
-Per ottimizzare le prestazioni e trovare i migliori valori per \textit{max depth}, \textit{min samples per leaf} \textit{min samples per split} e \textit{criterion} (tra \textit{gini} o \textit{entropy}, è stata effettuata una ricerca degli iperparametri tramite \textit{RandomizedSearchCV} di \textit{scikit-learn}, analizzando 500 combinazioni casuali attraverso una \textit{cross-validation} a 5 fold. Il processo ha permesso di individuare la configurazione ottimale (\textit{max depth}$=7$, \textit{min samples per leaf}$=100$, \textit{min samples per split}$=80$, \textit{criterion}$=$\textit{gini}), stabilizzando l'accuratezza sul test set al $60.6\%$. Questi risultati sono riportati in figura \ref{fig:dt_hyperP_tuning}.
+
+Per ottimizzare le prestazioni del modello e individuare i valori migliori per \textit{max depth}, \textit{min samples per leaf}, \textit{min samples per split} e \textit{criterion} (tra \textit{gini} ed \textit{entropy}), è stata effettuata una ricerca degli iperparametri tramite \textit{RandomizedSearchCV} di \textit{scikit-learn}. Sono state analizzate 500 combinazioni casuali attraverso una \textit{cross-validation} a 5 fold. Il processo ha permesso di individuare la configurazione ottimale (\textit{max depth}$=7$, \textit{min samples per leaf}$=100$, \textit{min samples per split}$=80$, \textit{criterion}=\textit{gini}), stabilizzando l’accuratezza sul \textit{test set} al $60.6\%$. I risultati sono riportati in figura \ref{fig:dt_hyperP_tuning}.
 
 \begin{figure}[h!]
 	\includegraphics[width=0.9\linewidth]{../figures/classification/decision_tree/NumDesires_YearPublished/dt_hyperparameter_tuning_Rating.png}
 	\centering
-	\caption{Risultati dell'ottimizzazione degli iperparametri tramite \textit{RandomizedSearchCV}. I grafici illustrano come la variazione dei parametri influenzi l'accuratezza media in \textit{Cross-Validation}. La classificazione è stata eseguita tramite un modello di \textit{decision trees} con lo scopo di classificare il \textit{rating} dei giochi tramite i features \textit{NumDesires} e \textit{YearPublished}.}
+	\caption{Risultati dell’ottimizzazione degli iperparametri tramite \textit{RandomizedSearchCV}. I grafici mostrano come la variazione dei parametri influenzi l’accuratezza media in \textit{cross-validation}.}
 	\label{fig:dt_hyperP_tuning}
 \end{figure}
 
-Si nota anche che la scelta di \textit{criterion} tra \textit{entropy} e \textit{gini} è poco influente sullà bontà del modello. 
+Si osserva inoltre che la scelta del \textit{criterion} tra \textit{entropy} e \textit{gini} risulta poco influente sulla bontà complessiva del modello.
 
-
-In aggiunta abbiamo studiato, al variare dei parametri, la complessità del modello al variare di certi parametri. Abbiamo fatto variare la profondità massima e \textit{min samples per leaf}, valutando come cambia l'accuratezza e il numero di nodi, ai fini di evitare \textit{overfitting} e controllare la complessità del modello. 
+In aggiunta, abbiamo studiato la complessità del modello al variare di alcuni parametri, analizzando l’effetto della profondità massima e di \textit{min samples per leaf} sull’accuratezza e sul numero di nodi dell’albero, con l’obiettivo di evitare fenomeni di \textit{overfitting} e controllare la complessità del modello.
 
 \begin{figure}[h!]
 	\includegraphics[width=0.9\linewidth]{../figures/classification/decision_tree/NumDesires_YearPublished/dt_complexity_analysis_Rating.png}
 	\centering
-	\caption{Analisi riassuntiva della complessità del modello di \textit{decision trees} con lo scopo di classificare il \textit{rating} dei giochi tramite i features \textit{NumDesires} e \textit{YearPublished}.}
+	\caption{Analisi della complessità del modello di \textit{decision trees} per la classificazione del \textit{Rating}.}
 	\label{fig:dt_complexity_analysis}
 \end{figure}
 
-Il riassunto dell'analisi si trova in figura \ref{fig:dt_complexity_analysis}, dove si vede chiaramente che la scelta di \textit{max depth}$=7$ porta alla miglior accuratezza senza portare a problemi di \textit{overfitting} sul \textit{test set}, insieme a \textit{min samples per leaf}$=100$. Questa configurazione permette di mantenere il modello leggero e applicabile anche senza perdità di generalità su dati nuovi. 
+Dalla figura \ref{fig:dt_complexity_analysis} si osserva chiaramente che la scelta di \textit{max depth}$=7$ e \textit{min samples per leaf}$=100$ consente di ottenere la massima accuratezza senza introdurre problemi di \textit{overfitting} sul \textit{test set}. Questa configurazione permette di mantenere il modello sufficientemente semplice e generalizzabile a dati non visti.
 
 \subsubsection{Analisi del modello}
 
-Avendo ora fissato i migliori valori dei parametri, 
+Fissati i migliori valori degli iperparametri, abbiamo analizzato la qualità del modello in maniera analoga ai casi precedenti. La figura \ref{fig:dt_dashboard} mostra la matrice di confusione, le \textit{ROC curves} e le curve di \textit{precision--recall}, fornendo una visione sintetica delle prestazioni del classificatore.
+
+\begin{figure}[h!]
+	\includegraphics[width=0.9\linewidth]{../figures/classification/decision_tree/NumDesires_YearPublished/decision_tree_Full_Summary_Report_Rating.png}
+	\centering
+	\caption{Matrice di confusione, \textit{ROC curves} e curve di precisione--richiamo per il target \textit{Rating}, utilizzando \textit{NumDesires} e \textit{YearPublished} come \textit{feature}, tramite un modello di \textit{decision trees}.}
+	\label{fig:dt_dashboard}
+\end{figure}
+
+Il modello raggiunge un’accuratezza del $60.6\%$, che viene confrontata con un modello casuale e un modello \textit{dummy}, come già discusso nella sezione \ref{sec:class_knn}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|}
+    \hline
+    \textbf{Modelli} & $d$ \textbf{ @ 95\% CL} \\
+    \hline
+    Reale vs Dummy & $0.161 \pm 0.012$ \\
+    Reale vs Random & $0.171 \pm 0.015$ \\
+    \hline
+\end{tabular}
+\caption{Risultati del test statistico di confronto tra l’accuratezza del modello reale e i baseline \textit{dummy} e \textit{random} per la classificazione tramite \textit{decision trees}.}
+\label{tab:real_dummy_random_table_DT}
+\end{table}
+
+Poiché entrambi gli intervalli riportati in \ref{tab:real_dummy_random_table_DT} risultano positivi, possiamo concludere che il modello è significativamente più accurato rispetto ai due baseline con un livello di confidenza del $95\%$, rendendolo accettabile come algoritmo di classificazione.
+
+Come negli altri casi, la classe $0$ risulta la meno separabile, in quanto intermedia tra le classi $-1$ e $1$, mentre la classe $1$ è maggiormente influenzata dal \textit{trade-off} tra precisione e richiamo, essendo la meno popolata. Inoltre, il modello consente di estrarre l’importanza relativa delle \textit{feature} in base al loro potere discriminatorio. La figura \ref{fig:dt_feature_importance} mostra che \textit{NumDesires} influisce in maniera significativamente maggiore sul \textit{Rating} rispetto all’anno di pubblicazione.
+
+\begin{figure}[h!]
+	\includegraphics[width=0.9\linewidth]{../figures/classification/decision_tree/NumDesires_YearPublished/dt_feature_importance_Rating.png}
+	\centering
+	\caption{Importanza delle \textit{feature} \textit{NumDesires} e \textit{YearPublished} nel modello di classificazione basato sui \textit{decision trees}.}
+	\label{fig:dt_feature_importance}
+\end{figure}
+
 
 \section{Regressione}
+\label{sec:regressione}
 
-Come ulteriore strumento di predizione abbiamo studiato la dipendenza tra le colonne utilizzando tecniche di regressione. Non ci siamo limitati alla banale regressione lineare, svolgendo analisi anche tramite tecniche non lineari che utilizzano termini di regolarizzazione, algoritmi \textit{lazy} tipo \textit{kNN} e \textit{eager learners} tipo \textit{decision trees}. Inoltre, abbiamo studiato la dipendenza di una colonna rispetto a due colonne indipendenti, utilizzando le stesse tecniche di prima. 
- 
-Cpme nella sezione precedente, il \textit{dataset} è stato diviso in due parti, dove il  $70\%$ delle righe (scelte randomicamente) sono state usate come set di \textit{training} e l'altro $30\%$ di \textit{test}. 
+Come ulteriore strumento di predizione abbiamo studiato la dipendenza tra le colonne del \textit{dataset} utilizzando tecniche di regressione. Non ci siamo limitati alla regressione lineare, ma abbiamo esplorato anche tecniche non lineari che includono termini di regolarizzazione, algoritmi \textit{lazy} come il \textit{KNN} e \textit{eager learners} come i \textit{decision trees}. Inoltre, abbiamo analizzato la dipendenza di una variabile rispetto a due variabili indipendenti, applicando le stesse tecniche descritte in precedenza.
+
+Come nella sezione precedente, il \textit{dataset} è stato suddiviso in due parti: il $70\%$ delle righe, selezionate randomicamente, è stato utilizzato come \textit{training set}, mentre il restante $30\%$ è stato riservato al \textit{test set}.
+
 \subsection{Una variabile indipendente}
-12345678
 
+Come prima analisi abbiamo voluto confermare la dipendenza tra due \textit{feature} fortemente correlate, scegliendo \textit{NumWant} e \textit{NumWish}, che risultano correlate ma non perfettamente dipendenti in modo lineare.
+
+Abbiamo utilizzato cinque tecniche di regressione: regressione lineare, regressione lineare con regolarizzazione (\textit{ridge} e \textit{lasso}), \textit{KNN} e \textit{decision trees}. Per ciascun algoritmo, i parametri sono stati fissati eseguendo il fit sul \textit{training set} e calcolando il coefficiente di determinazione $R^2$ sul \textit{test set}. Successivamente, i parametri sono stati fatti variare tramite uno \textit{sweep}, selezionando per ciascun modello il valore ottimale in corrispondenza del punto di ``gomito'' della curva. I risultati sono mostrati in figura \ref{fig:single_NumWNumW_parameter_sweep}.
+
+\begin{figure}[h!]
+\includegraphics[width=0.9\linewidth]{../figures/classification/regression/single/hyperparameter_tuning_NumWant_vs_NumWish.png}
+\centering
+\caption{$R^2$ al variare dei parametri dei diversi modelli di regressione per \textit{NumWant} vs \textit{NumWish}.}
+\label{fig:single_NumWNumW_parameter_sweep}
+\end{figure}
+
+I valori ottimali individuati sono $\alpha_r = 1500$ per il \textit{ridge}, $\alpha_l = 0.5$ per il \textit{lasso}, $n = 12$ per il \textit{KNN} e \textit{max\_depth}$=4$ per il \textit{decision tree}. Fissati questi iperparametri, abbiamo eseguito le regressioni per tutti i modelli, ottenendo i risultati riportati in figura \ref{fig:single_NumWNumW}.
+
+\begin{figure}[h!]
+\includegraphics[width=0.9\linewidth]{../figures/classification/regression/single/NumWant_vs_NumWish.png}
+\centering
+\caption{Regressione di \textit{NumWant} vs \textit{NumWish}. I punti rossi rappresentano i valori predetti sul \textit{test set}, mentre i punti blu rappresentano i valori reali del \textit{dataset}.}
+\label{fig:single_NumWNumW}
+\end{figure}
+
+Come atteso, tutte e cinque le regressioni forniscono ottimi risultati, riuscendo a spiegare oltre l’$80\%$ della varianza osservata nei dati.
+
+Successivamente, ci siamo concentrati sulla relazione tra \textit{WeightedRating} e \textit{NumDesires}, con l’obiettivo di predire il punteggio di un gioco in funzione dell’interesse mostrato dagli utenti. Utilizzando gli stessi cinque modelli e la medesima procedura di selezione degli iperparametri, abbiamo ottenuto i risultati riportati in figure \ref{fig:single_WRND_parameter_sweep} e \ref{fig:single_WRND}.
+
+\begin{figure}[h!]
+\includegraphics[width=0.9\linewidth]{../figures/classification/regression/single/hyperparameter_tuning_WeightedRating_vs_NumDesires.png}
+\centering
+\caption{$R^2$ al variare dei parametri dei diversi modelli di regressione per \textit{WeightedRating} vs \textit{NumDesires}.}
+\label{fig:single_WRND_parameter_sweep}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[width=0.9\linewidth]{../figures/classification/regression/single/WeightedRating_vs_NumDesires.png}
+\centering
+\caption{Regressione di \textit{WeightedRating} vs \textit{NumDesires}. I punti rossi rappresentano i valori predetti sul \textit{test set}, mentre i punti blu rappresentano i valori reali del \textit{dataset}.}
+\label{fig:single_WRND}
+\end{figure}
+
+In questo caso, le due \textit{feature} risultano meno correlate rispetto a \textit{NumWant} e \textit{NumWish}, e la loro relazione non è facilmente descrivibile tramite un modello lineare. Tra i cinque modelli considerati, il \textit{decision tree} risulta quello in grado di spiegare la maggiore frazione di varianza, seguito dal \textit{KNN}. Questi risultati suggeriscono che modelli più complessi, eventualmente includendo ulteriori \textit{feature} indipendenti, potrebbero fornire una descrizione più accurata della variabilità di \textit{WeightedRating}.
 
 \subsection{Due variabili indipendenti}
 
-Nel caso di due variabili indipendenti abbiamo utilizzato come variabile indipendente la colonna \textit{WeightedRating} con la speranza di poter predirre, tramite tecniche di regressione, l'eventuale successo di un gioco con determinate caratteristiche. Abbiamo provato tutte le coppie tra le seguenti colonne: \textit{Weight}, \textit{Playtime}, \textit{AgeRec}, \textit{NumDesires}, \textit{LanguageEase}, trovando che i risultati migliori si trovavano per la coppia \textit{NumDesires} e \textit{Weight}. 
+Nel caso di due variabili indipendenti abbiamo considerato come variabile dipendente la colonna \textit{WeightedRating}, con l’obiettivo di predire il successo di un gioco in funzione delle sue caratteristiche. Sono state testate tutte le coppie tra le colonne \textit{Weight}, \textit{Playtime}, \textit{AgeRec}, \textit{NumDesires} e \textit{LanguageEase}, trovando che i risultati migliori si ottengono utilizzando la coppia \textit{NumDesires} e \textit{Weight}.
 
-Abbiamo utilizzato 5 tecniche diverse, eseguendo un fit lineare, un fit lineare con regolarizzazione (utilizzando sia \textit{lasso} che \textit{ridge}), \textit{knn} e \textit{decision trees}. Per fissare i parametri di questi algoritmi abbiamo eseguito le regressioni sul \textit{dataset} di \textit{training} per un valore del parametro, e calcolato il $R^2$ dei risultati sul \textit{dataset} di \textit{test}. Poi, si è fatto variare il valore del parametro, eseguendo uno \textit{sweep} per ogni algoritmo. Abbiamo scelto il miglior valore di ciascun parametro in base al punto di "gomito" della curva ottenuta. Queste curve sono riportate in figura \ref{fig:regression_parameter_sweep}.
+Abbiamo utilizzato gli stessi cinque algoritmi della sezione precedente e selezionato i migliori iperparametri tramite uno \textit{sweep}, valutando il coefficiente $R^2$ sul \textit{test set}. I risultati sono mostrati in figura \ref{fig:regression_parameter_sweep}.
 
 \begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{../figures/classification/regression/multiple/hyperparameter_tuning_WeightedRating_vs_Weight_NumDesires.png}
 \centering
-\caption{$R^2$ al variare dei parametri dei diversi modelli di regressione, per \textit{WeightedRating} vs  \textit{NumDesires} e \textit{Weight} }
+\caption{$R^2$ al variare dei parametri dei diversi modelli di regressione per \textit{WeightedRating} in funzione di \textit{NumDesires} e \textit{Weight}.}
 \label{fig:regression_parameter_sweep}
 \end{figure}
 
-Da queste curve si sono impostati i valori dei parametri, e abbiamo eseguito il programma di regressione, ottenendo i risultati riportati in figura \ref{fig:regression_WR_R_NumD}
+Fissati i parametri ottimali, abbiamo eseguito le regressioni ottenendo i risultati riportati in figura \ref{fig:regression_WR_R_NumD}.
 
 \begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{../figures/classification/regression/multiple/comparison_5x2_WeightedRating_vs_Weight_NumDesires.png}
 \centering
-\caption{Regressione di \textit{WeightedRating} vs \textit{NumDesires} e \textit{Weight}, i punti rossi rappresentano la regressione sui valori di \textit{test} mentre i punti blu rappresentano i valori di \textit{test} del \textit{dataset}}
+\caption{Regressione di \textit{WeightedRating} vs \textit{NumDesires} e \textit{Weight}. I punti rossi rappresentano i valori predetti sul \textit{test set}, mentre i punti blu rappresentano i valori reali del \textit{dataset}.}
 \label{fig:regression_WR_R_NumD}
 \end{figure}
 
-Guadrdando il $R^2$ come metrica, il miglior risultato ottenuto è tramite l'algoritmo di \textit{decision trees} che spiega $44\%$ della varianza. Questo ci suggerisce che questa coppia di variabili indipendenti non basta per spiegare la varianza del \textit{WeightedRating}, ma già possono essere utilizzate come buoni indicatori per l'eventuale valutazione di un gioco. 
-
-
+Considerando il coefficiente $R^2$ come metrica di valutazione, il miglior risultato è ottenuto tramite il modello basato sui \textit{decision trees}, che riesce a spiegare circa il $44\%$ della varianza. Rispetto al caso con una sola variabile indipendente, anche gli altri modelli mostrano un miglioramento, spiegando almeno il $30\%$ della varianza. Questo suggerisce che, sebbene la coppia di variabili considerate non sia sufficiente a spiegare completamente la variabilità di \textit{WeightedRating}, essa fornisce comunque un indicatore significativo della valutazione di un gioco, migliorando sensibilmente rispetto alla regressione basata esclusivamente su \textit{NumDesires}.
 
 \section{Pattern Mining}
 
 Come ultima analisi abbiamo applicato due algoritmi di \textit{pattern mining} al dataset per trovare correlazioni e per trovare correlazioni e identificare strutture ricorrenti che caratterizzano il \textit{dataset}.
 \subsection{FP Growth}
 12345678
+
 \section{Conclusioni}
 
 In questo progetto abbiamo svolto un’analisi completa del \textit{dataset} proveniente da BoardGameGeek, affrontando in modo sistematico tutte le fasi del processo di preparazione ed esplorazione dei dati. A partire da una prima comprensione delle variabili, abbiamo identificato criticità strutturali e incoerenze semantiche, applicando una pulizia approfondita che ha permesso di rimuovere valori impossibili, gestire correttamente i dati mancanti e uniformare gli attributi secondo il loro dominio.
 
-La fase di analisi univariata e bivariata ci ha permesso di evidenziare le tendenze generali del \textit{dataset}: una forte asimmetria nelle variabili legate alla popolarità e all’engagement, la predominanza di giochi semplici e adatti a pochi giocatori, e pattern chiari nella distribuzione delle categorie di classificazione. L’analisi tramite istogrammi, \textit{scatterplots} e matrici di correlazione ha inoltre confermato l’esistenza di gruppi di variabili sostanzialmente ridondanti, spesso legate allo stesso concetto o derivate da misure analoghe.
+La fase di analisi univariata e bivariata ha permesso di evidenziare le principali tendenze del \textit{dataset}: una forte asimmetria nelle variabili legate alla popolarità e all’engagement degli utenti, la predominanza di giochi semplici e adatti a pochi giocatori, e pattern chiari nella distribuzione delle categorie di classificazione. L’uso di istogrammi, \textit{scatterplots} e matrici di correlazione ha inoltre confermato la presenza di gruppi di variabili sostanzialmente ridondanti, spesso riconducibili allo stesso concetto o a misure strettamente correlate.
 
-Questi risultati hanno guidato la fase successiva di \textit{data preparation and filtering}, in cui abbiamo ridotto la dimensionalità del \textit{dataset} tramite tecniche di aggregazione, tra cui \textit{PCA} per le coppie fortemente correlate e una trasformazione basata sul \textit{Bayesian shrinkage} per sintetizzare il comportamento dei punteggi degli utenti, ed un \textit{sampling} randomico finale per ridurre la dimensione del \textit{dataset}. Le trasformazioni applicate hanno permesso di ottenere un \textit{dataset} più compatto, interpretabile e pronto per essere analizzato. 
+Questi risultati hanno guidato la fase di \textit{data preparation and filtering}, durante la quale abbiamo ridotto la dimensionalità del \textit{dataset} tramite tecniche di aggregazione. In particolare, abbiamo utilizzato la \textit{PCA} per sintetizzare coppie di variabili fortemente correlate e una trasformazione basata sul \textit{Bayesian shrinkage} per costruire una misura più informativa del \textit{rating} degli utenti. Un \textit{sampling} finale ha inoltre permesso di ridurre la dimensione del \textit{dataset}, rendendolo più maneggevole senza perderne le caratteristiche statistiche principali. Il risultato è un insieme di dati più compatto, coerente e adatto ad analisi predittive.
+
+Sul \textit{dataset} così preparato abbiamo applicato diverse tecniche di \textit{clustering}, tra cui metodi \textit{density-based}, \textit{k-means} e \textit{hierarchical}. Pur individuando strutture locali nei dati, nessuna di queste tecniche ha evidenziato \textit{clusters} ben separati o interpretabili in modo convincente. Questo risultato suggerisce che i giochi da tavolo non si organizzano in gruppi distinti, ma coprono piuttosto uno spettro continuo di caratteristiche, in cui per ogni tipologia di utente esistono molteplici giochi potenzialmente adatti.
+
+Abbiamo poi affrontato il problema della predizione del \textit{rating} tramite tecniche di classificazione, utilizzando modelli \textit{lazy} come il \textit{KNN} e modelli \textit{eager} come \textit{Naive Bayes} e \textit{Decision Trees}. I risultati mostrano che, pur con accuratezze moderate, tutti i modelli considerati riescono a superare significativamente classificatori di riferimento casuali o \textit{dummy}, indicando che alcune caratteristiche dei giochi contengono effettivamente informazione predittiva sul \textit{rating}. L’inclusione di \textit{feature} categoriche, come la famiglia di appartenenza, ha inoltre migliorato le prestazioni, al prezzo però di una riduzione del \textit{dataset} analizzato.
+
+In modo complementare, abbiamo studiato la dipendenza tra le variabili tramite tecniche di regressione, sia con una che con due variabili indipendenti, confrontando modelli lineari, regolarizzati e non lineari, inclusi \textit{KNN} e \textit{Decision Trees}. Le analisi hanno mostrato che relazioni fortemente correlate possono essere spiegate efficacemente anche da modelli semplici, mentre la predizione del \textit{WeightedRating} richiede modelli più flessibili e l’inclusione di più \textit{feature}, pur rimanendo una variabile solo parzialmente spiegabile.
+
+MANCA UNA RIGA O DUE SUL PATTERN MINING 12345678
 
 
-Infine, abbiamo applicato diverse tecniche di \textit{clustering}, tra cui \textit{density-based}, \textit{k-means} e \textit{hierarchical}. Pur individuando alcuni \textit{clusters} con tutti e tre i metodi, la clusterizzazione non ha rivelato informazioni realmente nuove, suggerendo che, per come sono state applicate, queste tecniche non risultano particolarmente efficaci nello studio di questo \textit{dataset}. 
+Nel complesso, il lavoro svolto ha portato alla costruzione di un \textit{dataset} significativamente più coerente e informativo rispetto all’originale, permettendo di applicare in modo consapevole e critico diverse tecniche di \textit{data mining}. Le analisi di clustering, classificazione e regressione, insieme allo studio dei pattern frequenti, hanno fornito una visione articolata delle dinamiche interne al mondo dei giochi da tavolo, ponendo una solida base per future estensioni e analisi più approfondite.
 
-Tuttavia, la mancanza di \textit{clusters} ben separati e convincenti rappresenta essa stessa un risultato: indica infatti che i giochi da tavolo coprono uno spettro sostanzialmente continuo di caratteristiche, e che per ogni tipologia di utente esistono molteplici giochi potenzialmente adatti, senza che emergano gruppi nettamente distinti.
-
-
-Nel complesso, il lavoro svolto ha portato alla costruzione di un \textit{dataset} più coerente e informativo rispetto all’originale, facilitando le analisi successive e rivelando diverse dinamiche interne al mondo dei giochi da tavolo. Questa base potrà essere ulteriormente sfruttata per future analisi tramite regressioni, classificazioni, e altri studi più approfonditi.
 
 \end{document}
