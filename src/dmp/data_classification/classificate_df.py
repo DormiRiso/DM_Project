@@ -34,28 +34,28 @@ def classificate_df(df, percentuale, save_dfs=False, descriptors = None):
         print(f"File salvati correttamente in: {cartella_destinazione}")
 
 
-    # #Faccio il KNN per le colonne "NumDesires" e "YearPublished" (Funziona bene con Rating)
-    # knn(df_train, df_test, num_feats = ["NumDesires", "YearPublished"], target_col="Rating", k=26, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
+    #Faccio il KNN per le colonne "NumDesires" e "YearPublished" (Funziona bene con Rating)
+    knn(df_train, df_test, num_feats = ["NumDesires", "YearPublished"], target_col="Rating", k=26, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
     
-    # #Faccio il KNN per le colonne "Weight" e "AgeRec"(Sia con "Rating" che con "roll-action")
-    # knn(df_train, df_test, num_feats =["Weight", "AgeRec"], target_col="Rating", k=30, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
-    # knn(df_train, df_test, num_feats =["Weight", "AgeRec"], target_col="Rating", k=30, print_metrics=True, make_plot=True, descriptors=["roll", "action"], check_baseline=True)
+    #Faccio il KNN per le colonne "Weight" e "AgeRec"(Sia con "Rating" che con "roll-action")
+    knn(df_train, df_test, num_feats =["Weight", "AgeRec"], target_col="Rating", k=30, print_metrics=True, make_plot=True, descriptors=descriptors, check_baseline=True)
+    knn(df_train, df_test, num_feats =["Weight", "AgeRec"], target_col="Rating", k=30, print_metrics=True, make_plot=True, descriptors=["roll", "action"], check_baseline=True)
     
 
-    # # Algoritmo di Naive-Bayes per alcune colonne
-    # numeric_cols = ["NumDesires", "YearPublished"]
-    # categoric_cols = ["Family"]
+    # Algoritmo di Naive-Bayes per alcune colonne
+    numeric_cols = ["NumDesires", "YearPublished"]
+    categoric_cols = ["Family"]
     
-    # naive_bayes_classifier(
-    #     df_train, df_test, 
-    #     num_feats=numeric_cols, 
-    #     cat_feats=categoric_cols, 
-    #     target_col="Rating",
-    #     print_metrics=True, 
-    #     make_plot=True, 
-    #     descriptors=descriptors, 
-    #     check_baseline=True
-    # )
+    naive_bayes_classifier(
+        df_train, df_test, 
+        num_feats=numeric_cols, 
+        cat_feats=categoric_cols, 
+        target_col="Rating",
+        print_metrics=True, 
+        make_plot=True, 
+        descriptors=descriptors, 
+        check_baseline=True
+    )
 
     # 5. Decision Tree
     print("\n3. DECISION TREE")
