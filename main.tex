@@ -130,7 +130,7 @@ Questo metodo si basa sulla tecnica dello \textit{scarto interquantile}, che rap
 Un esempio di distribuzione prima e dopo questa pulizia è mostrato in figura \ref{fig:histo_YearPublished}, dove nella colonna \textit{YearPublished} sono stati rimossi tutti i giochi pubblicati prima del $1978$ e dopo il $2020$, considerati \textit{outlier} secondo questa metrica. 
 Solo il $7.88\%$ dei dati è stato rimosso, ma la leggibilità della distribuzione è migliorata in modo significativo. 
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{/histograms/all_data/analisi_singola_yearpublished.png}
 \centering
 \caption{Distribuzione della colonna \textit{YearPublished} prima e dopo la rimozione degli \textit{outlier} (considerando solo i valori compresi tra i percentili $5\%$ e $95\%$). Il \textit{binning} è stato scelto utilizzando il criterio di \textit{Sturges}.}
@@ -140,7 +140,7 @@ Solo il $7.88\%$ dei dati è stato rimosso, ma la leggibilità della distribuzio
 Abbiamo svolto un’analisi analoga per tutte le colonne numeriche, creando un \textit{box plot} sovrapposto a un istogramma per i dati originali e ripetendo la procedura per i dati filtrati secondo il criterio descritto in precedenza (mantenendo solo i valori tra i percentili $5\%$ e $95\%$). 
 La figura \ref{fig:histo_box_not_cleaned} riporta tutti gli istogrammi generati utilizzando i dati grezzi, mentre la figura \ref{fig:histo_box_cleaned} mostra gli stessi istogrammi dopo la pulizia applicata con il metodo discusso.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{/histograms/all_data/Histogram_Matrix_all_data_unfiltered.png}
 \centering
 \caption{Distribuzioni delle variabili numeriche senza alcuna filtratura sul \textit{dataset} pulito. 
@@ -150,7 +150,7 @@ Il \textit{binning} è stato determinato utilizzando il criterio di \textit{Stur
 \label{fig:histo_box_not_cleaned}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{/histograms/all_data/Histogram_Matrix_all_data_filtered.png}
 \centering
 \caption{Distribuzioni delle variabili singole dopo la rimozione degli \textit{outlier} (considerando solo i valori compresi tra i percentili $5\%$ e $95\%$). La visualizzazione è ottenuta tramite istogrammi sovrapposti a \textit{box plot}. I percentili corrispondono al $5, 25, 50, 75, 95\%$ dei dati filtrati. Il \textit{binning} è stato determinato utilizzando il criterio di \textit{Sturges}.}
@@ -181,7 +181,7 @@ Abbiamo effettuato anche uno studio completo delle categorie dei giochi.
 Come prima analisi, abbiamo verificato quanti giochi appartengono a più di una categoria e quante categorie sono coinvolte in media. 
 Questa informazione è riportata in figura \ref{fig:num_cats}, dove si osserva che la maggior parte dei giochi non è categorizzata oppure appartiene solo a una o due categorie.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{/category_figures/distribuzione_numero_categorie_per_gioco.png}
 \centering
 \caption{Numero di categorie a cui appartiene ogni gioco, in scala logaritmica. Ogni gioco è stato contato una sola volta, indipendentemente dal numero di categorie al quale apparteneva.}
@@ -192,7 +192,7 @@ Abbiamo inoltre analizzato la distribuzione delle singole categorie, contando qu
 I risultati sono mostrati in figura \ref{fig:distr_cats}. 
 Si nota immediatamente che i giochi di guerra sono i più comuni, seguiti da quelli di strategia e da quelli di famiglia.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{/category_figures/distribuzione_delle_categorie.png}
 \centering
 \caption{Distribuzione delle categorie di classificazione dei giochi.}
@@ -205,7 +205,7 @@ Abbiamo quindi creato una \textit{heatmap} che visualizza il numero di co-occorr
 In questa figura, la diagonale rappresenta il numero totale di giochi appartenenti a ciascuna categoria singola, mentre gli elementi fuoir diagonale indicano il numero di giochi che condividono entrambe le categorie. 
 La scala dei colori è stata impostata su base logaritmica, poiché i dati coprono diversi ordini di grandezza.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{/category_figures/category_couples_heatmap.png}
 \centering
 \caption{Occorrenze delle varie coppie di categorie per i giochi appartenenti a due categorie. 
@@ -227,7 +227,7 @@ dove ogni elemento della matrice è normalizzato in base al numero di occorrenze
 Per costruzione, l’equazione (\ref{eq:norm_cat}) impone che la diagonale valga 1, mentre tutti gli elementi fuori diagonale risultino compresi normalizzati nell’intervallo $[0,1]$. 
 La \textit{heatmap} normalizzata è mostrata in figura \ref{fig:heatmap_cats_norm}, dove la diagonale è stata eliminata (posta uguale a zero) per mettere in risalto i valori non banali.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{/category_figures/category_couples_heatmap_norm.png}
 \centering
 \caption{Co-occorrenze normalizzate delle varie coppie di categorie per i giochi appartenenti a due categorie, secondo l’equazione (\ref{eq:norm_cat}). 
@@ -249,7 +249,7 @@ Nel complesso, le figure \ref{fig:num_cats}, \ref{fig:distr_cats}, \ref{fig:heat
 \label{sec:distro_descriz}
 Infine, abbiamo studiato la distribuzione delle descrizioni dei giochi. Dopo aver convertito ogni colonna in una lista di stringhe, e assicurandoci che ogni parola comparisse una sola volta per lista, abbiamo creato un grafico a barre per visualizzare le occorrenze delle parole singole. Questo grafico si vede in figura \ref{fig:top_words}.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{/top_words/occorrenza_delle_parole_più_usate_nelle_descrizioni.png}
 \centering
 \caption{Grafico a barre delle occorrenze delle singole parole nella colonna \textit{Descriptions} del dataset.
@@ -271,7 +271,7 @@ Abbiamo escluso le variabili \textit{booleane}, come \textit{IsReimplementation}
 Queste colonne, assumendo pochi valori discreti, non sono adatte a essere rappresentate tramite \textit{scatterplot}; pertanto, per ridurre la dimensione dell’insieme di grafici, non sono state confrontate con le altre. 
 La figura \ref{fig:scatter_unfiltered} mostra tutte le coppie tra le variabili numeriche rimanenti, considerando ciascuna combinazione una sola volta.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{/scatterplots/all_data/Scatterplots_all_data_unfiltered}
 \centering
 \caption{\textit{Scatterplot} delle variabili numeriche di interesse. 
@@ -282,7 +282,7 @@ I dati non sono stati filtrati in alcun modo e ogni coppia compare una sola volt
 Utilizzando lo stesso criterio di pulizia dei dati discusso nella sezione \ref{sec:histos} (basato sulla rimozione dei valori al di fuori dei percentili $5\%$ e $95\%$), abbiamo generato un secondo insieme di \textit{scatterplot} utilizzando i dati depurati dagli \textit{outlier}. 
 Questo consente di visualizzare meglio le zone più dense e centrali delle distribuzioni, come mostrato in figura \ref{fig:scatter_filtered}.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{/scatterplots/all_data/Scatterplots_all_data_filtered}
 \centering
 \caption{\textit{Scatterplot} delle variabili numeriche di interesse. 
@@ -302,7 +302,7 @@ Per approfondire quanto osservato nella sezione precedente, abbiamo creato una \
 Il criterio di selezione delle colonne numeriche è lo stesso adottato nella sezione \ref{sec:scatters}. 
 La \textit{heatmap} di correlazione è mostrata in figura \ref{fig:heatmap_corr}.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{/heatmaps/correlation_heatmap_unfiltered.png}
 \centering
 \caption{Matrice di correlazione tra le colonne numeriche analizzate. 
@@ -312,7 +312,7 @@ I dati non sono stati filtrati in alcun modo.}
 
 Come di consueto, abbiamo applicato il nostro criterio di filtraggio basato sulla tecnica descritta nelle sezioni precedenti, e il risultato della pulizia è riportato in figura \ref{fig:heatmap_corr_filt}.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{/heatmaps/correlation_heatmap_filtered.png}
 \centering
 \caption{Matrice di correlazione tra le colonne numeriche analizzate. 
@@ -338,7 +338,7 @@ Pertanto, ai fini dell’analisi, tali variabili possono essere considerate rido
 Per ridurre la dimensionalità e mettere meglio in evidenza le altre relazioni, abbiamo rimosso le variabili \textit{ComWeight}, \textit{ComAgeRec}, \textit{NumUserRatings}, \textit{MfgPlaytime} e \textit{NumWish}. 
 La nuova matrice di correlazione è riportata in figura \ref{fig:heatmap_corr_filt_dim}.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{/heatmaps/correlation_heatmap_filtered_diminished.png}
 \centering
 \caption{Matrice di correlazione tra le colonne numeriche analizzate, dopo la rimozione di una variabile per ciascuna coppia correlata 1:1. 
@@ -398,7 +398,7 @@ Anche questa colonna è stata infine normalizzata nell’intervallo $[0,1]$ tram
 Infine, la colonna \textit{LanguageEase} è stata trasformata applicando una funzione logaritmica, per rendere la distribuzione più simmetrica, e successivamente normalizzata nell’intervallo $[0,1]$ con \textit{min–max scaling}.  
 Le distribuzioni delle colonne trasformate e aggregate sono mostrate in figura \ref{fig:histoboxmatrix_transformed}.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{/columns_transformed/all_data/histo_box_matrix_transformed_all_data.png}
 \centering
 \caption{Distribuzioni delle variabili numeriche trasformate e aggregate. 
@@ -416,7 +416,7 @@ Come si può osservare, le distribuzioni risultano ora più centralizzate e legg
 Come prossimo passo, abbiamo deciso di implementare delle tecniche di \textit{sampling} per ridurre la quantità di dati con lo scopo di perdere il numero minimo di informazione. Abbiamo usato un \textit{random sampling}, selezionando randomicamente con rimozione da tutte le righe possibile, con una probabilità uniforme per ogni riga. Abbiamo confrontato la distribuzione di alcune colonne \textit{sampled} randomicamente con $2000$ righe rispetto a no sampling. Si vede in figura \ref{fig:sampling_comparison_agerec} il confronto tra la distribuzione della colonna \textit{AgeRec} prima e dopo del \textit{sampling}.
 
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{/sampling/all_data/AgeRec_histogram_comparison.png}
 \centering
 \caption{Distribuzione della colonna \textit{AgeRec} prima e dopo del \textit{sampling} randomico.
@@ -436,60 +436,42 @@ L’analisi si è concentrata principalmente sulla relazione tra \textit{Weighte
 \label{sec:density}
 
 Come prima analisi abbiamo utilizzato un algoritmo di \textit{density-based clustering}, come mostrato nelle figure \ref{fig:db_numdes_weightedr} e \ref{fig:db_weightedr_agerec}. 
-Tutte le analisi sono state eseguite sul \textit{dataset} filtrato e sottoposto a \textit{sampling} a $2000$ righe. I valori \textit{NaN} sono stati rimossi.
 
-\begin{figure}[h]
-\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/dbscan_numdesires_vs_weightedrating.png}
+L'algoritmo DBSCAN è governato da due iperparametri fondamentali: il raggio $\varepsilon$ e il numero minimo di punti $N_{min}$. Per la determinazione dei valori ottimali, si è proceduto fissando inizialmente $N_{min}$ e derivando $\varepsilon$ mediante l'analisi del grafico delle k-distanze (k-distance plot).
+Nello specifico, è stata calcolata la distanza di ogni punto dal suo $N_{min}$-esimo vicino più prossimo; tali distanze sono state successivamente ordinate in modo crescente, come mostrato nelle Figure \ref{fig:db_numdes_weightedr} e \ref{fig:db_weightedr_agerec}. Il valore di soglia per $\varepsilon$ è stato identificato in corrispondenza del 'gomito' (knee point) della curva, ovvero il punto in cui si osserva un drastico incremento della pendenza. Tale criterio permette di definire una soglia di densità che include nei cluster i punti spazialmente coesi, relegando a rumore (outliers) le osservazioni caratterizzate da distanze inter-punto eccessivamente elevate. 
+
+\begin{figure}[h!]
+\includegraphics[width=0.9\linewidth]{../figures/clustered_scatters/dbscan_numdesires_vs_weightedrating.png}
 \centering
 \caption{Density-based clustering di weighted rating vs numdesires}
 \label{fig:db_numdes_weightedr}
 \end{figure}
 
-\begin{figure}[h]
-\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/dbscan_weightedrating_vs_agerec.png}
+\begin{figure}[h!]
+\includegraphics[width=0.9\linewidth]{../figures/clustered_scatters/dbscan_weightedrating_vs_agerec.png}
 \centering
 \caption{Density-based clustering di weighted rating vs agerec}
 \label{fig:db_weightedr_agerec}
 \end{figure}
 
-Come si osserva, i \textit{clusters} individuati non riportano informazioni particolarmente significative, suggerendo che questa tecnica non sia la più adatta allo studio di queste variabili. 
-Tuttavia, tra le varie coppie analizzate, queste presentavano i \textit{clusters} più separati e interpretabili. 
-Per esempio, in figura \ref{fig:db_weightedr_agerec} si nota un cluster che copre valori medi di \textit{WeightedRating} per quasi tutte le età considerate. Questo suggerisce che esistono giochi valutati in maniera neutra indipendentemente dalla fascia d’età, mentre altri giochi — pensati per categorie di età più specifiche — presentano valutazioni differenti, come mostrato dagli altri \textit{clusters}.
+
+In figura \ref{fig:db_numdes_weightedr} si nota un cluster che copre valori medi di \textit{WeightedRating} per quasi tutte le età considerate. Questo suggerisce che esistono giochi valutati in maniera neutra indipendentemente dalla fascia d’età, mentre altri giochi — pensati per categorie di età più specifiche — presentano valutazioni differenti, come mostrato dagli altri \textit{clusters}. Ad esempio è presente un cluster nella sezione inferiore dell'immagine che includerà tutti quei giochi valutati male e poco desiderati, mentre nel cluster in alto a sinistra potrebbero esserci dei giochi poco popolari ma molto ben valutati.
+
+Invece, in figura \ref{fig:db_weightedr_agerec} si osservano 2 cluster importanti nella fascia centrale del grafico, quindi ci sono molti giochi con una valutazione media che vanno bene per tutte le età; però ci sono anche dei piccoli cluster che potrebbero essere delle categorie di giochi ben valutate per specifiche fasce di età. 
 
 \subsection{K-means}
 \label{sec:kmeans}
 
-Abbiamo poi effettuato un’analisi analoga utilizzando l’algoritmo di \textit{k-means clustering}. Come riportato nelle figure \ref{fig:kmeans_numdes_weightedr} e \ref{fig:kmeans_weightedr_agerec}, abbiamo fissato $k=4$.
+L'analisi è proseguita applicando l'algoritmo \textit{k-means clustering} (Figure \ref{fig:kmeans_numdes_weightedr} e \ref{fig:kmeans_weightedr_agerec}). Per individuare il numero ottimale di cluster $k$, si è studiata la variazione della SSE (Sum of Squared Errors) al variare di $k$. Applicando il criterio del 'gomito' (Elbow Method), è stato selezionato il valore di $k$ corrispondente al punto di maggior cambio di pendenza della curva; oltre tale soglia, infatti, la riduzione dell'errore diventa marginale rispetto all'aumento della complessità del modello.
 
-\begin{figure}[h]
-\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/k_means_numdesires_vs_weightedrating.png}
-\centering
-\caption{K-means clustering weighted rating vs numdesires, 4 \textit{clusters}}
-\label{fig:kmeans_numdes_weightedr}
-\end{figure}
-
-\begin{figure}[h]
-\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/k_means_weightedrating_vs_agerec.png}
-\centering
-\caption{K-means clustering weighted rating vs agerec, 4 \textit{clusters}}
-\label{fig:kmeans_weightedr_agerec}
-\end{figure}
-
-In questo caso i \textit{clusters} si separano in base alla fascia d’età (figura \ref{fig:kmeans_weightedr_agerec}) o principalmente in base al punteggio pesato (figura \ref{fig:kmeans_numdes_weightedr}). 
-Inoltre, diversamente dagli algoritmi basati sulla densità, il metodo \textit{k-means} non gestisce il rumore: i punti che prima venivano classificati come rumore vengono forzati in uno dei \textit{clusters}.
-
-\smallskip
-
-È stato inoltre studiato l’andamento della \textit{Sum Squared Error (SSE)} al variare di $k$. I risultati sono mostrati in figura \ref{fig:sse_numdes_weightedr} e \ref{fig:sse_weightedr_agerec}, e sono il criterio utilizzato per fissare il valore ottimale di $k$ nelle figure precedenti.
-
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/sse_vs_k_numdesires_vs_weightedrating.png}
 \centering
 \caption{SSE del K-means clustering weighted rating vs numdesires, al variare di \textit{k}}
 \label{fig:sse_numdes_weightedr}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/sse_vs_k_weightedrating_vs_agerec.png}
 \centering
 \caption{SSE del K-means clustering weighted rating vs agerec, al variare di \textit{k}}
@@ -497,55 +479,67 @@ Inoltre, diversamente dagli algoritmi basati sulla densità, il metodo \textit{k
 \end{figure}
 
 Come atteso, la \textit{SSE} diminuisce all’aumentare del numero di centroidi, e le figure confermano questo andamento. 
-Per evitare \textit{overfitting}, abbiamo scelto $k=4$, corrispondente al punto di “gomito” della curva.
+Per evitare \textit{overfitting}, abbiamo scelto $k=4$, corrispondente al punto di “gomito” della curva. In più abbiamo ripetuto l'algoritmo 10 volte per ogni coppia di variaili e posto un massimo di iterazioni pari a 10. In questo modo si ovvia al problema della selezione iniziale dei centroidi e si riduce il numero di operazioni da effettuare. I risultati sono i seguenti:
+
+\begin{figure}[h!]
+\includegraphics[width=0.9\linewidth]{../figures/clustered_scatters/k_means_numdesires_vs_weightedrating.png}
+\centering
+\caption{K-means clustering weighted rating vs numdesires, 4 \textit{clusters}}
+\label{fig:kmeans_numdes_weightedr}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[width=0.9\linewidth]{../figures/clustered_scatters/k_means_weightedrating_vs_agerec.png}
+\centering
+\caption{K-means clustering weighted rating vs agerec, 4 \textit{clusters}}
+\label{fig:kmeans_weightedr_agerec}
+\end{figure}
+
+In questo caso i \textit{clusters} si separano in base alla fascia d’età (figura \ref{fig:kmeans_weightedr_agerec}) o principalmente in base al punteggio pesato (figura \ref{fig:kmeans_numdes_weightedr}). 
+
+Per interpretare i risultati ottenuti in legenda è presente il valore di SSE calcolato su un k-means con lo stesso valore di k del plot ma su dei dati distribuiti uniformemente sul piano. Se il nostro valore di SSE è confrontabile con quello del dataset random vuol dire che i nostri dati sono distribuiti praticamente in modo uniforme. In entrambi i plot il valore di SSE è inferiore rispetto a quello del dataset random, ma i cluster che mostra non sono fortemente riconoscibili. L'unica cosa che si può notare è che nel grafico in Figura \ref{fig:kmeans_weightedr_agerec} un cluster comprende i giochi peggiori e meno desiderati. È evidente come il K-means non si presti a queste \textit{features}, probabilmente perchè il dataset non ha dei potenziali clusters di forma globulare, ha forti variazioni di densità ed è rumoroso. 
+
 
 \subsection{Hierarchical clustering}
 \label{sec:hierarchical}
 
 Come ultima tecnica, abbiamo applicato l’\textit{hierarchical clustering} alle stesse variabili considerate finora. I risultati sono riportati nelle figure \ref{fig:hie_numdes_weightedr} e \ref{fig:hie_weightedr_agerec}.
 
-\begin{figure}[h]
-\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/hierarchical_numdesires_vs_weightedrating.png}
+\begin{figure}[h!]
+\includegraphics[width=0.9\linewidth]{../figures/clustered_scatters/hierarchical_numdesires_vs_weightedrating.png}
 \centering
 \caption{Hierarchical clustering weighted rating vs numdesires}
 \label{fig:hie_numdes_weightedr}
 \end{figure}
 
-\begin{figure}[h]
-\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/hierarchical_weightedrating_vs_agerec.png}
+\begin{figure}[h!]
+\includegraphics[width=0.9\linewidth]{../figures/clustered_scatters/hierarchical_weightedrating_vs_agerec.png}
 \centering
 \caption{Hierarchical clustering weighted rating vs agerec}
 \label{fig:hie_weightedr_agerec}
 \end{figure}
 
-I risultati ottenuti non sono molto soddisfacenti, tuttavia modificando leggermente i parametri è stato possibile ottenere una clusterizzazione più efficace:
+Dall’immagine \ref{fig:hie_numdes_weightedr} possiamo osservare 5 clusters: in rosa compaiono i giochi poco apprezzati e poco desiderati; in verde quelli mediamente valutati ma con scarso interesse da parte degli utenti (la categoria più numerosa); in azzurro i giochi molto desiderati ma con valutazioni nella media (come titoli minori diventati popolari grazie alla notorietà della casa produttrice o varianti meno riuscite) in giallo i giochi ben valutati ma poco desiderati( magari titoli di nicchia molto apprezzati); infine, in violetto, i giochi più popolari e meglio valutati.
 
-\begin{figure}[h]
-	\includegraphics[width=0.9\linewidth]{../static_images/hierarchical_numdesires_vs_weightedrating_average.png}
-	\centering
-	\caption{Hierarchical clustering weighted rating vs agerec}
-	\label{fig:hie_weightedr_agerec}
-\end{figure}
-
-Dall’immagine emergono cinque cluster ben distinti: in azzurro compaiono i giochi poco apprezzati e poco desiderati; in giallo quelli mediamente valutati ma con scarso interesse da parte degli utenti (la categoria più numerosa); in viola i giochi molto desiderati ma con valutazioni nella media, come titoli minori diventati popolari grazie alla notorietà della casa produttrice o varianti meno riuscite; in rosa i giochi ben valutati ma poco desiderati, magari titoli di nicchia molto apprezzati; infine, in verde, i giochi più popolari e meglio valutati.
+Purtroppo per quanto riguarda la figura \ref{fig:hie_weightedr_agerec} non possiamo dire molto, anche variando i metodi di \textit{linkage} e il numero di clusters non sono stati ottenute separazioni significative.
 
 Sono inoltre riportati i rispettivi \textit{dendrogram} in figure \ref{fig:ddg_numdes_weightedr} e \ref{fig:ddg_weightedr_agerec}.
 
-\begin{figure}[h]
-\includegraphics[width=0.9\linewidth]{../static_images/numdesires_vs_weightedrating/dendrogram_numdesires_vs_weightedrating.png}
+\begin{figure}[h!]
+\includegraphics[width=0.9\linewidth]{../figures/clustered_scatters/dendrogram_numdesires_vs_weightedrating.png}
 \centering
 \caption{Dendrogram dell’hierarchical clustering weighted rating vs numdesires}
 \label{fig:ddg_numdes_weightedr}
 \end{figure}
 
-\begin{figure}[h]
-\includegraphics[width=0.9\linewidth]{../static_images/weightedrating_vs_agerec/dendrogram_weightedrating_vs_agerec.png}
+\begin{figure}[h!]
+\includegraphics[width=0.9\linewidth]{../figures/clustered_scatters/dendrogram_weightedrating_vs_agerec.png}
 \centering
 \caption{Dendrogram dell’hierarchical clustering weighted rating vs agerec}
 \label{fig:ddg_weightedr_agerec}
 \end{figure}
 
-Osservando i diagrammi ad albero, si nota come la scelta di suddividere le due coppie di categorie in 4-5 cluster risulti appropriata: tracciando una linea orizzontale sull’albero è infatti possibile ottenere una suddivisione significativa dell’intero set di dati.
+Osservando i diagrammi ad albero, si nota come la scelta di suddividere le due coppie di categorie in 4-5 cluster risulti appropriata: tracciando una linea orizzontale sull’albero è infatti possibile ottenere una suddivisione significativa dell’intero set di dati. Questa scelta è inoltre corroborata dall'analisi della curva SSE (Elbow Method) effettuata precedentemente, che indicava un gomito proprio in corrispondenza di k=4 o k=5.
 
 \section{Classificazione}
 \label{sec:classification}
@@ -558,7 +552,7 @@ Per tutti gli algoritmi di classificazione, il \textit{dataset} è stato suddivi
 
 Abbiamo iniziato utilizzando il metodo di classificazione basato sui primi \textit{k} vicini, ovvero la classificazione \textit{KNN}, per stimare il \textit{Rating} utilizzando \textit{NumDesires} e \textit{YearPublished} come \textit{feature}.
 
-Prima di applicare l’algoritmo, abbiamo rimosso tutte le righe contenenti valori \textit{NaN} ed effettuato una standardizzazione basata sullo \textit{Z-score}, che porta le \textit{feature} ad avere media nulla e deviazione standard unitaria. Questa operazione è necessaria in quanto l’algoritmo si basa sulla distanza euclidea, e quindi è necessario che le variabili siano confrontabili sulla stessa scala. In questo modo, colonne come \textit{YearPublished} e \textit{NumDesires} contribuiscono in maniera bilanciata alla metrica Euclideaanza, evitando che una \textit{feature} domini rispetto alle altre.
+Prima di applicare l’algoritmo, abbiamo rimosso tutte le righe contenenti valori \textit{NaN} ed effettuato una standardizzazione basata sullo \textit{Z-score}, che porta le \textit{feature} ad avere media nulla e deviazione standard unitaria. Questa operazione è necessaria in quanto l’algoritmo si basa sulla distanza euclidea, e quindi è necessario che le variabili siano confrontabili sulla stessa scala. In questo modo, colonne come \textit{YearPublished} e \textit{NumDesires} contribuiscono in maniera bilanciata alla metrica Euclidea, evitando che una \textit{feature} domini rispetto alle altre.
 
 \subsubsection{Selezione del parametro \textit{k}}
 
@@ -566,7 +560,7 @@ Per individuare il valore ottimale di \textit{k}, abbiamo calcolato l’accurate
 
 Questa procedura consente di ottenere una stima più robusta delle prestazioni del modello, riducendo la dipendenza dalla particolare suddivisione tra \textit{training} e \textit{test set}.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 	\includegraphics[width=0.9\linewidth]{../figures/classification/KNN/NumDesires_YearPublished/KNN_K_Search_Accuracy_Rating.png}
 	\centering
 	\caption{Accuratezza in funzione di \textit{k}, calcolata tramite \textit{10-fold cross-validation}, con \textit{k} variabile tra $1$ e $96$ in passi di $5$. Si osserva che $k=26$ massimizza l’accuratezza del modello.}
@@ -579,20 +573,40 @@ Come mostrato in figura \ref{fig:k_sel_class_ND_YP}, il valore $k=26$ corrispond
 
 Dopo aver preparato i dati e selezionato il valore ottimale del parametro, abbiamo eseguito l’algoritmo di classificazione \textit{KNN} con $k=26$. Come prima analisi delle prestazioni, abbiamo esaminato la matrice di confusione ottenuta applicando il modello ai dati di \textit{test}, riportata in figura \ref{fig:confusion_matrix_ND_YP}.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 	\includegraphics[width=0.9\linewidth]{../figures/classification/KNN/NumDesires_YearPublished/KNN_Confusion_Matrix_Rating.png}
 	\centering
 	\caption{Matrice di confusione per il target \textit{Rating}, utilizzando \textit{NumDesires} e \textit{YearPublished} come \textit{feature}.}
 	\label{fig:confusion_matrix_ND_YP}
 \end{figure}
 
-Dalla matrice di confusione si osserva che accuratezza, precisione e richiamo si trovano intorno al $59\%$. A titolo di confronto, un classificatore che selezionasse casualmente una delle tre classi di \textit{Rating} otterrebbe un’accuratezza attesa di circa il $33\%$. Il modello risulta quindi significativamente migliore di una scelta casuale. Tuttavia, ci suggerisce che non riesca a spiegare completamente la variabilità del \textit{Rating} tramite queste sole \textit{feature}. 
+Dalla matrice di confusione si osserva che accuratezza, precisione e richiamo si trovano intorno al $59\%$. 
+
+Per determinare se questo valore di accuracy è statisticamente significativo, è stata effettuata un'analisi su una 10-fold-Cross-Validation. Il modello proposto è stato confrontato con altri due di riferimento: un \textit{Dummy classifier} che risponde sempre con la classe più frequente (per verificare le capacità del modello di superare gli sbilanciamenti nella classe "target") e un modello addestrato su target permutati casualmente, per comprendere se effettivamente il modello supera la semplice selezione casuale. Assumendo che le stime delle accuratezze seguano una distribuzione Normale (approssimazione valida per grandi campioni) con media pari all'accuratezza osservata $p$ e varianza derivata dalla distribuzione binomiale $\sigma_{p}^{2} = \frac{p (1-p)}{n}$, è possibile definire l'intervallo di confidenza al 95 \% per la differenza $d$ tra le performance dei due modelli come segue:
+
+\[$d \in \left[ \hat{d} - Z_{\alpha/2}\sigma_{d} \,;\, \hat{d} + Z_{\alpha/2}\sigma_{d} \right]$$
+\]
+
+dove $\hat{d}$ rappresenta la differenza osservata tra le medie e $\sigma_d$ l'errore standard combinato.
+
+Nel KNN proposto sulle feature si osservano i seguenti risultati:
+
+\begin{center}
+\begin{tabular}{|c|c|}
+modelli & $d \, \, @ 95\% \, CL$ \\
+\hline
+Reale vs Dummy & 0.141  \pm 0.012 \\
+Reale vs Random & 0.185  \pm 0.015 \\
+\end{tabular}
+\end{center}
+
+Siccome entrambi gli intervalli sono sempre positivi possiamo dire che il nostro modello è più accurato con un livello di confidenza al 95 \% rispetto agli altri due.
 
 Si nota inoltre che la classe $-1$ viene confusa meno frequentemente con la classe $1$ rispetto alla classe $0$, indicando che giochi con valutazioni estremamente positive o negative risultano più facilmente distinguibili rispetto a quelli con valutazione intermedia, che non ci sorprende come risultato.
 
 Per valutare la separabilità delle classi, abbiamo costruito le \textit{ROC curve} per ciascuna classe del target, considerando le altre due come classe negativa. A partire da queste curve abbiamo calcolato l’\textit{AUC (Area Under Curve)} come metrica di valutazione. La \textit{ROC curve} rappresenta il compromesso tra il tasso di veri positivi e quello di falsi positivi al variare della soglia di classificazione.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 	\includegraphics[width=0.9\linewidth]{../figures/classification/KNN/NumDesires_YearPublished/KNN_Combined_ROC_Rating.png}
 	\centering
 	\caption{\textit{ROC curve} per il target \textit{Rating} utilizzando \textit{NumDesires} e \textit{YearPublished}. La linea tratteggiata rappresenta un classificatore casuale privo di potere discriminante.}
@@ -603,7 +617,7 @@ Come mostrato in figura \ref{fig:ROC_ND_YP}, la classe $-1$ risulta la più faci
 
 Tuttavia, la \textit{ROC curve} non fornisce informazioni sulla distribuzione delle classi. Per completare l’analisi del modello abbiamo quindi considerato anche le \textit{precision-recall curves}, costruite ordinando le predizioni sul \textit{dataset} di test e valutando precisione e richiamo al variare della soglia di classificazione. 
 
-\begin{figure}[h]
+\begin{figure}[h!]
 	\includegraphics[width=0.9\linewidth]{../figures/classification/KNN/NumDesires_YearPublished/KNN_Combined_Precision_Recall_Rating.png}
 	\centering
 	\caption{\textit{Precision-recall curve} per il target \textit{Rating} utilizzando \textit{NumDesires} e \textit{YearPublished}.}
@@ -611,6 +625,51 @@ Tuttavia, la \textit{ROC curve} non fornisce informazioni sulla distribuzione de
 \end{figure}
 
 I risultati, riportati in figura \ref{fig:P_R_ND_YP}, mostrano che la classe $1$, pur presentando una buona \textit{AUC} nella \textit{ROC curve}, perde rapidamente precisione all’aumentare del richiamo. Questo comportamento è dovuto al fatto che si tratta della classe meno popolata: per individuare un numero maggiore di giochi con \textit{Rating} alto è necessario accettare una precisione inferiore rispetto alle altre classi.
+
+È stato fatto anche un tentativo utilizzando il modello KNN invece che sulla colonna "Rating" su due elementi della colonna "Description", ovvero "Action" e "Roll"; per vedere se il modello fosse capace di classificare il genere di un videogioco. Per applicare il KNN sono state selezionate le colonne numeriche "Weight" e "AgeRec".
+
+Per prima cosa è stato filtrato il dataset per mantenere solo quelle \textit{entries} che contengono almeno uno tra "Action" e "Roll" nella loro colonna "Description". Sono stati selezionati questi due descrittori perchè sono abbastanza popolati (5000 elementi nel \textit{training dataset} e 2000 nel \textit{test dataset}) e coprono principalmente due aree del piano distinte. 
+
+\begin{figure}[h!]
+	\includegraphics[width=0.9\linewidth]{../figures/classification/KNN/AgeRec_Weight/KNN_K_Search_Accuracy_roll_action.png}
+	\centering
+	\caption{Accuratezza in funzione di \textit{k}, calcolata tramite \textit{10-fold cross-validation}, con \textit{k} variabile tra $1$ e $96$ in passi di $5$}
+	\label{fig:k_sel_class_W_AR_roll_action}
+\end{figure}
+
+Per il valore di k è stata seguita la stessa procedura di prima, arrivando ad utilizzare un valore di k pari a 30.
+
+\begin{figure}[h!]
+	\includegraphics[width=0.9\linewidth]{../figures/classification/KNN/AgeRec_Weight/KNN_Confusion_Matrix_roll_action.png}
+	\centering
+	\caption{Matrice di confusione per il target \textit{roll-action}, utilizzando \textit{Weight} e \textit{AgeRec} come \textit{features}.}
+	\label{fig:confusion_matrix_W_AR_roll_action}
+\end{figure}
+
+\begin{figure}[h!]
+	\includegraphics[width=0.9\linewidth]{../figures/classification/KNN/AgeRec_Weight/KNN_Combined_ROC_roll_action.png}
+	\centering
+	\caption{\textit{ROC curve} per il target \textit{roll-action} utilizzando \textit{Weight} e \textit{AgeRec}. La linea tratteggiata rappresenta un classificatore casuale privo di potere discriminante.}
+	\label{fig:ROC_W_AR_roll_action}
+\end{figure}
+
+\begin{figure}[h!]
+	\includegraphics[width=0.9\linewidth]{../figures/classification/KNN/AgeRec_Weight/KNN_Combined_Precision_Recall_roll_action.png}
+	\centering
+	\caption{\textit{Precision-recall curve} per il target \textit{roll-action} utilizzando \textit{Weight} e \textit{AgeRec} come \textit{features}.}
+	\label{fig:P_R_W_AR_roll_action}
+\end{figure}
+
+Dalle figure \ref{fig:confusion_matrix_W_AR_roll_action}, \ref{fig:ROC_W_AR_roll_action} e \ref{fig:P_R_W_AR_roll_action} è evidente come il modello non riesca a classificare i giochi che sono sia "roll" che "action", probabilmente perchè sono davvero pochi punti con questa caratteristica. Il modello comunque mostra dei risultati soddisfacenti nel differenziare le due classi, soprattutto se lo confrontiamo con i due modelli "random" e "dummy":
+
+\begin{center}
+\begin{tabular}{|c|c|}
+modelli & $d \, \, @ 95\% \, CL$ \\
+\hline
+Reale vs Dummy & 0.059  \pm 0.020 \\
+Reale vs Random & 0.074  \pm 0.019 \\
+\end{tabular}
+\end{center}
 
 \subsection{Naive Bayes}
 
@@ -620,7 +679,7 @@ Come nel caso precedente, abbiamo iniziato rimuovendo dal \textit{dataset} tutte
 
 Abbiamo utilizzato il modello \textit{MixedNB} del pacchetto \textit{mixed-naive-bayes}, estensione di \textit{scikit-learn}, che tratta le \textit{feature} numeriche come variabili gaussiane e utilizza una \textit{likelihood} multibernoulliana per le \textit{feature} categoriche. A ciascuna categoria è stata assegnata una chiave numerica tramite \textit{ordinal encoding}. Come per la classificazione \textit{KNN}, abbiamo analizzato le prestazioni del modello tramite matrice di confusione, \textit{ROC curves} e curve di precisione-richiamo. Tutti i risultati sono riportati in figura \ref{fig:dashboard_NB}.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 	\includegraphics[width=0.9\linewidth]{../figures/classification/NB/NB_Full_Summary_Report_Rating.png}
 	\centering
 	\caption{Matrice di confusione, \textit{ROC curves} e curve di precisione-richiamo per il target \textit{Rating}, utilizzando \textit{NumDesires} e \textit{YearPublished} come \textit{feature} numeriche e \textit{Family} come \textit{feature} categorica.}
@@ -652,7 +711,7 @@ Nel caso di due variabili indipendenti abbiamo utilizzato come variabile indipen
 
 Abbiamo utilizzato 5 tecniche diverse, eseguendo un fit lineare, un fit lineare con regolarizzazione (utilizzando sia \textit{lasso} che \textit{ridge}), \textit{knn} e \textit{decision trees}. Per fissare i parametri di questi algoritmi abbiamo eseguito le regressioni sul \textit{dataset} di \textit{training} per un valore del parametro, e calcolato il $R^2$ dei risultati sul \textit{dataset} di \textit{test}. Poi, si è fatto variare il valore del parametro, eseguendo uno \textit{sweep} per ogni algoritmo. Abbiamo scelto il miglior valore di ciascun parametro in base al punto di "gomito" della curva ottenuta. Queste curve sono riportate in figura \ref{fig:regression_parameter_sweep}.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{../figures/classification/regression/multiple/hyperparameter_tuning_WeightedRating_vs_Weight_NumDesires.png}
 \centering
 \caption{$R^2$ al variare dei parametri dei diversi modelli di regressione, per \textit{WeightedRating} vs  \textit{NumDesires} e \textit{Weight} }
@@ -661,7 +720,7 @@ Abbiamo utilizzato 5 tecniche diverse, eseguendo un fit lineare, un fit lineare 
 
 Da queste curve si sono impostati i valori dei parametri, e abbiamo eseguito il programma di regressione, ottenendo i risultati riportati in figura \ref{fig:regression_WR_R_NumD}
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=0.9\linewidth]{../figures/classification/regression/multiple/comparison_5x2_WeightedRating_vs_Weight_NumDesires.png}
 \centering
 \caption{Regressione di \textit{WeightedRating} vs \textit{NumDesires} e \textit{Weight}, i punti rossi rappresentano la regressione sui valori di \textit{test} mentre i punti blu rappresentano i valori di \textit{test} del \textit{dataset}}
