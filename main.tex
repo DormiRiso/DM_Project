@@ -712,10 +712,23 @@ Per ottimizzare le prestazioni e trovare i migliori valori per \textit{max depth
 	\label{fig:dt_hyperP_tuning}
 \end{figure}
 
+Si nota anche che la scelta di \textit{criterion} tra \textit{entropy} e \textit{gini} è poco influente sullà bontà del modello. 
+
+
+In aggiunta abbiamo studiato, al variare dei parametri, la complessità del modello al variare di certi parametri. Abbiamo fatto variare la profondità massima e \textit{min samples per leaf}, valutando come cambia l'accuratezza e il numero di nodi, ai fini di evitare \textit{overfitting} e controllare la complessità del modello. 
+
+\begin{figure}[h!]
+	\includegraphics[width=0.9\linewidth]{../figures/classification/decision_tree/NumDesires_YearPublished/dt_complexity_analysis_Rating.png}
+	\centering
+	\caption{Analisi riassuntiva della complessità del modello di \textit{decision trees} con lo scopo di classificare il \textit{rating} dei giochi tramite i features \textit{NumDesires} e \textit{YearPublished}.}
+	\label{fig:dt_complexity_analysis}
+\end{figure}
+
+Il riassunto dell'analisi si trova in figura \ref{fig:dt_complexity_analysis}, dove si vede chiaramente che la scelta di \textit{max depth}$=7$ porta alla miglior accuratezza senza portare a problemi di \textit{overfitting} sul \textit{test set}, insieme a \textit{min samples per leaf}$=100$. Questa configurazione permette di mantenere il modello leggero e applicabile anche senza perdità di generalità su dati nuovi. 
 
 \subsubsection{Analisi del modello}
 
-12345678
+Avendo ora fissato i migliori valori dei parametri, 
 
 \section{Regressione}
 
