@@ -585,7 +585,7 @@ def _plot_separated_precision_recall(model, X_test, y_test, model_tag, feature_n
     plt.savefig(out_path)
     plt.close()
 
-def _plot_nb_summary_subplot(model, predictions, X_test, y_test, model_tag, feature_names, descriptors, target_name):
+def _plot_summary_subplot(model, predictions, X_test, y_test, model_tag, feature_names, descriptors, target_name):
     """
     Creates a 1x3 subplot containing the Confusion Matrix, ROC Curves, and Precision-Recall Curves.
     """
@@ -610,7 +610,7 @@ def _plot_nb_summary_subplot(model, predictions, X_test, y_test, model_tag, feat
     cm = confusion_matrix(y_test, predictions, labels=classes)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
     disp.plot(cmap=plt.cm.Blues, values_format='d', ax=axes[0], colorbar=False)
-    axes[0].set_title(f"Confusion Matrix\nAccuracy: {accuracy_score(y_test, y_pred):.2%}")
+    axes[0].set_title(f"Confusion Matrix\nAccuracy: {accuracy_score(y_test, predictions):.2%}")
 
     # --- 2. ROC Curves (Center) ---
     for i in range(n_classes):

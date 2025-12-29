@@ -11,7 +11,7 @@ from .classification_utils import (
     _plot_knn_k_search,
     _plot_confusion_matrix,
     _plot_separated_precision_recall,
-    _plot_nb_summary_subplot
+    _plot_summary_subplot
 )
 def naive_bayes_classifier(train_df, test_df, num_feats=None, cat_feats=None, target_col="Rating", print_metrics=False, make_plot=False, descriptors=None, check_baseline=False):
     """
@@ -99,6 +99,6 @@ Feature Categoriche: {cat_str}
                 final_feature_names, descriptors, actual_target
             )
             
-            _plot_nb_summary_subplot(model, predictions, X_test, y_test, model_tag, 
+            _plot_summary_subplot(model, predictions, X_test, y_test, model_tag, 
                 final_feature_names, descriptors, actual_target)
     return df_test_clean

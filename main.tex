@@ -582,9 +582,10 @@ Dopo aver preparato i dati e selezionato il valore ottimale del parametro, abbia
 
 Dalla matrice di confusione si osserva che accuratezza, precisione e richiamo si trovano intorno al $59\%$. 
 
-Per determinare se questo valore di accuracy è statisticamente significativo, è stata effettuata un'analisi su una 10-fold-Cross-Validation. Il modello proposto è stato confrontato con altri due di riferimento: un \textit{Dummy classifier} che risponde sempre con la classe più frequente (per verificare le capacità del modello di superare gli sbilanciamenti nella classe "target") e un modello addestrato su target permutati casualmente, per comprendere se effettivamente il modello supera la semplice selezione casuale. Assumendo che le stime delle accuratezze seguano una distribuzione Normale (approssimazione valida per grandi campioni) con media pari all'accuratezza osservata $p$ e varianza derivata dalla distribuzione binomiale $\sigma_{p}^{2} = \frac{p (1-p)}{n}$, è possibile definire l'intervallo di confidenza al 95 \% per la differenza $d$ tra le performance dei due modelli come segue:
+Per determinare se questo valore di accuracy è statisticamente significativo, è stata effettuata un'analisi su una 10-fold-Cross-Validation. Il modello proposto è stato confrontato con altri due di riferimento: un \textit{Dummy classifier} che risponde sempre con la classe più frequente (per verificare le capacità del modello di superare gli sbilanciamenti nella classe \textit{target}) e un modello addestrato su \textit{target} permutati casualmente, per comprendere se effettivamente il modello supera la semplice selezione casuale. Assumendo che le stime delle accuratezze seguano una distribuzione Normale (approssimazione valida per grandi campioni) con media pari all'accuratezza osservata $p$ e varianza derivata dalla distribuzione binomiale $\sigma_{p}^{2} = \frac{p (1-p)}{n}$, è possibile definire l'intervallo di confidenza al 95 \% per la differenza $d$ tra le performance dei due modelli come segue:
 
-\[$d \in \left[ \hat{d} - Z_{\alpha/2}\sigma_{d} \,;\, \hat{d} + Z_{\alpha/2}\sigma_{d} \right]$$
+\[
+d \in \left[ \hat{d} - Z_{\alpha/2}\sigma_{d} \,;\, \hat{d} + Z_{\alpha/2}\sigma_{d} \right]
 \]
 
 dove $\hat{d}$ rappresenta la differenza osservata tra le medie e $\sigma_d$ l'errore standard combinato.
@@ -592,11 +593,13 @@ dove $\hat{d}$ rappresenta la differenza osservata tra le medie e $\sigma_d$ l'e
 Nel KNN proposto sulle feature si osservano i seguenti risultati:
 
 \begin{center}
-\begin{tabular}{|c|c|}
-modelli & $d \, \, @ 95\% \, CL$ \\
+\begin{tabular}{|l|c|}
 \hline
-Reale vs Dummy & 0.141  \pm 0.012 \\
-Reale vs Random & 0.185  \pm 0.015 \\
+\textbf{Modelli} & $d$ \textbf{ @ 95\% CL} \\
+\hline
+Reale vs Dummy & $0.141 \pm 0.012$ \\
+Reale vs Random & $0.185 \pm 0.015$ \\
+\hline
 \end{tabular}
 \end{center}
 
@@ -626,9 +629,9 @@ Tuttavia, la \textit{ROC curve} non fornisce informazioni sulla distribuzione de
 
 I risultati, riportati in figura \ref{fig:P_R_ND_YP}, mostrano che la classe $1$, pur presentando una buona \textit{AUC} nella \textit{ROC curve}, perde rapidamente precisione all’aumentare del richiamo. Questo comportamento è dovuto al fatto che si tratta della classe meno popolata: per individuare un numero maggiore di giochi con \textit{Rating} alto è necessario accettare una precisione inferiore rispetto alle altre classi.
 
-È stato fatto anche un tentativo utilizzando il modello KNN invece che sulla colonna "Rating" su due elementi della colonna "Description", ovvero "Action" e "Roll"; per vedere se il modello fosse capace di classificare il genere di un videogioco. Per applicare il KNN sono state selezionate le colonne numeriche "Weight" e "AgeRec".
+È stato fatto anche un tentativo utilizzando il modello KNN invece che sulla colonna \textit{Rating} su due elementi della colonna \textit{Description}, ovvero "Action" e "Roll"; per vedere se il modello fosse capace di classificare il genere di un gioco. Per applicare il KNN sono state selezionate le colonne numeriche \textit{Weight} e \textit{AgeRec}.
 
-Per prima cosa è stato filtrato il dataset per mantenere solo quelle \textit{entries} che contengono almeno uno tra "Action" e "Roll" nella loro colonna "Description". Sono stati selezionati questi due descrittori perchè sono abbastanza popolati (5000 elementi nel \textit{training dataset} e 2000 nel \textit{test dataset}) e coprono principalmente due aree del piano distinte. 
+Per prima cosa è stato filtrato il dataset per mantenere solo quelle \textit{entries} che contengono almeno uno tra "Action" e "Roll" nella loro colonna \textit{Description}. Sono stati selezionati questi due descrittori perchè sono sufficientemente popolati (5000 elementi nel \textit{training dataset} e 2000 nel \textit{test dataset}) e coprono principalmente due aree del piano distinte. 
 
 \begin{figure}[h!]
 	\includegraphics[width=0.9\linewidth]{../figures/classification/KNN/AgeRec_Weight/KNN_K_Search_Accuracy_roll_action.png}
@@ -637,7 +640,7 @@ Per prima cosa è stato filtrato il dataset per mantenere solo quelle \textit{en
 	\label{fig:k_sel_class_W_AR_roll_action}
 \end{figure}
 
-Per il valore di k è stata seguita la stessa procedura di prima, arrivando ad utilizzare un valore di k pari a 30.
+Per il valore di \textit{k} è stata seguita la stessa procedura di prima, arrivando ad utilizzare un valore di \textit{k} pari a $30$.
 
 \begin{figure}[h!]
 	\includegraphics[width=0.9\linewidth]{../figures/classification/KNN/AgeRec_Weight/KNN_Confusion_Matrix_roll_action.png}
@@ -660,14 +663,16 @@ Per il valore di k è stata seguita la stessa procedura di prima, arrivando ad u
 	\label{fig:P_R_W_AR_roll_action}
 \end{figure}
 
-Dalle figure \ref{fig:confusion_matrix_W_AR_roll_action}, \ref{fig:ROC_W_AR_roll_action} e \ref{fig:P_R_W_AR_roll_action} è evidente come il modello non riesca a classificare i giochi che sono sia "roll" che "action", probabilmente perchè sono davvero pochi punti con questa caratteristica. Il modello comunque mostra dei risultati soddisfacenti nel differenziare le due classi, soprattutto se lo confrontiamo con i due modelli "random" e "dummy":
+Dalle figure \ref{fig:confusion_matrix_W_AR_roll_action}, \ref{fig:ROC_W_AR_roll_action} e \ref{fig:P_R_W_AR_roll_action} è evidente come il modello non riesca a classificare i giochi che sono sia "roll" che "action", probabilmente perchè esistono pochi punti con questa doppia caratteristica. Il modello comunque mostra dei risultati soddisfacenti nel differenziare le due classi, soprattutto se lo confrontiamo con i due modelli \textit{random} e \textit{dummy}:
 
 \begin{center}
-\begin{tabular}{|c|c|}
-modelli & $d \, \, @ 95\% \, CL$ \\
+\begin{tabular}{|l|c|}
 \hline
-Reale vs Dummy & 0.059  \pm 0.020 \\
-Reale vs Random & 0.074  \pm 0.019 \\
+\textbf{Modelli} & $d$ \textbf{ @ 95\% CL} \\
+\hline
+Reale vs Dummy & $0.059  \pm 0.020$ \\
+Reale vs Random & $0.074  \pm 0.019$ \\
+\hline
 \end{tabular}
 \end{center}
 
@@ -694,6 +699,22 @@ Infine, è importante ricordare che il \textit{Naive Bayes} assume l’indipende
 
 
 \subsection{Decision Trees}
+
+Come ultima tecnica di classificazione abbiamo utilizzato i \textit{decision trees} per determinare il \textit{rating} di giochi. Come nelle sezioni precedenti, abbiamo diviso il \textit{dataset} in due parti (\textit{training} e \textit{test}), rimosso i \textit{NaN}, e standardizzato le colonne numeriche. Come nelle sezioni precedenti, si useranno le colonne \textit{NumDesires} e \textit{YearPublished} come \textit{feature} per classificare i giochi in base al \textit{target} di \textit{rating}.
+
+\subsubsection{Selezione dei parametri}
+Per ottimizzare le prestazioni e trovare i migliori valori per \textit{max depth}, \textit{min samples per leaf} \textit{min samples per split} e \textit{criterion} (tra \textit{gini} o \textit{entropy}, è stata effettuata una ricerca degli iperparametri tramite \textit{RandomizedSearchCV} di \textit{scikit-learn}, analizzando 500 combinazioni casuali attraverso una \textit{cross-validation} a 5 fold. Il processo ha permesso di individuare la configurazione ottimale (\textit{max depth}$=7$, \textit{min samples per leaf}$=100$, \textit{min samples per split}$=80$, \textit{criterion}$=$\textit{gini}), stabilizzando l'accuratezza sul test set al $60.6\%$. Questi risultati sono riportati in figura \ref{fig:dt_hyperP_tuning}.
+
+\begin{figure}[h!]
+	\includegraphics[width=0.9\linewidth]{../figures/classification/decision_tree/NumDesires_YearPublished/dt_hyperparameter_tuning_Rating.png}
+	\centering
+	\caption{Risultati dell'ottimizzazione degli iperparametri tramite \textit{RandomizedSearchCV}. I grafici illustrano come la variazione dei parametri influenzi l'accuratezza media in \textit{Cross-Validation}. La classificazione è stata eseguita tramite un modello di \textit{decision trees} con lo scopo di classificare il \textit{rating} dei giochi tramite i features \textit{NumDesires} e \textit{YearPublished}.}
+	\label{fig:dt_hyperP_tuning}
+\end{figure}
+
+
+\subsubsection{Analisi del modello}
+
 12345678
 
 \section{Regressione}
