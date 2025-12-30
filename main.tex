@@ -16,7 +16,7 @@
 
 \graphicspath{ {./figures/} }
 
-\geometry{a4paper, top=2.5cm, bottom=2.5cm, left=2cm, right=2cm}
+\geometry{a4paper, top=2cm, bottom=2.5cm, left=2cm, right=2cm}
 \setlength{\absleftindent}{3cm}
 \setlength{\absrightindent}{3cm}
 
@@ -217,7 +217,7 @@ La scala dei colori è logaritmica.}
 \label{fig:heatmap_cats}
 \end{figure}
 
-La figura \ref{fig:heatmap_cats} mostra solo il numero assoluto di co-occorrenze per ciascuna coppia; tuttavia, le categorie più popolose singolarmente (come \textit{war}, \textit{strategy} e \textit{family}) tendono naturalmente ad avere anche più co-occorrenze. 
+La figura \ref{fig:heatmap_cats} mostra solo il numero assoluto di co-occorrenze per ciascuna coppia. Tuttavia, le categorie più popolose singolarmente (come \textit{war}, \textit{strategy} e \textit{family}) tendono naturalmente ad avere anche più co-occorrenze. 
 Per tenere conto di questo effetto, abbiamo introdotto un fattore di normalizzazione definito come
 
 \begin{equation}
@@ -868,107 +868,113 @@ Considerando il coefficiente $R^2$ come metrica di valutazione, il miglior risul
 
 \section{Pattern Mining}
 
-Come ultima analisi abbiamo applicato due algoritmi di \textit{pattern mining} al dataset per trovare correlazioni e identificare strutture ricorrenti. Per fare questo abbiamo scelto delle colonne sia numeriche che categoriche e abbiamo cercato delle "regole" che potessero essere interessanti sfruttando gli algoritmi "Apriori" e "FPGrowth". Come colonne categoriche sono state scelte: \textit{'YearPublished'}, \textit{'AgeRec'}, \textit{'Playtime'} e \textit{LanguageEase}; mentre tra quelle categoriche ci sono: \textit{'MinPlayers'}, \textit{'MaxPlayers'} \textit{'IsReimplementation'}, \textit{'Kickstarted'} e \textit{'Rating'}. Per le classi numeriche è stato deciso di fare un binning a 5 classi per ridurre il numero di operazioni da fare e rendere l'algoritmo più veloce. Per quanto riguarda i missing values è stato deciso di usare la mediana di campione per sostituire eventuali elementi vuoti, in quanto i nostri dati spesso non sono distribuiti simmetricamente (\textit{skeweness} alta).
+Come ultima analisi abbiamo applicato tecniche di \textit{pattern mining} al \textit{dataset} al fine di individuare correlazioni e strutture ricorrenti nei dati. A questo scopo sono stati utilizzati due algoritmi classici, \textit{Apriori} e \textit{FPGrowth}, con l’obiettivo di estrarre \textit{itemset} frequenti e regole di associazione potenzialmente informative.
 
-Successivamente abbiamo applicato gli stessi algoritmi sugli elementi della colonna "Description", al fine di osservare se alcuni giochi hanno delle regole.
+Sono state selezionate sia variabili numeriche sia categoriche. In particolare, tra le variabili numeriche sono state considerate \textit{YearPublished}, \textit{AgeRec}, \textit{Playtime} e \textit{LanguageEase}, mentre tra quelle categoriche figurano \textit{MinPlayers}, \textit{MaxPlayers}, \textit{IsReimplementation}, \textit{Kickstarted} e \textit{Rating}. Per le variabili numeriche è stato effettuato un \textit{binning} in 5 classi, al fine di ridurre la complessità computazionale e rendere l’algoritmo più efficiente. I \textit{missing values} sono stati sostituiti utilizzando la mediana campionaria, scelta motivata dalla forte asimmetria (\textit{skewness} elevata) di molte distribuzioni.
 
-Applicando entrambi gli algoritmi si osserva che i risultati sono (giustamente) identici, ma l'algoritmo "FPGrowth" è sensibilmente più rapido. Perciò mostreremo solo i risultati di quest'ultimo algoritmo.
+Successivamente, gli stessi algoritmi sono stati applicati anche agli elementi della colonna \textit{Description}, trattando le liste di descrittori testuali come \textit{itemset}, con l’obiettivo di individuare eventuali regolarità semantiche nei testi descrittivi dei giochi.
 
-Per ciascuno degli esempi abbiamo prima cercato degli \textit{itemset} con un supporto minimo, successivamente abbiamo applicato l'algoritmo per cercarele regole.
-Quindi abbiamo applicato l'algoritmo "FPGrowth" alle colonne sopra indicate utilizzando i seguenti parametri: 
+L’applicazione di entrambi gli algoritmi ha prodotto, come atteso, risultati identici in termini di \textit{itemset} e regole estratte. Tuttavia, l’algoritmo \textit{FPGrowth} si è dimostrato sensibilmente più rapido. Per questo motivo, nel seguito verranno mostrati esclusivamente i risultati ottenuti con \textit{FPGrowth}.
+
+\subsection{Pattern Mining sui feature}
+
+Per ciascuna analisi, si è proceduto inizialmente all’estrazione degli \textit{itemset} frequenti sopra una soglia minima di supporto, per poi applicare l’algoritmo di generazione delle regole di associazione. In particolare, \textit{FPGrowth} è stato applicato alle colonne sopra indicate utilizzando i seguenti parametri:
 
 \begin{itemize}
-\item $min\_support$ = 10 \%
-\item $z\_min$ = 2
-\item $z\_max$ = 5
+\item $min\_support = 10\%$
+\item $z\_min = 2$
+\item $z\_max = 5$
 \end{itemize}
 
-Il parametro \textit{$min\_support$} si riferisce al supporto minimo che ciascun elemento (o insieme di elementi) deve avere per poter essere considerato, $z\_min$ e $z\_max$ sono i limiti nel numero di elementi che possono appartenere ad un \textit{itemset}. Alcuni itemset con il supporto molto elevato sono:
+Il parametro \textit{$min\_support$} indica il supporto minimo che un singolo elemento o un insieme di elementi deve possedere per essere considerato, mentre $z\_min$ e $z\_max$ rappresentano rispettivamente il numero minimo e massimo di elementi ammessi in un \textit{itemset}. Alcuni degli \textit{itemset} con supporto più elevato sono riportati in Tabella~\ref{tab:itemsets_fp}.
 
 \begin{table}[ht]
 \centering
 \begin{tabular}{|l|l|}
 	\hline
-	Itemset &Supp.} \\
+	Itemset & Supp. (\%) \\
 	\hline
-	Kickst.=No, IsReimpl.=No & 74.60\\
-	MinPlayers=2, IsReimpl.=No &   60.81 \\
-	MinPlayers=2, Kickst.=No    & 59.79 \\
-        MinPlayers=2, Kickst.=No, IsReimpl.=No &   52.83 \\
-        LanguageEase=41-138, IsReimpl.=No &    41.92 \\
+	Kickst.=No, IsReimpl.=No & 74.60 \\
+	MinPlayers=2, IsReimpl.=No & 60.81 \\
+	MinPlayers=2, Kickst.=No & 59.79 \\
+        MinPlayers=2, Kickst.=No, IsReimpl.=No & 52.83 \\
+        LanguageEase=41--138, IsReimpl.=No & 41.92 \\
 	\hline
 \end{tabular}
-\caption{Itemset con valore più alto di supporto, applicando l'algoritmo FPGrowth}
+\caption{Itemset con valore più elevato di supporto estratti tramite \textit{FPGrowth}}
+\label{tab:itemsets_fp}
 \end{table}
 
-Si osserva come la maggioranza dei giochi non sia avviata con un \textit{Kickstarted} e non è una reimplementazione di qualche altro gioco, in più sono molto comuni anche i giochi con 2 giocatori e con una difficoltà nel linguaggio piuttosto bassa (Si ricorda che LanguageEase va da 0 a oltre i 600; 41-138 è il secondo di 5 bin).
+Si osserva come la maggior parte dei giochi non sia stata finanziata tramite \textit{Kickstarter} e non costituisca una reimplementazione di titoli precedenti. Risultano inoltre particolarmente comuni i giochi per due giocatori e quelli caratterizzati da una difficoltà linguistica relativamente bassa (si ricorda che \textit{LanguageEase} varia da 0 a oltre 600, e che l’intervallo 41--138 corrisponde al secondo \textit{bin} su cinque).
 
-Successivamente è stato applicato l'algoritmo per trovare delle regole. Per verificare se una regola è effettivamente valida si è calcolato per ciascuna regola il \textit{lift} e si sono prese quelle col lift più alto. Inoltre sono state considerate solo le regole con confidence maggiore del 50 \%. L'algoritmo ha restituito queste regole:
+Successivamente, è stato applicato l’algoritmo per l’estrazione delle regole di associazione. Per valutare la significatività delle regole individuate, per ciascuna di esse sono state calcolate le metriche di \textit{support}, \textit{confidence} e \textit{lift}. Sono state considerate esclusivamente le regole con \textit{confidence} superiore al 50\%, selezionando quelle con valore di \textit{lift} più elevato. Le principali regole estratte sono riportate in Tabella~\ref{tab:rules_agerec}.
 
 \begin{table}[ht!]
     \centering
-    % Imposta il font piccolo per tutta la tabella
-    \footnotesize 
-    % (Opzionale) Riduci leggermente lo spazio verticale tra le righe per compattare
-    \renewcommand{\arraystretch}{1.2} 
-    \caption{Regole di associazione estratte}
+    \footnotesize
+    \renewcommand{\arraystretch}{1.2}
+    \caption{Regole di associazione estratte dal \textit{dataset}}
     \label{tab:rules_agerec}
-
     \begin{tabular}{@{} p{0.05\linewidth} p{0.9\linewidth} @{}} 
         \hline
-        
-        \textbf{1.} & \{Playt.=90-240, Kick.=No, IsReimpl.=No\} $\to$ Age=10-12 \\
+        \textbf{1.} & \{Playt.=90--240, Kick.=No, IsReimpl.=No\} $\to$ Age=10--12 \\
          & \textit{Supp: 6.45\% \quad Conf: 56.62\% \quad Lift: 2.46} \\ 
         \hline
-        
-        \textbf{2.} & \{Playt.=90-240, MinPlay.=2\} $\to$ Age=10-12 \\
+        \textbf{2.} & \{Playt.=90--240, MinPlay.=2\} $\to$ Age=10--12 \\
          & \textit{Supp: 5.80\% \quad Conf: 56.16\% \quad Lift: 2.44} \\ 
         \hline
-        
-        \textbf{3.} & \{Playt.=90-240, Kick.=No\} $\to$ Age=10-12 \\
+        \textbf{3.} & \{Playt.=90--240, Kick.=No\} $\to$ Age=10--12 \\
          & \textit{Supp: 7.28\% \quad Conf: 55.88\% \quad Lift: 2.43} \\ 
         \hline
-        
-        \textbf{4.} & \{Playt.=90-240, IsReimpl=No\} $\to$ Age=10-12 \\
+        \textbf{4.} & \{Playt.=90--240, IsReimpl.=No\} $\to$ Age=10--12 \\
          & \textit{Supp: 7.08\% \quad Conf: 51.73\% \quad Lift: 2.25} \\ 
         \hline
-        
-        \textbf{5.} & \{Playt.=90-240\} $\to$ Age=10-12 \\
+        \textbf{5.} & \{Playt.=90--240\} $\to$ Age=10--12 \\
          & \textit{Supp: 8.00\% \quad Conf: 51.09\% \quad Lift: 2.22} \\ 
         \hline  
     \end{tabular}
 \end{table}
 
-Il \textit{Lift} rappresenta la metrica più significativa per valutare l'effettiva utilità di una regola di associazione, poiché depura il risultato dalla semplice popolarità del conseguente. Definito come il rapporto tra la confidenza della regola e il supporto atteso del conseguente ($Lift(A \to B) = \frac{P(B|A)}{P(B)}$), il Lift misura quanto l'antecedente aumenti la probabilità che si verifichi l'evento target rispetto al caso puramente casuale. 
-
-Mentre un valore pari a 1 indicherebbe indipendenza statistica tra le variabili, i valori ottenuti nella nostra analisi (Tabella \ref{tab:rules_agerec}), attestandosi intorno a $2.46$, evidenziano una forte correlazione positiva. Ciò implica che la presenza delle caratteristiche nell'antecedente (es. un \textit{Playtime} di 90--240 minuti) incrementa di quasi 2.5 volte la probabilità che il gioco sia destinato alla fascia d'età 10--12 anni rispetto alla media del dataset, confermando che la regola descrive un legame strutturale e non una mera coincidenza distributiva.
-
-Andando avanti a lift più bassi si trovano regole tipo:
+Il \textit{lift} rappresenta la metrica più significativa per valutare l’effettiva utilità di una regola di associazione, poiché corregge il risultato rispetto alla semplice popolarità del conseguente. Definito come
 \[
-\hline
-\{Age=6-8, Rating=0\} \to Playtime=15-30 
+Lift(A \to B) = \frac{P(B|A)}{P(B)},
+\]
+esso misura quanto la presenza dell’antecedente aumenti la probabilità del conseguente rispetto al caso di indipendenza statistica.
 
-\textit{Supp: 8.05\% \quad Conf: 64.1\% \quad Lift: 1.86}
-\hline
-\{Rating=-1, Playtime=15-30\} \to Age=6-8
+Valori di \textit{lift} prossimi a 1 indicano indipendenza tra le variabili, mentre i valori ottenuti nella nostra analisi (Tabella~\ref{tab:rules_agerec}), compresi tra 2.2 e 2.5, evidenziano una forte correlazione positiva. In particolare, un \textit{playtime} compreso tra 90 e 240 minuti incrementa di circa 2.5 volte la probabilità che il gioco sia destinato alla fascia d’età 10--12 anni rispetto alla media del \textit{dataset}.
 
+Considerando regole con valori di \textit{lift} inferiori, si osservano relazioni quali:
 
-\textit{Supp: 7.63\% \quad Conf: 51.88\% \quad Lift: 1.81}
+\[
+\begin{array}{l}
 \hline
+\{Age=6--8, Rating=0\} \to Playtime=15--30 \\
+\textit{Supp: 8.05\% \quad Conf: 64.1\% \quad Lift: 1.86} \\
+\hline
+\{Rating=-1, Playtime=15--30\} \to Age=6--8 \\
+\textit{Supp: 7.63\% \quad Conf: 51.88\% \quad Lift: 1.81} \\
+\hline
+\end{array}
 \]
 
-Quindi si osserva una correlazione tra i giochi che durano poco e i ragazzi tra i 6 e gli 8 anni, soprattutto nei giochi valutati peggio. Un'altra relazione interessante è la seguente:
-\[
-\hline
-\{Year=1978--2002\} \to Rating=-1 
+che suggeriscono una correlazione tra giochi di breve durata e giochi destinati a bambini tra i 6 e gli 8 anni, in particolare per titoli con valutazioni basse. Un’ulteriore relazione interessante è:
 
-\textit{Supp: 10.78\% \quad Conf: 51.32\% \quad Lift: 1.55}
+\[
+\begin{array}{l}
 \hline
+\{Year=1978--2002\} \to Rating=-1 \\
+\textit{Supp: 10.78\% \quad Conf: 51.32\% \quad Lift: 1.55} \\
+\hline
+\end{array}
 \]
 
-Dove si vede che i giochi vecchi sono più spesso valutati male.
+che indica come i giochi più datati tendano ad avere valutazioni peggiori.
 
-Il passo successivo è stato quello di effettuare le stesse pratiche anche sulla colonna \textit{Description}, usando le liste di descrittori come itemset. Come prima abbiamo osservato gli itemset con il supporto più elevato, mantenendo gli iperparametri sempre gli stessi dell'analisi precedente, ottenendo i seguenti itemset più frequenti:
+\subsection{Pattern mining sulle descrizioni}
+
+La stessa procedura è stata infine applicata alla colonna \textit{Description}, utilizzando i descrittori testuali come \textit{itemset}.
+
+Il passo successivo è stato quello di applicare le stesse procedure di \textit{pattern mining} anche alla colonna \textit{Description}, utilizzando le liste di descrittori testuali come \textit{itemset}. Analogamente a quanto fatto in precedenza, sono stati inizialmente analizzati gli \textit{itemset} con supporto più elevato, mantenendo invariati gli iperparametri dell’analisi precedente. Gli \textit{itemset} più frequenti ottenuti sono riportati in Tabella~\ref{tab:itemsets_descriptors}.
 
 \begin{table}[ht]
 \centering
@@ -983,49 +989,41 @@ Il passo successivo è stato quello di effettuare le stesse pratiche anche sulla
     (play, player) & 39.16 \\
     \hline
 \end{tabular}
-\caption{Itemset frequenti estratti dai descrittori testuali (FPGrowth)}
+\caption{Itemset frequenti estratti dai descrittori testuali tramite \textit{FPGrowth}}
 \label{tab:itemsets_descriptors}
 \end{table}
 
-Si osserva subito come gli elementi più frequenti nei descrittori (visti nella Figura \ref{fig:top_words}) sono anche quelli più presenti negli itemset col supporto più alto.
+Si osserva immediatamente come i termini più frequenti nei descrittori testuali (mostrati in Figura~\ref{fig:top_words}) coincidano con quelli che compaiono negli \textit{itemset} con supporto più elevato, confermando la coerenza tra l’analisi esplorativa del testo e i risultati del \textit{pattern mining}.
 
-Andando avanti con l'analisi si sono cercate le regole con supporto e confidence maggiori del 10 \%, in quanto il numero di elementi singoli è molto maggiore e ciò porta ad un calo delle confidence. I risultati con il \textit{Lift} più alto sono i seguenti:
+Proseguendo con l’analisi, sono state cercate regole di associazione con \textit{support} e \textit{confidence} maggiori del 10\%. Questa scelta è motivata dal fatto che l’elevato numero di termini distinti nei descrittori porta naturalmente a una riduzione dei valori di \textit{confidence}. Le regole con \textit{lift} più elevato sono riportate in Tabella~\ref{tab:rules_descriptors}.
 
 \begin{table}[ht!]
     \centering
-    % Imposta il font piccolo
-    \footnotesize 
-    % Spazio verticale tra le righe
-    \renewcommand{\arraystretch}{1.2} 
+    \footnotesize
+    \renewcommand{\arraystretch}{1.2}
     \caption{Regole di associazione estratte dai descrittori testuali}
     \label{tab:rules_descriptors}
-
     \begin{tabular}{@{} p{0.05\linewidth} p{0.9\linewidth} @{}} 
         \hline
-        
         \textbf{1.} & \{war, game\} $\to$ civil \\
          & \textit{Supp: 1.35\% \quad Conf: 11.80\% \quad Lift: 7.39} \\ 
         \hline
-        
         \textbf{2.} & \{war\} $\to$ civil \\
          & \textit{Supp: 1.46\% \quad Conf: 11.52\% \quad Lift: 7.22} \\ 
         \hline
-        
         \textbf{3.} & \{war, game\} $\to$ ii \\
          & \textit{Supp: 1.75\% \quad Conf: 15.31\% \quad Lift: 6.25} \\ 
         \hline
-        
         \textbf{4.} & \{war\} $\to$ ii \\
          & \textit{Supp: 1.85\% \quad Conf: 14.58\% \quad Lift: 5.95} \\ 
         \hline
-        
         \textbf{5.} & \{map, game\} $\to$ chart \\
          & \textit{Supp: 1.23\% \quad Conf: 12.26\% \quad Lift: 5.50} \\ 
-        \hline  
+        \hline
     \end{tabular}
 \end{table}
 
-È evidente come i giochi di guerra spesso siano legati alla guerra civile e alla seconda guerra mondiale, portando ad un lift molto elevato per queste regole. Un'altro insieme di regole interessanti è il seguente:
+È evidente come i giochi a tema bellico siano fortemente associati alla guerra civile e alla Seconda Guerra Mondiale, come indicato dai valori di \textit{lift} particolarmente elevati per queste regole. Un ulteriore insieme di regole interessanti è il seguente:
 
 \[
 \begin{array}{l}
@@ -1045,9 +1043,9 @@ Andando avanti con l'analisi si sono cercate le regole con supporto e confidence
 \end{array}
 \]
 
-Ovvero che i giochi che hanno una mappa spesso sono anche divisi in miglia oppure in esagoni. 
+Queste regole indicano che i giochi che prevedono una mappa sono spesso strutturati in unità spaziali come miglia, divisioni o esagoni, caratteristiche tipiche dei giochi strategici e di simulazione.
 
-Altre regole osservate sono:
+Ulteriori regole osservate sono:
 
 \[
 \begin{array}{l}
@@ -1055,15 +1053,18 @@ Altre regole osservate sono:
 \{dice, player\} \to roll \\
 \textit{Supp: 6.80\% \quad Conf: 60.64\% \quad Lift: 5.20} \\
 \hline
-\{deck, card, player \} \to shuffle \\
+\{deck, card, player\} \to shuffle \\
 \textit{Supp: 1.47\% \quad Conf: 13.10\% \quad Lift: 5.10} \\
 \hline
 \end{array}
 \]
 
-Ovvero che molti giochi coi dadi prevedono dei tiri e che quelli con le carte prevedono di mescolare, regole quasi ovvie ma sinonimo del fatto che il metodo per trovare delle regole funziona bene.
+che riflettono meccaniche di gioco quasi ovvie, come il lancio dei dadi o il mescolamento delle carte. Tuttavia, la loro emersione con valori di \textit{lift} elevati conferma il corretto funzionamento del metodo di estrazione delle regole e la sua capacità di catturare relazioni semantiche coerenti all’interno dei descrittori testuali.
 
-In conclusione si può dire che si osservano molte regole legate alla guerra, ai giochi di carte e ai giochi coi dadi.
+
+In conclusione, l’analisi di \textit{pattern mining} ha evidenziato numerose regolarità interpretabili, in particolare legate ai giochi di guerra, ai giochi di carte e ai giochi basati sui dadi, confermando sia la coerenza interna del \textit{dataset} sia l’efficacia delle tecniche adottate.
+
+
 
 \section{Conclusioni}
 
