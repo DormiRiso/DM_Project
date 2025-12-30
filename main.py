@@ -137,19 +137,59 @@ def classificate_data(input_file: Path, percentage, descriptors = None, verbose 
             spinner.ok("✅")
     print(f"{Colors.GREEN}📈 classificazione completata!{Colors.RESET}\n")  
 
-def patter_mine_data(input_file: Path, verbose = False):
-    print(f"{Colors.BLUE}📊 Caricamento dataset pulito e preparato da:{Colors.RESET} {input_file}")
-    prepared_df = pd.read_csv(input_file, converters={"Ranks": literal_eval}) #Leggi direttamente la colonna "Ranks" come python list e non stringa
+def patter_mine_data(input_file: Path, second_input_file: Path, verbose=False):
+    
+    print(f"{Colors.BLUE}📊 Caricamento dataset...{Colors.RESET}")
+    prepared_df = pd.read_csv(input_file, converters={"Ranks": literal_eval}) 
+    filtered_df = pd.read_csv(second_input_file, converters={"Ranks": literal_eval})
+    
+    # --- CONFIGURAZIONE MAPPING ---
+    # Sintassi: "Nome nel prepared_df" : "Nome nel filtered_df"
+    column_mapping = {
+        'YearPublished': 'YearPublished',         
+        'AgeRec': 'MfgAgeRec',              
+        'Playtime': 'MfgPlaytime',       
+    }
+    # ------------------------------
+
+    # Helper function per i bordi (aggiornata col mapping)
+    def get_bin_edges(series_name, ref_df, mapping, n_bins=5):
+        # Traduciamo il nome
+        ref_name = mapping.get(series_name, series_name)
+        
+        if ref_name in ref_df.columns:
+            clean_series = ref_df[ref_name].dropna()
+            if clean_series.empty: return []
+            _, edges = pd.qcut(clean_series, n_bins, retbins=True, duplicates='drop')
+            return edges
+        return []
 
     if verbose:
-        print(f"{Colors.CYAN}🔍 Avvio della classificazione dei dati {Colors.RESET}")
-        pattern_mine_df(prepared_df)
-    else:
-        with yaspin(text="🔍 Avvio della classificazione dei dati ", color="cyan") as spinner:
-            pattern_mine_df(prepared_df)
-            spinner.ok("✅")
-    print(f"{Colors.GREEN}📈 classificazione completata!{Colors.RESET}\n") 
+        print(f"\n{Colors.CYAN}🔍 Analisi preliminare Bin (con Mapping){Colors.RESET}")
+        cols_to_check = ['YearPublished', 'AgeRec', 'Playtime', 'WeightedRating']
+        
+        for col in cols_to_check:
+            # Usiamo la nuova funzione che supporta il mapping
+            edges = get_bin_edges(col, filtered_df, column_mapping, n_bins=5)
+            
+            ref_name = column_mapping.get(col, col) # Solo per stampare il nome usato
+            if len(edges) > 0:
+                edges_str = " -> ".join([f"{e:.2f}" for e in edges])
+                print(f" > '{col}' (ref: {ref_name}): [{edges_str}]")
+            else:
+                print(f" > '{col}': Impossibile calcolare bin (colonna ref '{ref_name}' mancante?)")
 
+        print(f"\n{Colors.CYAN}🔍 Avvio della classificazione... {Colors.RESET}")
+        
+        # Passiamo il mapping alla funzione principale
+        pattern_mine_df(prepared_df, filtered_df, run_descriptors=True, col_map=column_mapping)
+        
+    else:
+        with yaspin(text="🔍 Avvio classificazione ", color="cyan") as spinner:
+            pattern_mine_df(prepared_df, filtered_df, run_descriptors=True, col_map=column_mapping)
+            spinner.ok("✅")
+
+    print(f"{Colors.GREEN}📈 Classificazione completata!{Colors.RESET}\n")
 
 def hypno_toad():
     print(r"""
@@ -301,7 +341,7 @@ def main():
         classificate_data(prepared_output_file, percentage_for_split, descriptors = args.descriptors)
 
     if args.pattern_mine:
-        patter_mine_data(prepared_output_file)
+        patter_mine_data(prepared_output_file, filtered_output_file)
 
     print(f"{Colors.BOLD}🏁 Operazione completata!{Colors.RESET} ✅")
 

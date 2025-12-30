@@ -302,8 +302,8 @@ Il criterio di selezione delle colonne numeriche è lo stesso adottato nella sez
 La \textit{heatmap} di correlazione è mostrata in figura \ref{fig:heatmap_corr}.
 
 \begin{figure}[h!]
-\includegraphics[width=0.9\linewidth]{/heatmaps/correlation_heatmap_unfiltered.png}
 \centering
+\includegraphics[width=0.9\linewidth]{/heatmaps/correlation_heatmap_unfiltered.png}
 \caption{Matrice di correlazione tra le colonne numeriche analizzate. 
 I dati non sono stati filtrati in alcun modo.}
 \label{fig:heatmap_corr}
@@ -864,7 +864,7 @@ Considerando il coefficiente $R^2$ come metrica di valutazione, il miglior risul
 
 \section{Pattern Mining}
 
-Come ultima analisi abbiamo applicato due algoritmi di \textit{pattern mining} al dataset per trovare correlazioni e per trovare correlazioni e identificare strutture ricorrenti che caratterizzano il \textit{dataset}.
+Come ultima analisi abbiamo applicato due algoritmi di \textit{pattern mining} al dataset per trovare correlazioni e identificare strutture ricorrenti. Per fare questo abbiamo scelto delle colonne sia numeriche che categoriche e abiamo cercato delle "regole" che potessero essere interessanti sfruttando gli algoritmi "Apriori" e "FPGrowth". Come colonne categoriche sono state scelte: \textit{'YearPublished'}, \textit{'AgeRec'}, \textit{'Playtime'} e \textit{LanguageEase}; mentre tra quelle categoriche ci sono: \textit{'MinPlayers'}, \textit{'MaxPlayers'} \textit{'IsReimplementation'}, \textit{'Kickstarted'} e \textit{'Rating'}. Per le classi numeriche è stato deciso di fare un binning a 5 classi per ridurre il numero di operazioni da fare e rendere l'algoritmo più veloce. Per quanto riguarda i missing values è stato deciso di usare la mediana di campione per sostituire eventuali elementi vuoti, in quanto i nostri dati spesso non sono distribuiti simmetricamente (\textit{skeweness} alta).
 \subsection{FP Growth}
 12345678
 
